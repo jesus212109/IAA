@@ -437,9 +437,9 @@ def tarea3_comparativa_varianza(X: pd.DataFrame, y: pd.Series) -> dict:
 
     print("\n[CONCLUSIÓN]")
     if np.std(acc_skfold) < np.std(acc_kfold):
-        print("  ✔ StratifiedKFold produce una Accuracy con MENOR desviación típica.")
+        print("  [OK] StratifiedKFold produce una Accuracy con MENOR desviación típica.")
     if np.std(f1_skfold) < np.std(f1_kfold):
-        print("  ✔ StratifiedKFold produce un F1-macro con MENOR desviación típica.")
+        print("  [OK] StratifiedKFold produce un F1-macro con MENOR desviación típica.")
     print(
         "  → StratifiedKFold es más adecuado en problemas desbalanceados porque\n"
         "    garantiza particiones representativas, reduciendo la varianza de\n"
@@ -611,11 +611,13 @@ def tarea4_data_leakage(
         "Tarea 4 — Efecto del Data Leakage\n"
         "(rojo=con trampa, verde=sin trampa)"
     )
-    # Etiquetas de valor sobre cada barra
-    for bar, val in zip(bars, valores_bar):
+    # Etiquetas de valor sobre cada barra.
+    # Se posicionan por encima del cap de la barra de error (val + std + margen)
+    # para evitar solapamiento en barras con desviación grande (p.ej. acc_real).
+    for bar, val, err in zip(bars, valores_bar, errores_bar):
         ax.text(
             bar.get_x() + bar.get_width() / 2,
-            bar.get_height() + 0.02,
+            val + err + 0.04,          # supera el cap de error + margen extra
             f"{val:.3f}",
             ha="center", va="bottom", fontsize=9, fontweight="bold"
         )

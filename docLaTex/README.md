@@ -1,10 +1,10 @@
-# 🎓 Memoria de Prácticas — Introducción al Aprendizaje Automático (IAA)
+# Memoria de Prácticas — Introducción al Aprendizaje Automático (IAA)
 
 Este repositorio contiene la estructura profesionalizada en LaTeX para la generación de la memoria de prácticas de la asignatura. El proyecto ha sido modularizado para permitir la compilación tanto del documento completo como de capítulos individuales de forma independiente.
 
 ---
 
-## 🚀 Guía de Compilación (Automatizada)
+## Guía de Compilación (Automatizada)
 
 Se han configurado **Makefiles** en múltiples niveles para ofrecer flexibilidad total. **Todos los archivos de salida se generan en carpetas `build/`** para mantener limpio el directorio raíz.
 
@@ -43,7 +43,7 @@ make clean
 
 ---
 
-## 📁 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```text
 .
@@ -53,34 +53,34 @@ make clean
 ├── Makefile                  # Automatización principal
 ├── .latexmkrc                # Configuración de compilación (build-dir, shell-escape)
 ├── .gitignore                # Filtro para archivos temporales y PDFs
-├── sections/
+├── sections/                 # Capítulos de cada práctica
 │   ├── practica1/            # Módulo de la Práctica 1
-│   │   ├── practica1.tex     # Código fuente del capítulo
-│   │   ├── img/              # Imágenes locales de la P1
-│   │   └── build/            # Salida aislada para la P1
-│   └── practica2/            # (Misma estructura modular...)
+│   │   ├── practica1.tex     # Código fuente
+│   │   ├── img/              # Imágenes locales
+│   │   └── build/            # Salida aislada
+│   └── practica2/            # (Estructura idéntica)
 └── Portada/                  # Recursos de la portada principal
 ```
 
 ---
 
-## 🛠️ Herramientas de Automatización
+## Herramientas de Automatización
 
-### ⚙️ `.latexmkrc`
+### Configuración .latexmkrc
 Configura `latexmk` para:
-- Redirigir **todos** los auxiliares a `build/`.
+- Redirigir todos los auxiliares a `build/`.
 - Habilitar `-shell-escape` (necesario para el resaltado de código con `minted`).
 - Configurar el motor de limpieza recursiva.
 
-### 🧠 `preamble.tex`
-Centraliza la lógica del documento. Incluye el comando inteligente `\standalonecover`, que detecta automáticamente si el capítulo se está compilando solo (y necesita portada) o como parte de la memoria completa.
+### Preamble Centralizado
+Centraliza la lógica del documento. Incluye el comando inteligente `\standalonecover`, que detecta automáticamente si el capítulo se está compilando solo o como parte de la memoria completa.
 
-### 🙈 `.gitignore`
-Evita que archivos basura (`.log`, `.aux`, `.toc`, etc.) o binarios pesados se suban al control de versiones, manteniendo el repositorio impecable.
+### Filtro .gitignore
+Evita que archivos basura (`.log`, `.aux`, `.toc`, etc.) o binarios pesados se incluyan en el repositorio.
 
 ---
 
-## 📝 Cómo añadir una nueva práctica
+## Cómo añadir una nueva práctica
 
 1. Crea una carpeta en `sections/practicaN/`.
 2. Crea el archivo `.tex` usando la plantilla:
