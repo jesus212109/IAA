@@ -1,0 +1,86 @@
+% SUBIR ESTE CÓDIGO COMO CAPÍTULO DE PRÁCTICA EN LA MEMORIA DE PRACTICAS
+\chapter{Cuaderno de Laboratorio — Práctica 1: La Física del Aprendizaje Automático}
+
+\section*{Objetivo}
+Comprender la dinámica de la optimización mediante gradiente descendente y el impacto de los hiperparámetros en la convergencia.
+
+\section{Tarea 1 — Importancia de la tasa de aprendizaje ($\alpha$)}
+
+\subsection{Escenario A ($\alpha_{slow}$): convergencia lenta}
+Valor elegido: $\alpha =$ \underline{\hspace{2cm}}\\
+\begin{center}
+\includegraphics[width=0.85\linewidth]{outputs/alpha_A_alpha_slow_a0.01.png}
+\end{center}
+\textbf{Análisis:} ¿Por qué baja tan lentamente? ¿Cuántas iteraciones estimas para llegar cerca del mínimo?
+
+\vspace{2.0cm}
+
+\subsection{Escenario B ($\alpha_{opt}$): “curva de codo”}
+Valor elegido: $\alpha =$ \underline{\hspace{2cm}}\\
+\begin{center}
+\includegraphics[width=0.85\linewidth]{outputs/alpha_B_alpha_opt_a0.2.png}
+\end{center}
+\textbf{Análisis:} Describe la “curva de codo” y qué te indica sobre rapidez y estabilidad.
+
+\vspace{2.0cm}
+
+\subsection{Escenario C ($\alpha_{osc}$): oscilación amortiguada}
+Valor elegido: $\alpha =$ \underline{\hspace{2cm}}\\
+\begin{center}
+\includegraphics[width=0.85\linewidth]{outputs/alpha_C_alpha_osc_a0.8.png}
+\end{center}
+\textbf{Análisis:} ¿Qué ocurre con $\theta$ en el espacio de búsqueda? ¿Por qué oscila y puede estabilizarse?
+
+\vspace{2.0cm}
+
+\subsection{Escenario D ($\alpha_{fail}$): divergencia}
+Valor elegido: $\alpha =$ \underline{\hspace{2cm}}\\
+\begin{center}
+\includegraphics[width=0.85\linewidth]{outputs/alpha_D_alpha_fail_a2.0.png}
+\end{center}
+\textbf{Análisis:} ¿Por qué el error crece? Relaciónalo con “pasarse” del mínimo.
+
+\newpage
+\section{Tarea 2 — Compromiso del mini-batch}
+
+Usa tu $\alpha_{opt}$ y compara:
+
+\subsection{Batch completo}
+\begin{center}
+\includegraphics[width=0.85\linewidth]{outputs/batch_Batch_completo_b500.png}
+\end{center}
+
+\subsection{Mini-batch (32 o 16)}
+\begin{center}
+\includegraphics[width=0.85\linewidth]{outputs/batch_Mini_batch_32_b32.png}
+\end{center}
+
+\subsection{Estocástico puro (batch = 1)}
+\begin{center}
+\includegraphics[width=0.85\linewidth]{outputs/batch_Estocastico_1_b1.png}
+\end{center}
+
+\textbf{Preguntas de reflexión:}
+\begin{enumerate}
+    \item ¿Cuál de las tres curvas es más “ruidosa” y por qué?
+    \item A nivel de tiempo de ejecución (CPU), ¿cuál ha sido más eficiente? Justifica basándote en computación vectorial.
+\end{enumerate}
+
+\section{El reto — “Ajuste de precisión” (criterio de parada)}
+
+Implementa el criterio:
+\[
+|J_t - J_{t-1}| < 10^{-5}
+\]
+Mejor combinación: $\alpha=$ \underline{\hspace{2cm}} \quad batch=\underline{\hspace{2cm}} \quad épocas=\underline{\hspace{2cm}}.
+
+\vspace{0.5cm}
+\begin{center}
+\includegraphics[width=0.85\linewidth]{outputs/reto_early_stop.png}
+\end{center}
+
+\section{Conclusiones finales}
+Resume en 8--12 líneas lo aprendido sobre $\alpha$, tamaño de batch y criterio de parada.
+
+\vspace{3.0cm}
+

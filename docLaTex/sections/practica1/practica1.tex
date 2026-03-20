@@ -1,0 +1,152 @@
+% =============================================================================
+% practica1.tex --- Chapter: Practice 1
+%
+% This file is designed to be compiled either stand-alone (for quick preview)
+% or recursively included in the main document.
+% =============================================================================
+
+\documentclass[../../__memoria.tex]{subfiles}
+
+\begin{document}
+\standalonecover
+
+\chapter{Cuaderno de Laboratorio --- Práctica 1: La Física del Aprendizaje Automático}
+\chaptermark{Práctica 1}
+
+\section*{Objetivo}
+Comprender la dinámica de la optimización mediante gradiente descendente y el impacto de los hiperparámetros en la convergencia del algoritmo.
+
+% -----------------------------------------------------------------------------
+\section{Tarea 1 --- Importancia de la tasa de aprendizaje (\texorpdfstring{$\alpha$}{alpha})}
+% -----------------------------------------------------------------------------
+
+\subsection{Escenario A (\texorpdfstring{$\alpha_{slow}$}{alpha-slow}): convergencia lenta}
+Valor elegido: $\alpha =$ 1e-05\\
+\begin{center}
+  \includegraphics[width=0.85\linewidth]{img/alpha-A-alpha-slow.png}
+\end{center}
+\textbf{Análisis:} ¿Por qué baja tan lentamente? ¿Cuántas iteraciones estimas para llegar cerca del mínimo?
+
+Baja tan lentamente porque el tamaño de cada paso de actualización es minúsculo (el gradiente del error se multiplica por un $\alpha$ muy pequeño), por lo que los pesos apenas se modifican en cada iteración. Proyectando esta suave pendiente inicial, se estima que harían falta decenas de miles de iteraciones para acercarse de forma significativa al mínimo global.
+
+\vspace{2.0cm}
+
+\subsection{Escenario B (\texorpdfstring{$\alpha_{opt}$}{alpha-opt}): ``curva de codo''}
+Valor elegido: $\alpha =$ 0.01\\
+\begin{center}
+  \includegraphics[width=0.85\linewidth]{img/alpha-B-alpha-opt.png}
+\end{center}
+\textbf{Análisis:} Describe la ``curva de codo'' y qué te indica sobre rapidez y estabilidad.
+
+La ``curva de codo'' muestra una caída inicial muy abrupta seguida de un aplanamiento drástico de la pendiente. Esto evidencia un comportamiento óptimo: el algoritmo avanza muy rápido cuando está lejos del mínimo y, al llegar al fondo del valle, los pasos del gradiente se ajustan milimétricamente sin rebotar, logrando así una gran rapidez en la convergencia y una estabilidad absoluta.
+
+\vspace{2.0cm}
+
+\subsection{Escenario C (\texorpdfstring{$\alpha_{osc}$}{alpha-osc}): oscilación amortiguada}
+Valor elegido: $\alpha =$ 0.1\\
+\begin{center}
+  \includegraphics[width=0.85\linewidth]{img/alpha-C-alpha-osc.png}
+\end{center}
+\textbf{Análisis:} ¿Qué ocurre con $\theta$ en el espacio de búsqueda? ¿Por qué oscila y puede estabilizarse?
+
+En el espacio de búsqueda paramétrica, los pesos $\theta$ están sufriendo desplazamientos de magnitud excesiva y ``saltan'' repetidamente de una ladera a la opuesta del valle de coste, sobrepasando temporalmente el mínimo. Se observan oscilaciones por estos constantes rebotes; no obstante, el sistema logra estabilizarse porque la magnitud del verdadero gradiente disminuye gradualmente, atenuando la amplitud de los saltos hasta converger en la solución.
+
+\vspace{2.0cm}
+
+\subsection{Escenario D (\texorpdfstring{$\alpha_{fail}$}{alpha-fail}): divergencia}
+Valor elegido: $\alpha =$ 0.9\\
+\begin{center}
+  \includegraphics[width=0.85\linewidth]{img/alpha-D-alpha-fail.png}
+\end{center}
+\textbf{Análisis:} ¿Por qué el error crece? Relaciónalo con ``pasarse'' del mínimo.
+
+La función de coste diverge de forma monótona ascendente porque el coeficiente $\alpha$ es tan desproporcionado que el algoritmo ``se pasa de largo'' del mínimo local con una inercia destructiva. En lugar de descender gravitando hacia el valle, la gran magnitud de la corrección empuja a los pesos a rebotar cada vez a mayor altitud en las paredes opuestas, alejando indefinidamente la solución.
+
+% -----------------------------------------------------------------------------
+\newpage
+\section{Tarea 2 --- Compromiso del mini-batch}
+% -----------------------------------------------------------------------------
+
+Usa tu $\alpha_{opt}$ y compara los siguientes esquemas de procesamiento:
+
+\subsection{Batch completo}
+\begin{center}
+  \includegraphics[width=0.85\linewidth]{img/batch-Batch-completo-b500.png}
+\end{center}
+
+\subsection{Mini-batch (32 o 16)}
+\begin{center}
+  \includegraphics[width=0.85\linewidth]{img/batch-Mini-batch-32-b32.png}
+\end{center}
+
+\subsection{Estocástico puro (batch = 1)}
+\begin{center}
+  \includegraphics[width=0.85\linewidth]{img/batch-Estocastico-1-b1.png}
+\end{center}
+
+\textbf{Preguntas de reflexión:}
+\begin{enumerate}
+  \item ¿Cuál de las tres curvas es más ``ruidosa'' y por qué?
+        
+        La curva del gradiente estocástico puro (batch = 1) presenta el mayor nivel de ruido intrínseco. Fundamentar la dirección de máximo descenso en base a una única muestra observacional en cada iteración induce una elevadísima varianza estocástica. Esto provoca que el vector de descenso temporal apunte de forma muy errática, generando un fenotipo visual de dentado continuo (picos de subida y bajada). A pesar de esta inestabilidad local, la tendencia estocástica agregada garantiza un descenso a largo plazo.
+
+  \item A nivel de tiempo de ejecución (CPU), ¿cuál ha sido más eficiente? Justifica basándote en computación vectorial.
+
+        A nivel hardware, tanto el Batch completo como el Mini-batch son radicalmente más eficientes que el descenso estocástico a base de iteraciones unitarias. Esto radica en el paradigma de la computación vectorial y las arquitecturas de instrucciones SIMD (Single Instruction, Multiple Data) del procesador. Agrupar los datos en bloques matriciales sustanciales permite a librerías numéricas de bajo nivel procesar transformaciones matemáticas complejas en estricto paralelo y directamente en la ALU. Por el contrario, el modelo estocástico está condicionado a ejecutar un costoso control de flujo secuencial (bucles for ineficientes), provocando un cuello de botella abrumador en el tiempo de ejecución. El modelo \textbf{Mini-batch} resalta fundamentalmente por constituir un óptimo de Pareto: regulariza parcialmente el ruido de las muestras individuales garantizando un descenso suave, e invierte la carga computacional en veloces operaciones matriciales preservando simultáneamente una convergencia excepcionalmente rápida frente al Batch completo.
+\end{enumerate}
+
+% -----------------------------------------------------------------------------
+% Timing figures --- placed outside the enumerate to maintain correct hierarchy
+% -----------------------------------------------------------------------------
+\subsection{Tiempo de ejecución --- Estocástico puro (batch = 1)}
+\begin{figure}[H]
+  \centering
+  \includegraphics{img/apartado-2-batch-1.png}
+  \caption{Tiempo de ejecución con batch=1.}
+\end{figure}
+
+\vspace{1cm}
+
+\subsection{Tiempo de ejecución --- Mini-batch (batch = 32)}
+\begin{figure}[H]
+  \centering
+  \includegraphics{img/apartado-2-batch-32.png}
+  \caption{Tiempo de ejecución con batch=32.}
+\end{figure}
+
+\vspace{1cm}
+
+\subsection{Tiempo de ejecución --- Batch completo (batch = 500)}
+\begin{figure}[H]
+  \centering
+  \includegraphics{img/apartado-2-batch-500.png}
+  \caption{Tiempo de ejecución con batch=500.}
+\end{figure}
+
+% -----------------------------------------------------------------------------
+\section{El reto --- ``Ajuste de precisión'' (criterio de parada)}
+% -----------------------------------------------------------------------------
+
+Implementa empíricamente el criterio de tolerancia algorítmica:
+\[
+  |J_t - J_{t-1}| < 10^{-5}
+\]
+
+Para analizar las trayectorias asintóticas del sistema a largo plazo, se estableció un hiperparámetro deliberado que fijaba el límite en 2000 épocas en total. No obstante, al condicionar su diseño algorítmico al criterio de parada $|J_t - J_{t-1}| < 10^{-5}$ y equipar el modelo con su topología inicial más favorable ($\alpha=0.01$, batch$=32$), el algoritmo logra su punto de silla limitante ideal con una prontitud destacable y neutraliza la ejecución sistemáticamente en la \textbf{época 55}, obviando todo cómputo excedente e inútil que le sucediese al modelo a posterior.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics{img/apartad-3-Batch32alfaoptima.png}
+  \caption{Tiempo de convergencia interrumpida en la época 55 sujeto a $|J_t - J_{t-1}| < 10^{-5}$ para $\alpha=0.01$ y batch$=32$.}
+\end{figure}
+
+% -----------------------------------------------------------------------------
+\section{Conclusiones finales}
+% -----------------------------------------------------------------------------
+
+El presente cuaderno de laboratorio corrobora categóricamente que la estabilidad e integridad de la convergencia global de un estimador iterativo requiere una rigurosa sintonización analítica de sus hiperparámetros numéricos. Un factor paramétrico $\alpha$ marginal asegura la convergencia matemática, pero lo hace a expensas de un elevado lastre temporal infranqueable, mientras su hipertrofia causa la irremediable divergencia iterativa por retroproyección fuera del sumidero global. Por ello, el $\alpha$ óptimo impone un compromiso técnico de descenso inicial abrupto y mitigación suave sobre el vecindario absoluto.
+Respectivamente, se demuestra el segundo compromiso arquitectural: procesar muestras estocásticas individuales padece de extrema volatilidad métrica (ruido de las submuestras) y colapsa el motor computacional; el procesamiento de tipo Mini-batch emerge como el paradigma por excelencia superior, permitiendo actualizaciones continuas del vector de error al aprovechar el paralelismo subyacente de la microarquitectura del procesador de tipo vector (SIMD). Adicionalmente, el diseño del algoritmo ha reflejado categóricamente cómo implementar un control de flujo derivativo limitativo ($|J_t - J_{t-1}| < 10^{-5}$) extingue iteraciones marginales una vez garantizada la estabilización, culminando con un ahorro sustancial en el cálculo para el entrenamiento neuronal moderno.
+
+\vspace{3.0cm}
+
+\end{document}

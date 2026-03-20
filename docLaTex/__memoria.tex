@@ -1,0 +1,100 @@
+% =============================================================================
+% __memoria.tex — Main document file
+%
+% HOW TO COMPILE:
+%   pdflatex -shell-escape __memoria.tex   (run twice for cross-references)
+%
+% HOW TO ADD A NEW PRACTICE:
+%   1. Create the file:  practicaN.tex  (no \documentclass needed)
+%   2. Uncomment / copy the \input line in the "CHAPTERS" block below.
+%   That is all — the preamble, styles and numbering are inherited automatically.
+% =============================================================================
+
+\documentclass[a4paper, 12pt, oneside]{book}
+
+% ── Project metadata (author, title, degree) ──────────────────────────────────
+\input{_datos_proyecto}
+
+% ── Single, centralised preamble ──────────────────────────────────────────────
+\input{preamble}
+
+% =============================================================================
+\begin{document}
+% =============================================================================
+
+% ── Start with no visible page numbers ───────────────────────────────────────
+\pagenumbering{empty}
+
+% ─────────────────────────────────────────────────────────────────────────────
+% COVER PAGE
+% ─────────────────────────────────────────────────────────────────────────────
+\input{Portada/cover}
+
+% Two intentional blank pages after the physical cover (institution requirement)
+\newpage
+\thispagestyle{empty}
+\mbox{}
+\newpage
+\thispagestyle{empty}
+\mbox{}
+
+% ─────────────────────────────────────────────────────────────────────────────
+% FRONT MATTER  (Roman numerals)
+% ─────────────────────────────────────────────────────────────────────────────
+\pagenumbering{Roman}
+\pagestyle{indice}
+
+% Dedication
+\thispagestyle{indice}
+\begin{flushright}
+  \textit{Dedicado a \\
+    mi familia}
+\end{flushright}
+
+% Abstract (Spanish + English)
+\input{0_resumen_y_abstract}
+
+% ── Table of contents, lists ──────────────────────────────────────────────────
+% \clearpage (not \cleardoublepage) avoids inserting blank pages when a list
+% already ends on an odd page (common in book class with two-sided output).
+\clearpage
+\thispagestyle{fancy}
+\tableofcontents
+
+\clearpage
+\listoffigures
+
+\clearpage
+\listoftables
+
+% Flow-diagram index — uncomment when diagrams are added
+%\clearpage
+%\phantomsection
+%\addcontentsline{toc}{chapter}{Índice de diagramas de flujo}
+%\listofdiagrams
+
+% =============================================================================
+% MAIN BODY  (Arabic numerals)
+% =============================================================================
+\clearpage
+\pagestyle{cuerpo}
+\pagenumbering{arabic}
+
+% =============================================================================
+% CHAPTERS — ADD NEW PRACTICES HERE
+% To add Práctica 2: create sections/practica2.tex, then uncomment below.
+% =============================================================================
+\subfile{sections/practica1/practica1}
+\subfile{sections/practica2/practica2}
+%\subfile{sections/practica3/practica3}
+
+% =============================================================================
+% BIBLIOGRAPHY
+% The bibliography will only appear if there are actual citations (\cite{}) 
+% or if \nocite{*} is used.
+% =============================================================================
+\bibliographystyle{plainnat}
+\bibliography{referencias}
+
+% =============================================================================
+\end{document}

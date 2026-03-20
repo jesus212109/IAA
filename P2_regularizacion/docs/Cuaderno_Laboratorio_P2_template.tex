@@ -1,0 +1,266 @@
+% =========================================================
+% SUBIR ESTE CÓDIGO COMO CAPÍTULO DE PRÁCTICA EN LA MEMORIA
+% =========================================================
+\chapter{Cuaderno de Laboratorio — Práctica 2: Selección de Modelos y Regularización}
+
+\section*{Objetivo}
+Dominar el protocolo de \textbf{Validación Cruzada (K-Fold)} y comprender cómo la regularización
+\textbf{Ridge (L2)} y \textbf{Lasso (L1)} previenen el sobreajuste y ayudan a la \textbf{selección de atributos}.
+
+\section*{Material de partida}
+Se parte del script \texttt{seleccion\_modelos\_viviendas.py} (o \texttt{.jl}), que incluye:
+\begin{itemize}
+    \item Un dataset sintético de \textbf{200 viviendas} con \textbf{10 variables predictoras}.
+    \item Implementación de \textbf{validación cruzada} y del cálculo del \textbf{RMSE} (raíz del error cuadrático medio).
+\end{itemize}
+
+\vspace{0.4cm}
+\noindent\textbf{Nota:} En este cuaderno se insertan capturas/gráficas generadas por el script (carpeta \texttt{outputs/}).
+Ajusta los nombres de fichero a los que obtengas tú.
+
+% =========================================================
+% TAREA 1
+% =========================================================
+\section{Tarea 1 — Estabilidad de la Validación Cruzada (K-Fold)}
+
+\subsection*{Configuración común}
+Modelo usado: \underline{\hspace{6cm}} (regresión lineal sin regularización)\\
+Métrica: \underline{\hspace{3cm}} (RMSE)\\
+Semilla(s) / aleatoriedad: \underline{\hspace{6cm}}\\
+
+\vspace{0.3cm}
+\noindent\textbf{Hipótesis inicial (antes de ejecutar):}
+¿Crees que el RMSE será estable al cambiar K? ¿Por qué?
+\vspace{1.4cm}
+
+\subsection{Experimento A — K = 2 (Validación simple): variabilidad entre ejecuciones}
+
+\noindent Ejecuta el modelo \textbf{varias veces} con K=2 (por ejemplo 5--10) y registra el RMSE.
+
+\vspace{0.2cm}
+\begin{center}
+\includegraphics[width=0.90\linewidth]{outputs/kfold_K2_rmse_runs.png}
+\end{center}
+
+\noindent\textbf{Registro de resultados (rellena):}
+\begin{center}
+\begin{tabular}{|c|c|}
+\hline
+Ejecución & RMSE \\
+\hline
+1 & \underline{\hspace{2.5cm}} \\
+2 & \underline{\hspace{2.5cm}} \\
+3 & \underline{\hspace{2.5cm}} \\
+4 & \underline{\hspace{2.5cm}} \\
+5 & \underline{\hspace{2.5cm}} \\
+\hline
+\end{tabular}
+\end{center}
+
+\vspace{0.2cm}
+\noindent\textbf{Análisis:}
+\begin{itemize}
+    \item ¿Por qué el error varía tanto entre ejecuciones?
+    \item ¿Es fiable esta métrica (con K=2) para tomar una decisión técnica?
+\end{itemize}
+
+\vspace{1.4cm}
+
+\subsection{Experimento B — K = 10 (estándar): RMSE más estable}
+
+\noindent Ejecuta el modelo con K=10 y anota el RMSE.
+
+\vspace{0.2cm}
+\begin{center}
+\includegraphics[width=0.90\linewidth]{outputs/kfold_K10_rmse.png}
+\end{center}
+
+\noindent RMSE observado (K=10): \underline{\hspace{3cm}}
+
+\vspace{0.4cm}
+\noindent\textbf{Análisis:}
+Describe si el resultado parece más estable que en K=2 y por qué.
+\vspace{1.2cm}
+
+\subsection{Experimento C — K = 100 (Leave-One-Out): coste vs. precisión}
+
+\noindent Ejecuta el modelo con K=100 (LOOCV) y observa el RMSE y el tiempo.
+
+\vspace{0.2cm}
+\begin{center}
+\includegraphics[width=0.90\linewidth]{outputs/kfold_K100_loocv_rmse.png}
+\end{center}
+
+\noindent RMSE observado (K=100): \underline{\hspace{3cm}} \quad
+Tiempo aproximado: \underline{\hspace{3cm}}
+
+\vspace{0.4cm}
+\noindent\textbf{Análisis:}
+Compara el coste computacional frente a K=10. ¿Merece la pena el tiempo extra para mejorar la precisión obtenida?
+\vspace{1.2cm}
+
+\subsection{Resumen comparativo (K = 2 vs 10 vs 100)}
+
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+K & RMSE & Comentario de estabilidad/coste \\
+\hline
+2 & \underline{\hspace{2.5cm}} & \underline{\hspace{6cm}} \\
+10 & \underline{\hspace{2.5cm}} & \underline{\hspace{6cm}} \\
+100 & \underline{\hspace{2.5cm}} & \underline{\hspace{6cm}} \\
+\hline
+\end{tabular}
+\end{center}
+
+\vspace{0.3cm}
+\noindent\textbf{Conclusión Tarea 1 (3--6 líneas):}
+¿Cuál elegirías para este problema y por qué?
+\vspace{1.6cm}
+
+\newpage
+
+% =========================================================
+% TAREA 2
+% =========================================================
+\section{Tarea 2 — Regularización Ridge vs. Lasso (K = 10)}
+
+\subsection*{Configuración}
+Fijamos K = 10 y comparamos:
+\begin{itemize}
+    \item \textbf{Ridge Regression} (penalización L2)
+    \item \textbf{Lasso Regression} (penalización L1)
+\end{itemize}
+
+\subsection{Ridge (L2) — $\lambda = 0.1,\, 10,\, 100$}
+
+\noindent\textbf{Resultados:} captura el gráfico de barras de coeficientes para cada $\lambda$.
+
+\vspace{0.2cm}
+\begin{center}
+\includegraphics[width=0.90\linewidth]{outputs/ridge_lambda_0.1_coeffs.png}
+\end{center}
+\noindent RMSE Ridge ($\lambda=0.1$): \underline{\hspace{3cm}}
+
+\vspace{0.4cm}
+\begin{center}
+\includegraphics[width=0.90\linewidth]{outputs/ridge_lambda_10_coeffs.png}
+\end{center}
+\noindent RMSE Ridge ($\lambda=10$): \underline{\hspace{3cm}}
+
+\vspace{0.4cm}
+\begin{center}
+\includegraphics[width=0.90\linewidth]{outputs/ridge_lambda_100_coeffs.png}
+\end{center}
+\noindent RMSE Ridge ($\lambda=100$): \underline{\hspace{3cm}}
+
+\vspace{0.4cm}
+\noindent\textbf{Análisis:}
+¿Llegan a valer \textbf{cero} los coeficientes de las variables ruidosas (\texttt{Var\_4} a \texttt{Var\_10})?
+Explica qué observas y por qué pasa (o no pasa).
+\vspace{1.6cm}
+
+\subsection{Lasso (L1) — $\lambda = 0.1,\, 10,\, 100$}
+
+\noindent\textbf{Resultados:} captura el gráfico de barras de coeficientes para cada $\lambda$.
+
+\vspace{0.2cm}
+\begin{center}
+\includegraphics[width=0.90\linewidth]{outputs/lasso_lambda_0.1_coeffs.png}
+\end{center}
+\noindent RMSE Lasso ($\lambda=0.1$): \underline{\hspace{3cm}}
+
+\vspace{0.4cm}
+\begin{center}
+\includegraphics[width=0.90\linewidth]{outputs/lasso_lambda_10_coeffs.png}
+\end{center}
+\noindent RMSE Lasso ($\lambda=10$): \underline{\hspace{3cm}}
+
+\vspace{0.4cm}
+\begin{center}
+\includegraphics[width=0.90\linewidth]{outputs/lasso_lambda_100_coeffs.png}
+\end{center}
+\noindent RMSE Lasso ($\lambda=100$): \underline{\hspace{3cm}}
+
+\vspace{0.4cm}
+\noindent\textbf{Análisis clave:}
+\begin{enumerate}
+    \item Identifica para qué valor de $\lambda$ el modelo \textbf{Lasso} consigue \textbf{eliminar} (poner a cero)
+    las 7 variables ruidosas, quedándose solo con las 3 importantes:
+    \[
+    \lambda^{*} = \underline{\hspace{2.5cm}}
+    \]
+    \item Variables con coeficiente distinto de cero (modelo Lasso con $\lambda^{*}$):\\
+    \underline{\hspace{13cm}}
+\end{enumerate}
+
+\vspace{1.0cm}
+
+\subsection{El dilema de la complejidad — $\lambda$ demasiado alto (ej. 1000)}
+
+\noindent Prueba un valor extremo, por ejemplo $\lambda = 1000$, y registra qué ocurre.
+
+\vspace{0.2cm}
+\begin{center}
+\includegraphics[width=0.90\linewidth]{outputs/lasso_lambda_1000_coeffs.png}
+\end{center}
+
+\noindent RMSE ($\lambda=1000$): \underline{\hspace{3cm}}
+
+\vspace{0.4cm}
+\noindent\textbf{Análisis:}
+Explica qué ocurre con el RMSE si aplicas un $\lambda$ demasiado alto.
+¿Estamos ante un caso de \textbf{sesgo alto} o \textbf{varianza alta}? Justifica.
+\vspace{1.8cm}
+
+\newpage
+
+% =========================================================
+% RETO
+% =========================================================
+\section{Reto — El “Cazador de Variables”}
+
+\noindent\textbf{Contexto:} Imagina que cada variable incluida en tu modelo tiene un \textbf{coste de mantenimiento}.
+Tu objetivo es encontrar el modelo \textbf{más sencillo posible} (menos variables con coeficientes $\neq 0$)
+que mantenga un RMSE inferior a un umbral:
+
+\[
+\text{RMSE} < \underline{\hspace{2.5cm}} \quad (\text{umbral del profesor})
+\]
+
+\vspace{0.3cm}
+\noindent\textbf{Mejor solución encontrada (rellena):}
+\[
+\lambda = \underline{\hspace{2.5cm}}
+\quad\quad
+\text{\#Variables activas} = \underline{\hspace{2.5cm}}
+\quad\quad
+\text{RMSE} = \underline{\hspace{2.5cm}}
+\]
+
+\vspace{0.3cm}
+\noindent Variables seleccionadas (coeficiente $\neq 0$):
+\underline{\hspace{13cm}}
+
+\vspace{0.5cm}
+\begin{center}
+\includegraphics[width=0.90\linewidth]{outputs/reto_best_model_coeffs.png}
+\end{center}
+
+\vspace{0.3cm}
+\noindent\textbf{Justificación técnica (6--10 líneas):}
+¿Por qué este modelo es el mejor compromiso entre simplicidad (coste) y rendimiento (RMSE)?
+\vspace{2.2cm}
+
+% =========================================================
+% CONCLUSIONES
+% =========================================================
+\section{Conclusiones finales}
+Resume en 8--12 líneas lo aprendido sobre:
+\begin{itemize}
+    \item Estabilidad de K-Fold al variar K (K=2 vs K=10 vs LOOCV).
+    \item Diferencias prácticas entre Ridge y Lasso (coeficientes, selección de variables).
+    \item Relación entre $\lambda$ grande y el sesgo/varianza.
+\end{itemize}
+
+\vspace{3.0cm}

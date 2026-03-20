@@ -1,0 +1,297 @@
+======================================================================
+  PRÁCTICA 3 — Metodología de Evaluación y Rigor Científico
+  Introducción al Aprendizaje Automático — Curso 2025/2026
+======================================================================
+[INFO] Dataset cargado: 1000 filas × 7 columnas
+
+  Columnas: ['Var_0', 'Var_1', 'Var_2', 'Var_3', 'Var_4', 'ID_Hospital_Filtro', 'Clase']
+  Distribución de clases:
+Clase
+0    980
+1     20
+  Proporción clase 1: 2.00%
+
+  Variables legítimas (5): ['Var_0', 'Var_1', 'Var_2', 'Var_3', 'Var_4']
+  Variable trampa: ID_Hospital_Filtro
+
+======================================================================
+  TAREA 1 — La Lotería de la Partición Aleatoria
+======================================================================
+  Ejecución 1 (seed=0): 4 positivos en test (2.0%)
+  Ejecución 2 (seed=1): 3 positivos en test (1.5%)
+  Ejecución 3 (seed=2): 5 positivos en test (2.5%)
+  Ejecución 4 (seed=3): 4 positivos en test (2.0%)
+  Ejecución 5 (seed=4): 3 positivos en test (1.5%)
+
+[TABLA RESUMEN - TAREA 1]
+ Ejecución  Semilla  Positivos en test  Positivos en train  % clase 1 en test  Total en test
+         1        0                  4                  16                2.0            200
+         2        1                  3                  17                1.5            200
+         3        2                  5                  15                2.5            200
+         4        3                  4                  16                2.0            200
+         5        4                  3                  17                1.5            200
+
+[ANÁLISIS]
+  Si el test solo contiene 0 o 1 ejemplo positivo, el modelo no puede
+  ser evaluado con métricas como F1 o Recall para la clase minoritaria.
+  La Accuracy puede ser 98-100% simplemente prediciendo siempre clase 0,
+  dando una falsa sensación de buen rendimiento.
+  → La partición aleatoria es poco fiable con datasets desbalanceados.
+
+[FIGURA] Guardada en: /home/jesus/IAA/P3_evaluación/src/../docs/figuras/tarea1_loteria.png
+
+======================================================================
+  TAREA 2 — Partición Estratificada con StratifiedKFold
+======================================================================
+  Proporción global de clase 1 en el dataset: 2.00%
+
+  Fold  1: test= 100 muestras, clase1_test=2.00%, clase1_train=2.00%
+  Fold  2: test= 100 muestras, clase1_test=2.00%, clase1_train=2.00%
+  Fold  3: test= 100 muestras, clase1_test=2.00%, clase1_train=2.00%
+  Fold  4: test= 100 muestras, clase1_test=2.00%, clase1_train=2.00%
+  Fold  5: test= 100 muestras, clase1_test=2.00%, clase1_train=2.00%
+  Fold  6: test= 100 muestras, clase1_test=2.00%, clase1_train=2.00%
+  Fold  7: test= 100 muestras, clase1_test=2.00%, clase1_train=2.00%
+  Fold  8: test= 100 muestras, clase1_test=2.00%, clase1_train=2.00%
+  Fold  9: test= 100 muestras, clase1_test=2.00%, clase1_train=2.00%
+  Fold 10: test= 100 muestras, clase1_test=2.00%, clase1_train=2.00%
+
+  Desviación típica de la proporción de clase 1 entre folds: 0.0000%
+  → Cercana a 0, lo que confirma que la estratificación funciona correctamente.
+
+[TABLA RESUMEN - TAREA 2]
+ Fold  % clase 1 en test  % clase 1 en train  Ejemplos positivos test  Tamaño test
+    1                2.0                 2.0                        2          100
+    2                2.0                 2.0                        2          100
+    3                2.0                 2.0                        2          100
+    4                2.0                 2.0                        2          100
+    5                2.0                 2.0                        2          100
+    6                2.0                 2.0                        2          100
+    7                2.0                 2.0                        2          100
+    8                2.0                 2.0                        2          100
+    9                2.0                 2.0                        2          100
+   10                2.0                 2.0                        2          100
+
+[ANÁLISIS]
+  Con StratifiedKFold, cada fold mantiene aprox. el mismo porcentaje
+  de clase 1. Esto garantiza que las métricas de evaluación sean
+  representativas del rendimiento real del modelo en todas las particiones.
+  Sin estratificación, la varianza entre folds puede ser enorme,
+  haciendo la comparación entre modelos poco fiable.
+
+[FIGURA] Guardada en: /home/jesus/IAA/P3_evaluación/src/../docs/figuras/tarea2_estratificada.png
+
+======================================================================
+  TAREA 3 — Comparativa de la Varianza (KFold vs StratifiedKFold)
+======================================================================
+
+----------------------------------------------------------------------
+  KFold estándar (sin estratificación)
+----------------------------------------------------------------------
+  Iter  1 (seed=0): Acc=0.5770, F1=0.3841
+  Iter  2 (seed=1): Acc=0.5840, F1=0.3891
+  Iter  3 (seed=2): Acc=0.5580, F1=0.3732
+  Iter  4 (seed=3): Acc=0.5820, F1=0.3853
+  Iter  5 (seed=4): Acc=0.5920, F1=0.3847
+  Iter  6 (seed=5): Acc=0.5840, F1=0.3882
+  Iter  7 (seed=6): Acc=0.5720, F1=0.3786
+  Iter  8 (seed=7): Acc=0.5680, F1=0.3757
+  Iter  9 (seed=8): Acc=0.5760, F1=0.3873
+  Iter 10 (seed=9): Acc=0.5780, F1=0.3825
+
+----------------------------------------------------------------------
+  StratifiedKFold (con estratificación)
+----------------------------------------------------------------------
+  Iter  1 (seed=0): Acc=0.5780, F1=0.3885
+  Iter  2 (seed=1): Acc=0.5700, F1=0.3830
+  Iter  3 (seed=2): Acc=0.5810, F1=0.3829
+  Iter  4 (seed=3): Acc=0.5760, F1=0.3868
+  Iter  5 (seed=4): Acc=0.5850, F1=0.3925
+  Iter  6 (seed=5): Acc=0.5800, F1=0.3877
+  Iter  7 (seed=6): Acc=0.5800, F1=0.3834
+  Iter  8 (seed=7): Acc=0.5750, F1=0.3837
+  Iter  9 (seed=8): Acc=0.5620, F1=0.3753
+  Iter 10 (seed=9): Acc=0.5960, F1=0.3936
+
+[TABLA COMPARATIVA - TAREA 3]
+Métrica                               KFold    StratifiedKFold
+--------------------------------------------------------------
+  Accuracy (media)                   0.5771             0.5783
+  Accuracy (std)                     0.0090             0.0085
+  F1-macro (media)                   0.3829             0.3857
+  F1-macro (std)                     0.0051             0.0050
+
+[CONCLUSIÓN]
+  ✔ StratifiedKFold produce una Accuracy con MENOR desviación típica.
+  ✔ StratifiedKFold produce un F1-macro con MENOR desviación típica.
+  → StratifiedKFold es más adecuado en problemas desbalanceados porque
+    garantiza particiones representativas, reduciendo la varianza de
+    las métricas y haciendo la evaluación más fiable y repetible.
+
+[FIGURA] Guardada en: /home/jesus/IAA/P3_evaluación/src/../docs/figuras/tarea3_varianza.png
+
+======================================================================
+  TAREA 4 — Detección de Data Leakage (La Trampa)
+======================================================================
+
+----------------------------------------------------------------------
+  4.1 Entrenando CON la variable trampa (ID_Hospital_Filtro)
+----------------------------------------------------------------------
+  ADVERTENCIA: Esta variable está correlacionada artificialmente con
+  la clase objetivo. Su inclusión genera una evaluación engañosa.
+
+  Accuracy con trampa → media=1.0000, std=0.0000
+  F1-macro con trampa → media=1.0000, std=0.0000
+
+  ⚠️  RESULTADO SOSPECHOSO: Accuracy cercana o superior al 90%.
+       En un problema real con estas características, una Accuracy
+       tan alta casi siempre indica data leakage u otro error.
+
+----------------------------------------------------------------------
+  4.2 Entrenando SIN la variable trampa
+----------------------------------------------------------------------
+  Ahora se eliminó 'ID_Hospital_Filtro'. Los resultados deben ser
+  significativamente más bajos y representativos de la dificultad real.
+
+  Accuracy sin trampa → media=0.5850, std=0.0482
+  F1-macro sin trampa → media=0.3887, std=0.0178
+
+----------------------------------------------------------------------
+  4.3 Reflexión / Comparativa
+----------------------------------------------------------------------
+  Diferencia en Accuracy (trampa - real): +0.4150
+  Diferencia en F1-macro (trampa - real): +0.6113
+
+  La variable 'ID_Hospital_Filtro' provoca una inflación artificial
+  del rendimiento. Al eliminarla, el modelo muestra su capacidad real.
+  Publicar o usar en producción un modelo entrenado con esta variable
+  llevaría a conclusiones falsas sobre su utilidad clínica.
+
+[FIGURA] Guardada en: /home/jesus/IAA/P3_evaluación/src/../docs/figuras/tarea4_leakage.png
+
+======================================================================
+  RETO — Auditoría Metodológica
+======================================================================
+
+  ══════════════════════════════════════════════════════════════════
+  INFORME DE AUDITORÍA METODOLÓGICA
+  Experimentos de clasificación binaria desbalanceada (2% clase 1)
+  ══════════════════════════════════════════════════════════════════
+
+  ─────────────────────────────────────────────────────────────────
+  PROBLEMA 1 — Partición aleatoria simple en datos desbalanceados
+  ─────────────────────────────────────────────────────────────────
+  ERROR DETECTADO:
+    Usar train_test_split sin stratify=y en un dataset con solo un
+    2% de la clase positiva puede resultar en conjuntos de test con
+    0 o 1 ejemplos positivos, dependiendo de la semilla aleatoria.
+
+  POR QUÉ INVALIDA LA EVALUACIÓN:
+    → Con 0 positivos en test, las métricas como F1, Recall o AUC-ROC
+      de la clase positiva son matemáticamente indefinidas o triviales.
+    → La Accuracy aparente (>97%) no refleja capacidad predictiva real:
+      predecir siempre clase 0 ya da ≈98% de Accuracy en este dataset.
+    → La reproducibilidad del experimento es nula: cambiando la semilla
+      se pueden obtener resultados radicalmente distintos.
+
+  BUENA PRÁCTICA:
+    → Usar siempre stratify=y en train_test_split cuando las clases
+      están desbalanceadas.
+
+  ─────────────────────────────────────────────────────────────────
+  PROBLEMA 2 — KFold estándar vs StratifiedKFold en datasets
+               desbalanceados
+  ─────────────────────────────────────────────────────────────────
+  ERROR DETECTADO:
+    Aplicar KFold sin estratificación en datos desbalanceados produce
+    folds con proporciones de clase muy variables.
+
+  POR QUÉ INVALIDA LA EVALUACIÓN:
+    → Una alta varianza entre folds hace que elegir el "mejor modelo"
+      sea dependiente del azar, no del mérito real del clasificador.
+    → Las comparaciones entre modelos pueden llevar a elegir el modelo
+      incorrecto simplemente porque le tocaron folds "más fáciles".
+
+  BUENA PRÁCTICA:
+    → Usar StratifiedKFold para garantizar que cada fold tenga la
+      misma distribución de clases que el dataset completo.
+    → Reportar media ± desviación típica de las métricas para
+      cuantificar la incertidumbre de la evaluación.
+
+  ─────────────────────────────────────────────────────────────────
+  PROBLEMA 3 — Data Leakage por variable correlacionada con el target
+  ─────────────────────────────────────────────────────────────────
+  ERROR DETECTADO:
+    La variable 'ID_Hospital_Filtro' está artificialmente correlacionada
+    con la variable objetivo. Al incluirla durante el entrenamiento y la
+    evaluación, el modelo "aprende" implícitamente el target a través de
+    esta variable en lugar de aprender el problema real.
+
+  EFECTO OBSERVADO:
+    → Las métricas de evaluación son anormalmente altas (>90% Accuracy,
+      F1-macro >>0.8), muy por encima de lo esperado para este problema.
+    → Al eliminar la variable trampa, las métricas caen a niveles más
+      realistas y acordes a la dificultad del dataset.
+
+  POR QUÉ CONDUCE A CONCLUSIONES FALSAS:
+    → Un modelo con data leakage tiene un rendimiento excelente en el
+      sistema de evaluación pero fallará estrepitosamente en producción,
+      donde la variable trampa no estaría disponible (o no debería estarlo).
+    → En un contexto clínico, desplegar ese modelo podría causar errores
+      médicos graves al no detectar casos de riesgo real.
+
+  BUENA PRÁCTICA:
+    → Auditar todas las variables del dataset antes de entrenar.
+    → Verificar que ninguna feature es una transformación o derivada
+      del target (ni temporal ni artificialmente).
+    → Aplicar una matriz de correlación y análisis de importancias de
+      características para detectar variables sospechosamente fuertes.
+
+  ─────────────────────────────────────────────────────────────────
+  RESUMEN DE BUENAS PRÁCTICAS PARA FUTUROS EXPERIMENTOS
+  ─────────────────────────────────────────────────────────────────
+    1. Siempre estratificar las particiones en problemas desbalanceados.
+    2. Usar StratifiedKFold en lugar de KFold estándar.
+    3. Reportar métricas orientadas a clases minoritarias: F1, Recall,
+       Precision y AUC-ROC además de la Accuracy global.
+    4. Auditar el dataset en busca de variables con data leakage.
+    5. Usar Pipelines para asegurar que los preprocesados no filtran
+       información del test al train durante la validación cruzada.
+    6. Repetir experimentos con distintas semillas y reportar la
+       desviación típica para cuantificar la incertidumbre.
+    7. Documentar y compartir el código de evaluación para asegurar
+       la reproducibilidad del experimento.
+  ══════════════════════════════════════════════════════════════════
+    
+
+======================================================================
+  RESUMEN EJECUTIVO FINAL
+======================================================================
+
+  Dataset: 1000 pacientes, 20 positivos (2.0%)
+
+  TAREA 1 — Lotería de la partición aleatoria:
+    · Rango de positivos en test:  3 – 5
+    · Desv. típica:                0.84
+    → Alta variabilidad → partición aleatoria NO es fiable aquí.
+
+  TAREA 2 — Partición estratificada:
+    · Desv. típica de % clase 1:  0.0000%
+    → Prácticamente nula → StratifiedKFold garantiza representatividad.
+
+  TAREA 3 — Comparativa de varianza:
+    · Accuracy std KFold:          0.0090
+    · Accuracy std StratifiedKFold: 0.0085
+    · F1 std KFold:                0.0051
+    · F1 std StratifiedKFold:      0.0050
+    → StratifiedKFold produce métricas más estables.
+
+  TAREA 4 — Data Leakage:
+    · Accuracy CON trampa:  1.0000 ± 0.0000
+    · Accuracy SIN trampa:  0.5850 ± 0.0482
+    · F1-macro CON trampa:  1.0000 ± 0.0000
+    · F1-macro SIN trampa:  0.3887 ± 0.0178
+    → La variable 'ID_Hospital_Filtro' infla artificialmente las métricas.
+
+  Figuras guardadas en: /home/jesus/IAA/P3_evaluación/src/../docs/figuras
+    

@@ -1,0 +1,244 @@
+% =============================================================================
+% preamble.tex — Centralised preamble for the IAA lab report
+%
+% This file is \input{}'d by __memoria.tex (main document).
+% Sub-files compiled standalone with subfiles should also \input this file
+% inside their own \documentclass declaration (see comments in each subfile).
+%
+% Rule: edit packages / styles HERE only --- never in __memoria.tex or subfiles.
+% =============================================================================
+
+% ── Language & encoding ──────────────────────────────────────────────────────
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[utf8]{inputenc}
+  \usepackage[T1]{fontenc}
+\else
+  \usepackage{fontspec}
+\fi
+\usepackage[spanish,es-tabla]{babel}
+\usepackage{lmodern}
+\usepackage{textcomp}           % Extended symbols (€, etc.)
+
+% ── Page geometry ─────────────────────────────────────────────────────────────
+\usepackage[left=35mm, right=25mm, top=25mm, headheight=70pt, headsep=20pt, includehead]{geometry}
+
+% ── Headers & footers ─────────────────────────────────────────────────────────
+\usepackage{fancyhdr}
+
+% ── Fonts ─────────────────────────────────────────────────────────────────────
+\usepackage[scaled]{berasans}   % Cover font; drop for default serif body text
+% \renewcommand*\familydefault{\sfdefault}  % Uncomment for full sans-serif body
+
+% ── Graphics & floats ─────────────────────────────────────────────────────────
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{wrapfig}
+\usepackage{subcaption}
+\usepackage[skip=12pt, font=small]{caption}
+\usepackage{afterpage}
+
+% ── Colour (single loader — xcolor supersedes the old color package) ──────────
+% NOTE: 'table' option gives colortbl functionality; load BEFORE any other
+%       package that might load xcolor without options.
+\usepackage[dvipsnames, svgnames, table]{xcolor}
+
+% ── Math ─────────────────────────────────────────────────────────────────────
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% ── Tables ───────────────────────────────────────────────────────────────────
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{tabularx}
+
+% ── Lists ────────────────────────────────────────────────────────────────────
+\usepackage{enumitem}
+
+% ── Code listings ────────────────────────────────────────────────────────────
+\usepackage{listings}
+\usepackage[newfloat]{minted}   % Requires --shell-escape at compilation
+
+% ── Diagrams ─────────────────────────────────────────────────────────────────
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows}
+
+% ── Section titles ───────────────────────────────────────────────────────────
+\usepackage{titlesec}
+
+% ── PDF & hyperlinks ─────────────────────────────────────────────────────────
+\usepackage{pdfpages}
+\usepackage{pdflscape}          % Landscape pages inside portrait document
+\usepackage[hidelinks, 
+            pdfauthor={Jesús Fernández López, Rafael Carlos Schoettel Vilchez},
+            pdftitle={Memoria de Prácticas - IAA},
+            pdfsubject={Introducción al Aprendizaje Automático},
+            pdfkeywords={Machine Learning, Gradient Descent, Mini-batch, LaTeX},
+            pdfproducer={LaTeX with hyperref},
+            pdfcreator={pdflatex}]{hyperref}
+\hypersetup{
+    colorlinks=false,   % No borders around links
+    pdfborder={0 0 0}   % No border for print/screen
+}
+
+% ── Bibliography ─────────────────────────────────────────────────────────────
+\usepackage[square, numbers]{natbib}
+\usepackage[nottoc]{tocbibind}  % Adds bibliography/list-of-X to TOC
+
+% ── Appendices & glossaries ──────────────────────────────────────────────────
+\usepackage{appendix}
+% \usepackage{glossaries} % Disabled to keep the document clean as requested
+
+% ── Miscellaneous ────────────────────────────────────────────────────────────
+% \usepackage{lipsum}           % Dummy text --- uncomment only for testing
+\usepackage{eurosym}            % € symbol
+\usepackage{url}
+\usepackage{subfiles}           % Support for multi-file projects
+
+% ── Date formatting ──────────────────────────────────────────────────────────
+\usepackage{datetime}
+\newcommand\Monthname[1][EMPTY]{%
+  \ifnum1=#1Enero\else
+  \ifnum2=#1Febrero\else
+  \ifnum3=#1Marzo\else
+  \ifnum4=#1Abril\else
+  \ifnum5=#1Mayo\else
+  \ifnum6=#1Junio\else
+  \ifnum7=#1Julio\else
+  \ifnum8=#1Agosto\else
+  \ifnum9=#1Septiembre\else
+  \ifnum10=#1Octubre\else
+  \ifnum11=#1Noviembre\else
+  \ifnum12=#1Diciembre\else
+  \fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi\fi
+}
+\newdateformat{monthyeardate}{\Monthname[\THEMONTH], \THEYEAR}
+
+% =============================================================================
+% Configurations (colours, code style, flowchart styles)
+% =============================================================================
+
+% --- Colours ---
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+% --- Code listings style ---
+\lstdefinestyle{codestyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    literate=
+    {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+    {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+    {ñ}{{\~{n}}}1 {€}{{\EUR}}1 {£}{{\pounds}}1
+}
+\lstset{style=codestyle}
+
+% --- Flowchart styles (TikZ) ---
+\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=red!30]
+\tikzstyle{io} = [trapezium, trapezium stretches=true, trapezium left angle=70, trapezium right angle=110, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=blue!30]
+\tikzstyle{process} = [rectangle, minimum width=3cm, minimum height=1cm, text centered, text width=3cm, draw=black, fill=orange!30]
+\tikzstyle{decision} = [diamond, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=green!30]
+\tikzstyle{arrow} = [thick,->,>=stealth]
+
+% =============================================================================
+% Floats & captions
+% =============================================================================
+\newfloat{diagrama}{htbp}{loc}
+\floatname{diagrama}{Diagrama}
+\newcommand{\listofdiagrams}{\listof{diagrama}{Índice de Diagramas de Flujo}}
+\floatstyle{plaintop}
+\restylefloat{table}
+
+% Code listing caption names (Spanish)
+\newenvironment{code}{\captionsetup{type=listing}}{}
+\renewcommand{\listingname}{Código}
+\renewcommand*{\listlistingname}{Índice de Códigos}
+
+% =============================================================================
+% Graphics path
+% =============================================================================
+\graphicspath{{Imagenes/}{\subfix{Imagenes/}}{img/}}
+
+% =============================================================================
+% Page styles (headers & footers)
+% =============================================================================
+\pagestyle{fancy}
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+\renewcommand{\sectionmark}[1]{\markright{#1}}
+
+\fancypagestyle{cuerpo}{%
+  \fancyhf{}
+  \fancyfoot[L]{\Autor}
+  \fancyfoot[R]{- \thepage\ -}
+  \fancyhead[L]{\leftmark}
+  \fancyhead[R]{\includegraphics[height=1.8cm]{logo_uco}}
+  \renewcommand{\headrulewidth}{0.4pt}
+  \renewcommand{\footrulewidth}{0.4pt}
+}
+
+\fancypagestyle{indice}{%
+  \fancyhf{}
+  \fancyfoot[L]{\Autor}
+  \fancyfoot[R]{- \thepage\ -}
+  \fancyhead[L]{\Titulo}
+  \fancyhead[R]{\includegraphics[height=1.8cm]{logo_uco}}
+  \renewcommand{\headrulewidth}{0.4pt}
+  \renewcommand{\footrulewidth}{0.4pt}
+}
+
+\fancypagestyle{plain}{%
+  \fancyhf{}
+  \fancyfoot[L]{\Autor}
+  \fancyfoot[R]{- \thepage\ -}
+  \fancyhead[L]{\leftmark}
+  \fancyhead[R]{\includegraphics[height=1.8cm]{logo_uco}}
+  \renewcommand{\headrulewidth}{0.4pt}
+  \renewcommand{\footrulewidth}{0.4pt}
+}
+
+% =============================================================================
+% Document-wide settings
+% =============================================================================
+\setcounter{secnumdepth}{4}
+\raggedbottom   % Prevents large vertical gaps on short pages
+
+% Appendix label: "Anexo" instead of "Apéndice"
+\addto\captionsspanish{\renewcommand{\appendixname}{Anexo}}
+
+% ── Standalone Chapter Cover ────────────────────────────────────────────────
+\makeatletter
+\newcommand{\standalonecover}{%
+  \@ifclassloaded{subfiles}{%
+    \begin{titlepage}
+      \centering
+      \vspace*{2cm}
+      {\Huge \textbf{\Titulo} \par}
+      \vspace{1.5cm}
+      {\Large \Asignatura \par}
+      \vfill
+      {\large \Autor \par}
+      \vfill
+      {\large \monthyeardate{\today} \par}
+    \end{titlepage}
+    % Reset page counter and numbering for the standalone chapter
+    \setcounter{page}{1}
+    \pagenumbering{arabic}
+  }{}%
+}
+\makeatother
+
+% \makeglossaries % Disabled as requested

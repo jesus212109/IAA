@@ -1,0 +1,61 @@
+% Portada del documento
+
+% Definición de colores usados en la portada
+\definecolor{epsc:oscuro}{HTML}{280091}
+\definecolor{epsc:medio}{HTML}{4C5CC5}
+\definecolor{epsc:verde}{HTML}{00B299}
+\definecolor{epsc:claro}{HTML}{3FCFD5}
+
+\definecolor{PORTADA_0}{cmyk}{1.00,0.00,0.07,0.28,1.00}
+
+\definecolor{PORTADA_1}{cmyk}{0.58,0.55,0.00,0.44,1.00}
+
+\definecolor{friendlyGray}{HTML}{f0f0f0}
+
+\thispagestyle{empty}
+
+\begin{tikzpicture}[remember picture, overlay]
+  % Top Corner Decoration
+   \node [anchor=north east, inner sep=0pt]  at (current page.north east)%
+     {\includegraphics[height=6cm]{Portada/Img/topRightCorner}};
+   % Bottom Decorations (Optional/Commented)
+%   \node [anchor=south west, inner sep=0pt]  at (current page.south west)%
+%     {\includegraphics[height=6cm]{Portada/Img/bottomLeftCorner}};
+  \node (uco) [anchor=south east, inner sep=0pt, xshift=-10mm, yshift=10mm]  at (current page.south east)%
+    {\includegraphics[height=2cm]{Portada/Img/uco_escudo}};
+\end{tikzpicture}
+
+% Logo central
+\begin{center}
+\vspace*{1cm}
+\vfill
+\vfill
+\vfill
+\vfill
+\includegraphics[width=12.5cm]{Portada/Img/LogotipoEPSC}
+\vfill
+\vfill
+
+{\color{epsc:verde}
+\large
+
+\textbf{\Asignatura}
+
+\textit{\Grado}
+} \vspace{0.5cm}
+
+{\color{epsc:oscuro}
+
+\textbf{\large \Titulo}
+
+\vspace{14.35mm}
+\begin{tabular}{rl}
+\textbf{Autores:} & \begin{tabular}[t]{l} \Autor \end{tabular}
+\end{tabular}
+
+\vspace{6.79mm}
+\textbf{\monthyeardate{\today}}        % Compilation date in Month, Year format
+
+}
+\end{center}
+\endinput

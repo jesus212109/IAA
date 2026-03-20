@@ -1,0 +1,83 @@
+Introducción al Aprendizaje Automático
+3º Ingeniería Informática - Curso 2025/2026
+
+Práctica 3: Metodología de Evaluación y
+Rigor Científico
+Objetivo: Aprender a realizar evaluaciones honestas en condiciones difíciles, especialmente con datos desbalanceados, y detectar errores metodológicos graves como la fuga de datos (data leakage).
+Material de partida
+Se proporciona lo siguiente:
+Un dataset sintético de 1000 pacientes, con 5 variables predictoras.
+Un problema de clasificación fuertemente desbalanceado, donde solo el 2 % de los casos pertenecen a la clase
+positiva (clase 1).
+
+Tarea 1: La lotería de la partición aleatoria
+Utilizando el dataset desbalanceado proporcionado, realiza una evaluación básica con partición aleatoria:
+Ejecuta train_test_split con partición 80/20 en 5 ocasiones distintas.
+En cada ejecución, registra cuántos ejemplos de la clase positiva (clase 1) han quedado en el conjunto de
+test.
+Analiza si la composición del test cambia mucho entre ejecuciones debido al azar.
+Pregunta: ¿Es posible evaluar correctamente un modelo si en el conjunto de test solo aparecen 0 o 1 casos
+positivos?
+
+Tarea 2: Partición estratificada
+Sustituye la estrategia anterior por una partición estratificada para preservar la proporción de clases.
+Aplica StratifiedKFold.
+Comprueba la proporción de la clase positiva en cada uno de los folds.
+Demuestra que el porcentaje de la clase 1 se mantiene aproximadamente constante en todas las particiones.
+Análisis: Explica por qué esta estrategia es más adecuada cuando el dataset está desbalanceado.
+
+Tarea 3: Comparativa de la varianza
+Compara la estabilidad de la evaluación usando validación cruzada normal y validación cruzada estratificada.
+Calcula el rendimiento del modelo mediante métricas como Accuracy y F1.
+Realiza 10 iteraciones con validación cruzada estándar (KFold) y 10 iteraciones con validación cruzada
+estratificada (StratifiedKFold).
+Calcula la desviación típica de los resultados obtenidos en ambos casos.
+Conclusión: Indica qué método produce métricas más estables y menos dependientes del azar.
+
+Tarea 4: Detección de Data Leakage (La trampa)
+En esta parte se introduce una variable artificial que filtra información del objetivo y puede provocar una evaluación
+engañosa.
+Entrena un modelo utilizando todas las variables, incluida la variable trampa.
+Observa si el resultado obtenido es anormalmente alto (por ejemplo, cercano al 100 %). Hay una puesta a propósito trampa
+Identifica qué variable está provocando la fuga de datos.
+Elimina esa variable y repite el experimento.
+Reflexión: Compara el resultado “engañoso” con el resultado más realista tras eliminar la variable problemática.
+
+EPSC
+
+Última modificación: 12 de marzo de 2026
+
+1
+
+Introducción al Aprendizaje Automático
+3º Ingeniería Informática - Curso 2025/2026
+
+Práctica 3: Metodología de Evaluación y
+Rigor Científico
+Reto: Auditoría metodológica
+Actúa como si fueras un revisor de un artículo científico o un auditor técnico de un sistema de IA.
+Tu objetivo es detectar qué decisiones metodológicas invalidan una evaluación y justificar por qué.
+Explica por qué una partición aleatoria simple puede ser poco fiable en problemas desbalanceados.
+Justifica por qué la validación estratificada mejora el rigor experimental.
+Identifica el efecto del data leakage y explica por qué conduce a conclusiones falsas sobre el rendimiento real
+del modelo.
+Resume qué buenas prácticas metodológicas deberían seguirse en futuros experimentos.
+
+Formato de entrega
+Debes entregar un Informe de Resultados (PDF) que incluya:
+Una tabla o resumen con el número de casos positivos presentes en el conjunto de test en las 5 ejecuciones de
+la partición aleatoria.
+Una comprobación de la proporción de clases en los folds generados por StratifiedKFold.
+Una comparativa de métricas (Accuracy y/o F1) entre validación cruzada normal y estratificada.
+El cálculo de la desviación típica en ambos casos.
+Una explicación clara del caso de data leakage, indicando cuál es la variable problemática y cómo cambia el
+resultado al eliminarla.
+Una conclusión final sobre la importancia del rigor metodológico en problemas de clasificación desbalanceada.
+
+EPSC
+
+Última modificación: 12 de marzo de 2026
+
+2
+
+

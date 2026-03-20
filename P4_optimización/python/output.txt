@@ -1,0 +1,35 @@
+Cargando datos...
+Separando entrenamiento y prueba...
+Entrenando modelo...
+Obteniendo probabilidades...
+
+=== Umbral por defecto (0.5) ===
+Umbral: 0.50
+TN: 501
+FP: 1
+FN: 22
+TP: 16
+Coste total: 4410.00 €
+
+Analizando varios umbrales...
+
+=== Mejor umbral según coste ===
+Umbral: 0.05
+TN: 390.0
+FP: 112.0
+FN: 9.0
+TP: 29.0
+Coste total: 2920.00 €
+
+Generando curvas ROC y Precision-Recall...
+
+AUC ROC: 0.8442
+Average Precision: 0.6551
+
+=== INDICACIONES PARA LA MEMORIA ===
+1. Explica si el umbral 0.5 parece razonable en este contexto.
+2. Comenta cómo cambian FP y FN al variar el umbral.
+3. Indica qué umbral minimiza el coste total.
+4. Justifica qué política recomendarías al banco.
+5. Razona si la curva ROC o la curva PR es más informativa.
+6. Usa la tabla y las gráficas generadas en la carpeta outputs/.

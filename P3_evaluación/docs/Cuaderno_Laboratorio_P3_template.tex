@@ -1,0 +1,147 @@
+% =========================================================
+% SUBIR ESTE CÓDIGO COMO CAPÍTULO DE PRÁCTICA EN LA MEMORIA
+% =========================================================
+\chapter{Cuaderno de Laboratorio — Práctica 3: Metodología de Evaluación y Rigor Científico}
+
+\section*{Objetivo}
+Aprender a realizar evaluaciones honestas en condiciones difíciles, especialmente con datos desbalanceados,
+y detectar errores metodológicos graves como la fuga de datos (\textit{data leakage}).
+
+\section*{Material de partida}
+Se parte de:
+\begin{itemize}
+    \item Un dataset sintético de \textbf{1000 pacientes} con \textbf{5 variables predictoras}.
+    \item Una clase positiva muy minoritaria (\textbf{2\%} de los casos).
+\end{itemize}
+
+\section{Tarea 1 — La lotería de la partición aleatoria}
+
+\subsection*{Configuración común}
+Modelo usado: \texttt{LogisticRegression} (con \texttt{class\_weight='balanced'})\\
+Métricas usadas: \texttt{Nº positivos en test}, \texttt{\% clase 1}\\
+Semilla(s): \texttt{0, 1, 2, 3, 4} (5 ejecuciones aleatorias)
+
+\vspace{0.3cm}
+\noindent\textbf{Hipótesis inicial (antes de ejecutar):}
+Es probable que el número de positivos en test sea muy inestable. Al haber solo un 2\% de casos positivos (20 de 1000), una partición aleatoria de 200 ejemplos (20\%) podría capturar por puro azar una cantidad muy variable de estos casos, o incluso ninguno, invalidando la representatividad del conjunto de test.
+\vspace{0.3cm}
+
+\subsection{Registro de resultados (5 particiones aleatorias)}
+\begin{center}
+\begin{tabular}{|c|c|}
+\hline
+Ejecución & Positivos en test \\
+\hline
+1 & 4 \\
+2 & 3 \\
+3 & 5 \\
+4 & 4 \\
+5 & 3 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\includegraphics[width=0.85\linewidth]{figuras/tarea1_loteria.png}
+\end{center}
+
+\noindent\textbf{Análisis:}
+\begin{itemize}
+    \item ¿Ha cambiado mucho el número de positivos en test entre ejecuciones? Sí, el número oscila entre 3 y 5. Aunque parece una diferencia pequeña en valor absoluto, supone una variación relativa significativa ($\pm 25\%$) en un conjunto de test tan pequeño.
+    \item ¿Sería fiable la evaluación si el azar dejara solo 0 o 1 positivos en test? No. Con 0 o 1 positivos, métricas como F1-score o Recall para la clase minoritaria serían imposibles de calcular o carecerían de significado estadístico, dando resultados extremos (0 o 100\%) que no reflejan la capacidad real del modelo.
+\end{itemize}
+
+\vspace{1.5cm}
+
+\section{Tarea 2 — Partición estratificada}
+
+\subsection{Registro por folds}
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Fold & Positivos en test & Tamaño del fold & Proporción clase 1 \\
+\hline
+1  & 2 & 100 & 2.0\% \\
+2  & 2 & 100 & 2.0\% \\
+3  & 2 & 100 & 2.0\% \\
+4  & 2 & 100 & 2.0\% \\
+5  & 2 & 100 & 2.0\% \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\includegraphics[width=0.85\linewidth]{figuras/tarea2_estratificada.png}
+\end{center}
+
+\noindent\textbf{Análisis:}
+Explica por qué \texttt{StratifiedKFold} es más adecuado que una partición aleatoria simple en este problema.
+\texttt{StratifiedKFold} garantiza que cada fold mantenga la misma proporción de clases que el dataset original (2\%). En datasets muy desbalanceados, esto evita que algunos folds se queden sin muestras de la clase minoritaria, asegurando que el modelo sea evaluado siempre sobre una distribución representativa y reduciendo la varianza debida al azar.
+\vspace{0.3cm}
+
+\section{Tarea 3 — Comparativa de la varianza}
+
+\subsection{Resumen de resultados}
+\begin{center}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+Método & Accuracy media & std(Accuracy) & F1 media & std(F1) \\
+\hline
+KFold & 0.5771 & 0.0090 & 0.3829 & 0.0051 \\
+StratifiedKFold & 0.5783 & 0.0085 & 0.3857 & 0.0050 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\includegraphics[width=0.85\linewidth]{figuras/tarea3_varianza.png}
+\end{center}
+
+\noindent\textbf{Interpretación:}
+\begin{itemize}
+    \item ¿Qué método produce métricas más estables? El método \texttt{StratifiedKFold} produce métricas más estables, como se observa en la menor desviación típica (\textit{std}) tanto en Accuracy como en F1-macro.
+    \item ¿Dónde se nota más la mejora, en Accuracy o en F1? La mejora en la estabilidad es notable en ambas, pero el rigor metodológico es especialmente crítico en F1-macro, ya que esta métrica penaliza el mal rendimiento en la clase minoritaria, la cual es más sensible a particiones no representativas.
+\end{itemize}
+
+\vspace{1.4cm}
+
+\section{Tarea 4 — Detección de data leakage}
+
+\subsection{Comparativa}
+\begin{center}
+\begin{tabular}{|l|c|c|}
+\hline
+Escenario & Accuracy & F1 \\
+\hline
+Sin variable trampa & 0.5850 & 0.3887 \\
+Con variable trampa & 1.0000 & 1.0000 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\includegraphics[width=0.85\linewidth]{figuras/tarea4_leakage.png}
+\end{center}
+
+\noindent\textbf{Preguntas:}
+\begin{itemize}
+    \item ¿Qué variable sospechas que está filtrando información del objetivo? La variable \texttt{ID\_Hospital\_Filtro}.
+    \item ¿Por qué esa variable invalida la evaluación? Porque ha sido construida (o seleccionada) de tal forma que tiene una correlación perfecta o casi perfecta con la clase objetivo. El modelo aprende a usar este "filtro" en lugar de las variables clínicas reales, obteniendo un rendimiento del 100\% que es imposible en la práctica.
+    \item ¿Qué diferencia conceptual hay entre un modelo ``bueno'' y un modelo contaminado por leakage? Un modelo bueno aprende patrones generales y reales a partir de los datos predictores. Un modelo con leakage hace "trampa": utiliza información que no estará disponible en el momento de la predicción real (despliegue), por lo que fallará totalmente al enfrentarse a nuevos datos.
+\end{itemize}
+
+\vspace{1.4cm}
+
+\section{Reto — Auditoría metodológica}
+\begin{enumerate}
+    \item \textbf{Peligros de la partición aleatoria:} Puede generar conjuntos de test vacíos de clase minoritaria, impidiendo una evaluación estadística significante y dando una falsa sensación de precisión mediante el "acierto por mayoría".
+    \item \textbf{Aporte de la estratificación:} Garantiza la representatividad de la muestra en cada fold, permitiendo comparar modelos de forma justa y estable.
+    \item \textbf{Data Leakage:} Hace inútil el experimento porque el modelo no aprende a resolver el problema, sino a identificar una variable que ya contiene la respuesta, invalidando su uso futuro en producción.
+    \item \textbf{Buenas prácticas:} Usar siempre estratificación, auditar variables en busca de correlaciones sospechosas, emplear métricas robustas (F1, AUC-ROC) y utilizar repetibilidad mediante semillas y validación cruzada.
+\end{enumerate}
+
+\vspace{0.5cm}
+
+\section{Conclusión final}
+He aprendido que la evaluación de modelos de IA no es solo ejecutar un comando, sino que requiere rigor metodológico. En el aprendizaje con datos desbalanceados, el azar es un enemigo que la estratificación ayuda a controlar. Además, el \textit{data leakage} es un error silente y catastrófico: métricas perfectas suelen ser señal de un error de diseño, no de un modelo excepcional. La honestidad en la evaluación es la base de un sistema de IA confiable.
+\end{document}
