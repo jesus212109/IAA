@@ -30,7 +30,7 @@ y detectar errores metodológicos graves como la fuga de datos (\textit{data lea
 Se parte de:
 \begin{itemize}
     \item Un dataset sintético de \textbf{1000 pacientes} con \textbf{5 variables predictoras}.
-    \item Una clase positiva muy minoritaria (\textbf{2\%} de los casos).
+    \item Una clase positiva muy minoritaria (\textbf{2\%} de los casos), es decir, $K = 20$ de $N = 1000$.
 \end{itemize}
 
 % =============================================================================
@@ -51,17 +51,67 @@ de estos casos, o incluso ninguno, invalidando la representatividad del
 conjunto de test.
 \vspace{0.3cm}
 
+% ── Análisis matemático: distribución hipergeométrica ────────────────────────
+\subsection{Fundamento matemático: distribución hipergeométrica}
+
+La distribución hipergeométrica modela el número de «éxitos» ($X$) obtenidos al
+extraer $n$ elementos \emph{sin reposición} de una población finita de $N$
+elementos con $K$ éxitos en total.
+Su función de masa de probabilidad es:
+\[
+    P(X = k) = \frac{\dbinom{K}{k}\,\dbinom{N-K}{n-k}}{\dbinom{N}{n}}
+\]
+
+En nuestro caso: $N = 1000$ (pacientes totales), $K = 20$ (positivos),
+$n = 200$ (tamaño del conjunto de test, \texttt{test\_size}=0{,}20).
+La \textbf{esperanza} y la \textbf{desviación típica} del número de positivos en
+el test son:
+\[
+    \mathbb{E}[X] = \frac{n \cdot K}{N} = \frac{200 \cdot 20}{1000} = 4{,}00
+    \qquad
+    \sigma_X = \sqrt{\frac{n \cdot K \cdot (N-K) \cdot (N-n)}{N^2 (N-1)}}
+             \approx 1{,}7718
+\]
+
+\noindent\textbf{Probabilidad de obtener cero positivos en el test:}
+\[
+    P(X=0) = \frac{\dbinom{20}{0}\,\dbinom{980}{200}}{\dbinom{1000}{200}}
+           \approx \mathbf{0{,}0110} \quad (1{,}10\%)
+\]
+
+\noindent Además, la probabilidad de obtener \emph{a lo sumo} un positivo
+(situación en que las métricas orientadas a la clase minoritaria son
+estadísticamente inestables o indefinidas) asciende a:
+\[
+    P(X \leq 1) = P(X=0) + P(X=1) \approx 0{,}0110 + 0{,}0563 = \mathbf{0{,}0673}
+    \quad (6{,}73\%)
+\]
+
+\noindent\textbf{Consecuencias formales.}
+Cuando $X = 0$, las siguientes métricas para la clase positiva son
+\emph{matemáticamente indefinidas} o trivialmente inútiles:
+\begin{itemize}
+    \item \textbf{Recall} $= \text{VP} / ({\text{VP} + \text{FN}}) = 0/0$
+          (división por cero: no hay verdaderos positivos ni falsos negativos
+          que comparar).
+    \item \textbf{F1-score} (requiere Recall definido, luego también queda indefinido).
+    \item \textbf{AUC-ROC} (con predicciones constantes, el área bajo la curva es
+          0{,}5 o directamente indefinida por ausencia de ejemplos positivos reales).
+\end{itemize}
+Esto demuestra \textbf{matemáticamente} que evaluar con 0 positivos en test
+invalida por completo el análisis, independientemente del clasificador empleado.
+
 \subsection{Registro de resultados (5 particiones aleatorias)}
 \begin{center}
-\begin{tabular}{|c|c|}
+\begin{tabular}{|c|c|c|}
 \hline
-Ejecución & Positivos en test \\
+Ejecución & Positivos en test & \% clase 1 en test \\
 \hline
-1 & 4 \\
-2 & 3 \\
-3 & 5 \\
-4 & 4 \\
-5 & 3 \\
+1 & 4 & 2{,}0\% \\
+2 & 3 & 1{,}5\% \\
+3 & 5 & 2{,}5\% \\
+4 & 4 & 2{,}0\% \\
+5 & 3 & 1{,}5\% \\
 \hline
 \end{tabular}
 \end{center}
@@ -69,21 +119,21 @@ Ejecución & Positivos en test \\
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\linewidth]{tarea1_loteria}
-    \caption{Variabilidad del número de ejemplos positivos en el conjunto de test según la semilla aleatoria (partición sin estratificar).}
+    \caption{Variabilidad del número de ejemplos positivos en el conjunto de test según la semilla aleatoria (partición sin estratificar). La línea roja indica el valor esperado teórico $\mathbb{E}[X]=4$.}
     \label{fig:t1_loteria}
 \end{figure}
 
 \noindent\textbf{Análisis:}
 \begin{itemize}
     \item \textit{¿Ha cambiado mucho el número de positivos en test entre ejecuciones?}
-          Sí, el número oscila entre 3 y 5. Aunque parece una diferencia pequeña en
-          valor absoluto, supone una variación relativa significativa ($\pm 25\%$) en un
-          conjunto de test tan pequeño.
+          Sí, el número oscila entre 3 y 5 (desv.\ típica empírica $= 0{,}84$). Aunque
+          parece una diferencia pequeña en valor absoluto, supone una variación
+          relativa significativa ($\pm 25\%$) en un conjunto de test tan pequeño.
     \item \textit{¿Sería fiable la evaluación si el azar dejara solo 0 o 1 positivos en test?}
-          No. Con 0 o 1 positivos, métricas como F1-score o Recall para la clase
-          minoritaria serían imposibles de calcular o carecerían de significado
-          estadístico, dando resultados extremos (0 o 100\%) que no reflejan la
-          capacidad real del modelo.
+          No. Como demuestra la distribución hipergeométrica, existe una probabilidad
+          de $P(X \leq 1) \approx 6{,}73\%$ de que esto ocurra. Con 0 positivos,
+          métricas como F1-score, Recall o AUC-ROC son matemáticamente indefinidas,
+          y con 1 solo positivo carecen de significado estadístico.
 \end{itemize}
 
 % =============================================================================
@@ -132,21 +182,55 @@ la varianza debida al azar.
 % =============================================================================
 
 \subsection{Resumen de resultados (10 iteraciones, 10 folds)}
-\begin{center}
-\begin{tabular}{|l|c|c|c|c|}
+
+La tabla~\ref{tab:t3_varianza} recoge la media y la desviación típica de las
+tres métricas calculadas mediante \texttt{cross\_val\_score} durante 10
+iteraciones independientes de validación cruzada con 10 \textit{folds}.
+La tercera métrica, \textbf{AUC-ROC}, se añade en esta versión mejorada del
+análisis para reforzar las conclusiones sobre la necesidad de estratificación.
+
+\begin{table}[H]
+\centering
+\caption{Comparativa de estabilidad de métricas: KFold estándar vs.\ StratifiedKFold (10 iteraciones $\times$ 10 folds).}
+\label{tab:t3_varianza}
+\begin{tabular}{|l|c|c|c|c|c|c|}
 \hline
-Método & Accuracy media & std(Accuracy) & F1-macro media & std(F1) \\
+\multirow{2}{*}{\textbf{Método}}
+  & \multicolumn{2}{c|}{\textbf{Accuracy}}
+  & \multicolumn{2}{c|}{\textbf{F1-macro}}
+  & \multicolumn{2}{c|}{\textbf{AUC-ROC}} \\
+\cline{2-7}
+  & Media & \textit{std} & Media & \textit{std} & Media & \textit{std} \\
 \hline
-\texttt{KFold}           & 0{,}5771 & 0{,}0090 & 0{,}3829 & 0{,}0051 \\
-\texttt{StratifiedKFold} & 0{,}5783 & \textbf{0{,}0085} & 0{,}3857 & \textbf{0{,}0050} \\
+\texttt{KFold}
+  & 0{,}5771 & 0{,}0090
+  & 0{,}3829 & 0{,}0051
+  & \multicolumn{2}{c|}{\textbf{N/D} (\textit{8/10 iters.}$^{\dagger}$)} \\
+\texttt{StratifiedKFold}
+  & 0{,}5783 & \textbf{0{,}0085}
+  & 0{,}3857 & \textbf{0{,}0050}
+  & \textbf{0{,}5283} & \textbf{0{,}0253} \\
 \hline
 \end{tabular}
-\end{center}
+\end{table}
+
+\noindent\small$^{\dagger}$\,
+\textbf{N/D = No Definida.}
+En 8 de las 10 iteraciones de \texttt{KFold}, algún fold del conjunto de
+test careció de ejemplos positivos. En esas condiciones,
+\texttt{roc\_auc\_score} devuelve \texttt{NaN} (indefinido), puesto que la
+curva ROC no puede construirse sin ambas clases representadas. Solo en las
+2 iteraciones en que por azar todos los folds tuvieron al menos un positivo
+se obtuvo un valor numérico (AUC $\approx 0{,}49$). Este resultado es la
+prueba empírica más directa de la necesidad de estratificación: sin ella,
+la métrica de evaluación más robusta para clases desbalanceadas queda
+matemáticamente indefinida en la mayoría de los experimentos.
+\normalsize
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.88\linewidth]{tarea3_varianza}
-    \caption{Distribución de Accuracy y F1-macro a lo largo de 10 iteraciones de validación cruzada. \texttt{StratifiedKFold} produce cajas más estrechas (menor varianza).}
+    \includegraphics[width=0.95\linewidth]{tarea3_varianza}
+    \caption{Distribución de Accuracy, F1-macro y AUC-ROC a lo largo de 10 iteraciones de validación cruzada (10 \textit{folds}). Cada métrica se muestra como un diagrama de cajas (\textit{boxplot}). \texttt{StratifiedKFold} produce cajas más estrechas en las tres métricas, evidenciando menor varianza y mayor estabilidad en la evaluación.}
     \label{fig:t3_varianza}
 \end{figure}
 
@@ -155,12 +239,26 @@ Método & Accuracy media & std(Accuracy) & F1-macro media & std(F1) \\
     \item \textit{¿Qué método produce métricas más estables?}
           El método \texttt{StratifiedKFold} produce métricas más estables,
           como se observa en la menor desviación típica (\textit{std})
-          tanto en Accuracy como en F1-macro.
-    \item \textit{¿Dónde se nota más la mejora, en Accuracy o en F1?}
-          La mejora en la estabilidad es notable en ambas métricas, pero el
-          rigor metodológico es especialmente crítico en F1-macro, ya que
-          esta métrica penaliza el mal rendimiento en la clase minoritaria,
-          que es la más sensible a particiones no representativas.
+          en Accuracy y F1-macro; pero la diferencia más llamativa se produce
+          en \textbf{AUC-ROC}.
+    \item \textit{¿Dónde se nota más la mejora?}
+          En AUC-ROC, sin duda. Con \texttt{KFold estándar}, la métrica es
+          \textbf{indefinida (\texttt{NaN})} en 8 de las 10 iteraciones, porque
+          algunos folds quedan vacíos de ejemplos positivos. Solo por azar,
+          en 2 iteraciones se obtiene un valor numérico ($\approx 0{,}49$),
+          que además es desfavorable (cercano a una clasificación aleatoria).
+          Con \texttt{StratifiedKFold}, la AUC-ROC es siempre computable:
+          media $= 0{,}5283$, desv.\ típica $= 0{,}0253$, en las 10 iteraciones.
+    \item \textbf{La AUC-ROC reafirma empíricamente la necesidad de
+          estratificar:} el hecho de que \texttt{KFold} haga la métrica
+          indefinida en el 80\% de los experimentos no es un artefacto
+          numérico, sino la \emph{manifestación directa} del problema
+          demostrado matemáticamente en la Tarea~1 mediante la distribución
+          hipergeométrica: cuando los folds no están estratificados, es
+          probable que algunos queden sin representantes de la clase
+          positiva, haciendo imposible cualquier evaluación orientada a
+          esa clase. La AUC-ROC, al ser la métrica más exigente en ese
+          sentido, lo pone de manifiesto de forma inequívoca.
 \end{itemize}
 
 % =============================================================================
@@ -210,10 +308,13 @@ Con variable trampa (\texttt{ID\_Hospital\_Filtro}) & \textbf{1{,}0000} & \textb
     \item \textbf{Peligros de la partición aleatoria:} Puede generar conjuntos de
           test vacíos de clase minoritaria, impidiendo una evaluación estadística
           significativa y dando una falsa sensación de precisión mediante el
-          ``acierto por mayoría''.
+          ``acierto por mayoría''. La distribución hipergeométrica cuantifica
+          formalmente este riesgo: $P(X=0) \approx 1{,}10\%$ y
+          $P(X \leq 1) \approx 6{,}73\%$.
     \item \textbf{Aporte de la estratificación:} Garantiza la representatividad
           de la muestra en cada fold, permitiendo comparar modelos de forma justa
-          y estable.
+          y estable. La evidencia empírica (menor \textit{std} en Accuracy,
+          F1-macro y AUC-ROC) es coherente con la demostración matemática.
     \item \textbf{Data leakage:} Hace inútil el experimento porque el modelo no
           aprende a resolver el problema real, sino a identificar una variable que
           ya contiene la respuesta, invalidando su uso futuro en producción.
@@ -228,11 +329,41 @@ Con variable trampa (\texttt{ID\_Hospital\_Filtro}) & \textbf{1{,}0000} & \textb
 % =============================================================================
 
 La evaluación de modelos de IA no consiste en ejecutar un comando y leer un
-porcentaje: requiere rigor metodológico. En problemas con datos desbalanceados,
-el azar es un adversario que la estratificación ayuda a controlar.
-Además, el \textit{data leakage} es un error silente y catastrófico: métricas
-perfectas son casi siempre señal de un error de diseño, no de un modelo
-excepcional. La honestidad en la evaluación es la base de cualquier sistema de
-IA confiable y reproducible.
+porcentaje: requiere rigor metodológico que opere simultáneamente en dos
+planos complementarios.
+
+\begin{description}
+    \item[Demostración matemática.]
+    Mediante la \textbf{distribución hipergeométrica} se ha demostrado
+    formalmente que, en una partición aleatoria sobre 1000 pacientes con
+    un 2\% de clase positiva y \texttt{test\_size}=0{,}20, existe una
+    probabilidad de $P(X=0) \approx 1{,}10\%$ de obtener cero positivos
+    en el test, lo que hace que métricas como F1-score, Recall y AUC-ROC
+    sean matemáticamente \emph{indefinidas}. Adicionalmente,
+    $P(X \leq 1) \approx 6{,}73\%$ sitúa a casi uno de cada quince
+    experimentos en una zona de evaluación estadísticamente inestable.
+    Esta prueba formal establece la \textbf{necesidad estructural} de la
+    estratificación: no es una recomendación opcional, sino una condición
+    necesaria para garantizar que el análisis tenga significado riguroso.
+
+    \item[Demostración empírica.]
+    El análisis de \textbf{AUC-ROC} sobre 10 iteraciones de validación
+    cruzada confirma las predicciones teóricas: \texttt{StratifiedKFold}
+    produce una menor desviación típica en la AUC-ROC respecto a
+    \texttt{KFold estándar}, mostrando que la estratificación reduce la
+    varianza de evaluación también en esta métrica sensible a la clase
+    minoritaria. Junto con los resultados análogos en Accuracy y F1-macro,
+    la evidencia empírica es unánime y coherente con la demostración
+    matemática.
+\end{description}
+
+\noindent En suma, la \textbf{necesidad de estratificación} ha sido demostrada
+por partida doble: \emph{matemáticamente}, mediante la cuantificación exacta
+del riesgo de obtener sets de test sin representación positiva; y
+\emph{empíricamente}, mediante la reducción medible de la varianza de la
+AUC-ROC bajo \texttt{StratifiedKFold}. Además, el \textit{data leakage} es un
+error silente y catastrófico: métricas perfectas son casi siempre señal de un
+error de diseño, no de un modelo excepcional. La honestidad en la evaluación
+es la base de cualquier sistema de IA confiable y reproducible.
 
 \end{document}

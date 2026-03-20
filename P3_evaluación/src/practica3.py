@@ -1,34 +1,33 @@
 """
 =============================================================================
-PRÁCTICA 3: Metodología de Evaluación y Rigor Científico
-Asignatura: Introducción al Aprendizaje Automático
-3º Ingeniería Informática - Curso 2025/2026
+PRACTICE 3: Evaluation Methodology and Scientific Rigor
+Subject: Introduction to Machine Learning
+3rd Year Computer Engineering - 2025/2026
 =============================================================================
 
-Este script cubre TODAS las tareas requeridas en la práctica:
+This script covers ALL required tasks for Practice 3:
 
-  Tarea 1 → La lotería de la partición aleatoria
-             Muestra cuántos ejemplos de clase 1 caen en test en 5 ejecuciones
-             con diferentes semillas aleatorias.
+  Task 1 -> The random split lottery
+             Shows how many class-1 examples fall in the test set across
+             5 runs with different random seeds (no stratification).
 
-  Tarea 2 → Partición estratificada
-             Aplica StratifiedKFold y verifica que la proporción de clase 1
-             se mantiene constante en todos los folds.
+  Task 2 -> Stratified split
+             Applies StratifiedKFold and verifies that the class-1 proportion
+             remains constant across all folds.
 
-  Tarea 3 → Comparativa de la varianza
-             Compara la estabilidad (varianza / desviación típica) entre
-             KFold normal y StratifiedKFold usando Accuracy y F1.
+  Task 3 -> Variance comparison
+             Compares the stability (variance / std) between standard KFold
+             and StratifiedKFold using Accuracy, F1-macro, and AUC-ROC.
 
-  Tarea 4 → Detección de Data Leakage
-             Introdujo una variable artificial (ID_Hospital_Filtro) que filtra
-             información del target. Se entrena con ella y sin ella, y se
-             comparan los resultados.
+  Task 4 -> Data Leakage detection
+             Introduces an artificial variable (ID_Hospital_Filtro) that leaks
+             target information. Trains with and without it and compares results.
 
-  Reto     → Auditoría metodológica
-             Reflexión final sobre las buenas prácticas descubiertas.
+  Challenge -> Methodological audit
+             Final reflection on the good practices discovered.
 
-Requisitos del entorno:
-    pip install scikit-learn pandas numpy matplotlib seaborn
+Environment requirements:
+    pip install scikit-learn pandas numpy matplotlib seaborn scipy
 =============================================================================
 """
 
@@ -36,19 +35,19 @@ Requisitos del entorno:
 # IMPORTACIONES
 # ---------------------------------------------------------------------------
 import warnings
-warnings.filterwarnings("ignore")          # Suprimimos warnings menores para
-                                           # que la salida sea más limpia
+warnings.filterwarnings("ignore")          # Suppress minor warnings for
+                                           # cleaner console output
 
 import os
 import numpy as np
 import pandas as pd
 import matplotlib
-matplotlib.use("Agg")                      # Backend sin ventana (compatible con
-                                           # entornos sin pantalla)
+matplotlib.use("Agg")                      # Non-interactive backend (compatible
+                                           # with headless environments)
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Métricas y modelos de scikit-learn
+# scikit-learn models and metrics
 from sklearn.model_selection import (
     train_test_split,
     KFold,
@@ -59,39 +58,40 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
     accuracy_score,
     f1_score,
+    roc_auc_score,
     classification_report,
 )
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 
 # ---------------------------------------------------------------------------
-# CONSTANTES GLOBALES
+# GLOBAL CONSTANTS
 # ---------------------------------------------------------------------------
-# Ruta al dataset (relativa al directorio del script)
+# Path to dataset (relative to script directory)
 DATASET_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
     "..", "data", "pacientes_riesgo.csv"
 )
 
-# Columna objetivo (etiqueta)
+# Target column (label)
 TARGET_COL = "Clase"
 
-# Variable trampa que provoca data leakage
+# Trap variable that causes data leakage
 TRAP_COL = "ID_Hospital_Filtro"
 
-# Número de ejecuciones para la Tarea 1
+# Number of runs for Task 1
 N_RUNS_TASK1 = 5
 
-# Número de folds para StratifiedKFold (Tarea 2 y 3)
+# Number of folds for StratifiedKFold (Tasks 2 and 3)
 N_FOLDS = 10
 
-# Número de iteraciones de CV para la Tarea 3
+# Number of cross-validation iterations for Task 3
 N_ITER_TASK3 = 10
 
-# Tamaño del conjunto de test en partición simple (20 %)
+# Test set fraction for simple split (20%)
 TEST_SIZE = 0.20
 
-# Directorio donde se guardarán las figuras generadas
+# Directory where generated figures will be saved
 FIGURES_DIR = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
     "..", "docs", "figuras"
@@ -100,13 +100,13 @@ os.makedirs(FIGURES_DIR, exist_ok=True)
 
 
 # ===========================================================================
-# FUNCIONES AUXILIARES
+# HELPER FUNCTIONS
 # ===========================================================================
 
 def separador(titulo: str, ancho: int = 70) -> None:
     """
-    Imprime un separador visual con título centrado.
-    Útil para organizar la salida en consola por secciones.
+    Print a visual separator with centered title.
+    Useful for organizing console output by sections.
     """
     print("\n" + "=" * ancho)
     print(f"  {titulo}")
@@ -114,7 +114,7 @@ def separador(titulo: str, ancho: int = 70) -> None:
 
 
 def subseparador(titulo: str, ancho: int = 70) -> None:
-    """Separador de segundo nivel (guiones)."""
+    """Second-level separator (dashes)."""
     print("\n" + "-" * ancho)
     print(f"  {titulo}")
     print("-" * ancho)
@@ -122,39 +122,39 @@ def subseparador(titulo: str, ancho: int = 70) -> None:
 
 def cargar_dataset(path: str) -> pd.DataFrame:
     """
-    Carga el CSV del dataset sintético de pacientes.
+    Load the synthetic patient dataset from a CSV file.
 
-    Parámetros
+    Parameters
     ----------
     path : str
-        Ruta absoluta o relativa al fichero CSV.
+        Absolute or relative path to the CSV file.
 
-    Retorna
+    Returns
     -------
-    pd.DataFrame con los datos cargados.
+    pd.DataFrame with the loaded data.
     """
     df = pd.read_csv(path)
-    print(f"[INFO] Dataset cargado: {df.shape[0]} filas × {df.shape[1]} columnas")
+    print(f"[INFO] Dataset loaded: {df.shape[0]} rows x {df.shape[1]} columns")
     return df
 
 
 def crear_modelo() -> Pipeline:
     """
-    Crea un pipeline con escalado estándar y regresión logística.
+    Create a pipeline with standard scaling and logistic regression.
 
-    Usamos un Pipeline para evitar data leakage entre train y test durante
-    la validación cruzada: el escalador se ajusta SOLO sobre el train de
-    cada fold y se aplica al test del fold.
+    Using a Pipeline prevents data leakage between train and test during
+    cross-validation: the scaler is fitted ONLY on the train set of each
+    fold and then applied to the test set of that fold.
 
-    Retorna
+    Returns
     -------
-    sklearn.pipeline.Pipeline listo para entrenar.
+    sklearn.pipeline.Pipeline ready to train.
     """
     modelo = Pipeline([
-        ("scaler", StandardScaler()),          # Estandarización (μ=0, σ=1)
+        ("scaler", StandardScaler()),          # Standardization (mean=0, std=1)
         ("clf", LogisticRegression(
-            max_iter=1000,                     # Más iteraciones para convergencia
-            class_weight="balanced",           # Penaliza más los errores en clase 1
+            max_iter=1000,                     # More iterations for convergence
+            class_weight="balanced",           # Increases penalty for class-1 errors
             random_state=42,
             solver="lbfgs",
         ))
@@ -365,126 +365,168 @@ def tarea2_particion_estratificada(X: pd.DataFrame, y: pd.Series) -> pd.DataFram
 
 def tarea3_comparativa_varianza(X: pd.DataFrame, y: pd.Series) -> dict:
     """
-    Compara la estabilidad de la evaluación entre KFold estándar
-    y StratifiedKFold, repitiendo N_ITER_TASK3 veces cada uno.
+    Compare the evaluation stability between standard KFold and StratifiedKFold,
+    repeating N_ITER_TASK3 times for each strategy.
 
-    En datasets desbalanceados, KFold estándar produce mayor varianza en las
-    métricas porque cada ejecución puede tener proporciones de clase muy
-    distintas. StratifiedKFold produce métricas más estables.
+    On imbalanced datasets, standard KFold produces higher metric variance
+    because each run may have very different class proportions.
+    StratifiedKFold produces more stable metrics.
 
-    Parámetros
+    Metrics evaluated: Accuracy, F1-macro, AUC-ROC.
+
+    Parameters
     ----------
-    X : pd.DataFrame   → Variables predictoras
-    y : pd.Series      → Variable objetivo (0/1)
+    X : pd.DataFrame   -> Feature matrix
+    y : pd.Series      -> Target variable (0/1)
 
-    Retorna
+    Returns
     -------
-    dict con los resultados de ambas estrategias.
+    dict with results for both strategies across all iterations.
     """
-    separador("TAREA 3 — Comparativa de la Varianza (KFold vs StratifiedKFold)")
+    separador("TASK 3 — Variance Comparison (KFold vs StratifiedKFold)")
 
     modelo = crear_modelo()
 
-    # Almacenamos los resultados de cada iteración
-    acc_kfold, f1_kfold         = [], []
-    acc_skfold, f1_skfold       = [], []
+    # Store per-iteration results
+    acc_kfold,  f1_kfold,  auc_kfold  = [], [], []
+    acc_skfold, f1_skfold, auc_skfold = [], [], []
 
-    subseparador("KFold estándar (sin estratificación)")
+    subseparador("Standard KFold (without stratification)")
     for seed in range(N_ITER_TASK3):
         kf = KFold(n_splits=N_FOLDS, shuffle=True, random_state=seed)
 
-        # Accuracy usando cross_val_score
+        # Accuracy using cross_val_score
         acc = cross_val_score(modelo, X, y, cv=kf, scoring="accuracy")
-        # F1 macro (promedia entre ambas clases)
+        # F1-macro (averaged across both classes)
         f1  = cross_val_score(modelo, X, y, cv=kf, scoring="f1_macro")
+        # AUC-ROC (requires probability estimates)
+        auc = cross_val_score(modelo, X, y, cv=kf, scoring="roc_auc")
 
         acc_kfold.append(acc.mean())
         f1_kfold.append(f1.mean())
+        auc_kfold.append(auc.mean())
         print(
             f"  Iter {seed+1:2d} (seed={seed}): "
-            f"Acc={acc.mean():.4f}, F1={f1.mean():.4f}"
+            f"Acc={acc.mean():.4f}, F1={f1.mean():.4f}, AUC={auc.mean():.4f}"
         )
 
-    subseparador("StratifiedKFold (con estratificación)")
+    subseparador("StratifiedKFold (with stratification)")
     for seed in range(N_ITER_TASK3):
         skf = StratifiedKFold(n_splits=N_FOLDS, shuffle=True, random_state=seed)
 
         acc = cross_val_score(modelo, X, y, cv=skf, scoring="accuracy")
         f1  = cross_val_score(modelo, X, y, cv=skf, scoring="f1_macro")
+        auc = cross_val_score(modelo, X, y, cv=skf, scoring="roc_auc")
 
         acc_skfold.append(acc.mean())
         f1_skfold.append(f1.mean())
+        auc_skfold.append(auc.mean())
         print(
             f"  Iter {seed+1:2d} (seed={seed}): "
-            f"Acc={acc.mean():.4f}, F1={f1.mean():.4f}"
+            f"Acc={acc.mean():.4f}, F1={f1.mean():.4f}, AUC={auc.mean():.4f}"
         )
 
     # ------------------------------------------------------------------
-    # RESUMEN ESTADÍSTICO
+    # STATISTICAL SUMMARY
     # ------------------------------------------------------------------
-    print("\n[TABLA COMPARATIVA - TAREA 3]")
-    print(f"{'Métrica':<30} {'KFold':>12} {'StratifiedKFold':>18}")
+    # Count NaN values: NaN in AUC means a fold had no positive examples
+    nan_kfold  = int(np.sum(np.isnan(auc_kfold)))
+    nan_skfold = int(np.sum(np.isnan(auc_skfold)))
+
+    print("\n[COMPARATIVE TABLE - TASK 3]")
+    print(f"{'Metric':<30} {'KFold':>12} {'StratifiedKFold':>18}")
     print("-" * 62)
 
-    metricas = {
-        "Accuracy (media)":  (np.mean(acc_kfold), np.mean(acc_skfold)),
-        "Accuracy (std)":    (np.std(acc_kfold),  np.std(acc_skfold)),
-        "F1-macro (media)":  (np.mean(f1_kfold),  np.mean(f1_skfold)),
-        "F1-macro (std)":    (np.std(f1_kfold),   np.std(f1_skfold)),
+    metrics = {
+        "Accuracy (mean)":  (np.mean(acc_kfold),       np.mean(acc_skfold)),
+        "Accuracy (std)":   (np.std(acc_kfold),        np.std(acc_skfold)),
+        "F1-macro (mean)":  (np.mean(f1_kfold),        np.mean(f1_skfold)),
+        "F1-macro (std)":   (np.std(f1_kfold),         np.std(f1_skfold)),
+        "AUC-ROC (mean)": (np.nanmean(auc_kfold),  np.nanmean(auc_skfold)),
+        "AUC-ROC (std)":  (np.nanstd(auc_kfold),   np.nanstd(auc_skfold)),
     }
-    for nombre, (v_kf, v_skf) in metricas.items():
-        print(f"  {nombre:<28} {v_kf:>12.4f} {v_skf:>18.4f}")
+    for name, (v_kf, v_skf) in metrics.items():
+        print(f"  {name:<28} {v_kf:>12.4f} {v_skf:>18.4f}")
 
-    print("\n[CONCLUSIÓN]")
+    print(f"\n  [WARNING] KFold AUC-ROC was NaN in {nan_kfold}/{N_ITER_TASK3} iterations")
+    print(f"            (folds with zero positive examples -> undefined AUC-ROC)")
+    print(f"            StratifiedKFold AUC-ROC NaN count: {nan_skfold}/{N_ITER_TASK3}")
+
+    print("\n[CONCLUSION]")
     if np.std(acc_skfold) < np.std(acc_kfold):
-        print("  [OK] StratifiedKFold produce una Accuracy con MENOR desviación típica.")
+        print("  [OK] StratifiedKFold produces Accuracy with LOWER standard deviation.")
     if np.std(f1_skfold) < np.std(f1_kfold):
-        print("  [OK] StratifiedKFold produce un F1-macro con MENOR desviación típica.")
+        print("  [OK] StratifiedKFold produces F1-macro with LOWER standard deviation.")
+    if nan_kfold > nan_skfold:
+        print(f"  [OK] KFold made AUC-ROC undefined (NaN) in {nan_kfold} iterations vs"
+              f" {nan_skfold} in StratifiedKFold.")
+    elif np.nanstd(auc_skfold) < np.nanstd(auc_kfold):
+        print("  [OK] StratifiedKFold produces AUC-ROC with LOWER standard deviation.")
     print(
-        "  → StratifiedKFold es más adecuado en problemas desbalanceados porque\n"
-        "    garantiza particiones representativas, reduciendo la varianza de\n"
-        "    las métricas y haciendo la evaluación más fiable y repetible."
+        "  -> StratifiedKFold is more appropriate for imbalanced problems because\n"
+        "     it guarantees representative partitions, reducing metric variance\n"
+        "     and making evaluation more reliable and reproducible.\n"
+        "  -> AUC-ROC especially benefits from stratification: it relies on the\n"
+        "     ranking of predicted probabilities for the positive class, which\n"
+        "     requires at least some positive examples in every test fold."
     )
 
     # ------------------------------------------------------------------
-    # GRÁFICO: Distribución de métricas en ambas estrategias
+    # FIGURE: Metric distributions for both strategies (3 subplots)
     # ------------------------------------------------------------------
-    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
 
-    datos = {
-        "KFold Acc":        acc_kfold,
-        "StratifiedKFold\nAcc": acc_skfold,
-    }
-    etiquetas = list(datos.keys())
-    valores   = list(datos.values())
-    axes[0].boxplot(valores, labels=etiquetas, patch_artist=True,
-                    boxprops=dict(facecolor="steelblue", color="navy"))
-    axes[0].set_title("Accuracy: KFold vs StratifiedKFold")
-    axes[0].set_ylabel("Accuracy media por iteración")
+    # ---- Accuracy ----
+    axes[0].boxplot(
+        [acc_kfold, acc_skfold],
+        labels=["KFold", "StratifiedKFold"],
+        patch_artist=True,
+        boxprops=dict(facecolor="steelblue", color="navy"),
+        medianprops=dict(color="white", linewidth=2),
+    )
+    axes[0].set_title("Accuracy", fontsize=12, fontweight="bold")
+    axes[0].set_ylabel("Mean accuracy per iteration")
 
-    datos_f1 = {
-        "KFold F1":         f1_kfold,
-        "StratifiedKFold\nF1": f1_skfold,
-    }
-    etiquetas_f1 = list(datos_f1.keys())
-    valores_f1   = list(datos_f1.values())
-    axes[1].boxplot(valores_f1, labels=etiquetas_f1, patch_artist=True,
-                    boxprops=dict(facecolor="darkorange", color="saddlebrown"))
-    axes[1].set_title("F1-macro: KFold vs StratifiedKFold")
-    axes[1].set_ylabel("F1-macro media por iteración")
+    # ---- F1-macro ----
+    axes[1].boxplot(
+        [f1_kfold, f1_skfold],
+        labels=["KFold", "StratifiedKFold"],
+        patch_artist=True,
+        boxprops=dict(facecolor="darkorange", color="saddlebrown"),
+        medianprops=dict(color="white", linewidth=2),
+    )
+    axes[1].set_title("F1-macro", fontsize=12, fontweight="bold")
+    axes[1].set_ylabel("Mean F1-macro per iteration")
 
-    plt.suptitle("Tarea 3 — Varianza de métricas: KFold vs StratifiedKFold", y=1.01)
+    # ---- AUC-ROC ----
+    axes[2].boxplot(
+        [auc_kfold, auc_skfold],
+        labels=["KFold", "StratifiedKFold"],
+        patch_artist=True,
+        boxprops=dict(facecolor="mediumseagreen", color="darkgreen"),
+        medianprops=dict(color="white", linewidth=2),
+    )
+    axes[2].set_title("AUC-ROC", fontsize=12, fontweight="bold")
+    axes[2].set_ylabel("Mean AUC-ROC per iteration")
+
+    plt.suptitle(
+        "Task 3 — Metric Variance: KFold vs StratifiedKFold\n"
+        "(10 cross-validation iterations, 10 folds each)",
+        y=1.02, fontsize=13
+    )
     plt.tight_layout()
     ruta_fig = os.path.join(FIGURES_DIR, "tarea3_varianza.png")
     plt.savefig(ruta_fig, dpi=150, bbox_inches="tight")
     plt.close()
-    print(f"\n[FIGURA] Guardada en: {ruta_fig}")
+    print(f"\n[FIGURE] Saved at: {ruta_fig}")
 
     return {
         "acc_kfold":   acc_kfold,
         "f1_kfold":    f1_kfold,
+        "auc_kfold":   auc_kfold,
         "acc_skfold":  acc_skfold,
         "f1_skfold":   f1_skfold,
+        "auc_skfold":  auc_skfold,
     }
 
 
@@ -800,36 +842,42 @@ def main() -> None:
     reto_auditoria()
 
     # ------------------------------------------------------------------
-    # RESUMEN FINAL
+    # FINAL SUMMARY
     # ------------------------------------------------------------------
-    separador("RESUMEN EJECUTIVO FINAL")
+    separador("FINAL EXECUTIVE SUMMARY")
     print(f"""
-  Dataset: {df.shape[0]} pacientes, {df[TARGET_COL].sum()} positivos ({df[TARGET_COL].mean()*100:.1f}%)
+  Dataset: {df.shape[0]} patients, {df[TARGET_COL].sum()} positives ({df[TARGET_COL].mean()*100:.1f}%)
 
-  TAREA 1 — Lotería de la partición aleatoria:
-    · Rango de positivos en test:  {df_t1["Positivos en test"].min()} – {df_t1["Positivos en test"].max()}
-    · Desv. típica:                {df_t1["Positivos en test"].std():.2f}
-    → Alta variabilidad → partición aleatoria NO es fiable aquí.
+  TASK 1 — Random split lottery:
+    · Range of positives in test:       {df_t1["Positivos en test"].min()} – {df_t1["Positivos en test"].max()}
+    · Standard deviation:               {df_t1["Positivos en test"].std():.2f}
+    -> High variability -> random split is NOT reliable here.
 
-  TAREA 2 — Partición estratificada:
-    · Desv. típica de % clase 1:  {df_t2["% clase 1 en test"].std():.4f}%
-    → Prácticamente nula → StratifiedKFold garantiza representatividad.
+  TASK 2 — Stratified split:
+    · Std of class-1 proportion:        {df_t2["% clase 1 en test"].std():.4f}%
+    -> Near zero -> StratifiedKFold guarantees representativeness.
 
-  TAREA 3 — Comparativa de varianza:
-    · Accuracy std KFold:          {np.std(resultados_t3["acc_kfold"]):.4f}
-    · Accuracy std StratifiedKFold: {np.std(resultados_t3["acc_skfold"]):.4f}
-    · F1 std KFold:                {np.std(resultados_t3["f1_kfold"]):.4f}
-    · F1 std StratifiedKFold:      {np.std(resultados_t3["f1_skfold"]):.4f}
-    → StratifiedKFold produce métricas más estables.
+  TASK 3 — Variance comparison (KFold vs StratifiedKFold):
+    · Accuracy std  KFold:              {np.std(resultados_t3["acc_kfold"]):.4f}
+    · Accuracy std  StratifiedKFold:    {np.std(resultados_t3["acc_skfold"]):.4f}
+    · F1-macro std  KFold:              {np.std(resultados_t3["f1_kfold"]):.4f}
+    · F1-macro std  StratifiedKFold:    {np.std(resultados_t3["f1_skfold"]):.4f}
+    · AUC-ROC NaN iters KFold:          {int(np.sum(np.isnan(resultados_t3["auc_kfold"])))}/{N_ITER_TASK3} (folds with zero positives)
+    · AUC-ROC mean  KFold (valid only): {np.nanmean(resultados_t3["auc_kfold"]):.4f}
+    · AUC-ROC std   KFold (valid only): {np.nanstd(resultados_t3["auc_kfold"]):.4f}
+    · AUC-ROC mean  StratifiedKFold:    {np.nanmean(resultados_t3["auc_skfold"]):.4f}
+    · AUC-ROC std   StratifiedKFold:    {np.nanstd(resultados_t3["auc_skfold"]):.4f}
+    -> KFold AUC-ROC is undefined in most iterations: empirical proof of the problem.
+    -> StratifiedKFold produces computable, stable metrics across all three indicators.
 
-  TAREA 4 — Data Leakage:
-    · Accuracy CON trampa:  {resultados_t4["acc_trampa"].mean():.4f} ± {resultados_t4["acc_trampa"].std():.4f}
-    · Accuracy SIN trampa:  {resultados_t4["acc_real"].mean():.4f} ± {resultados_t4["acc_real"].std():.4f}
-    · F1-macro CON trampa:  {resultados_t4["f1_trampa"].mean():.4f} ± {resultados_t4["f1_trampa"].std():.4f}
-    · F1-macro SIN trampa:  {resultados_t4["f1_real"].mean():.4f} ± {resultados_t4["f1_real"].std():.4f}
-    → La variable 'ID_Hospital_Filtro' infla artificialmente las métricas.
+  TASK 4 — Data Leakage:
+    · Accuracy WITH trap:  {resultados_t4["acc_trampa"].mean():.4f} +/- {resultados_t4["acc_trampa"].std():.4f}
+    · Accuracy WITHOUT trap: {resultados_t4["acc_real"].mean():.4f} +/- {resultados_t4["acc_real"].std():.4f}
+    · F1-macro WITH trap:  {resultados_t4["f1_trampa"].mean():.4f} +/- {resultados_t4["f1_trampa"].std():.4f}
+    · F1-macro WITHOUT trap: {resultados_t4["f1_real"].mean():.4f} +/- {resultados_t4["f1_real"].std():.4f}
+    -> Variable 'ID_Hospital_Filtro' artificially inflates all metrics.
 
-  Figuras guardadas en: {FIGURES_DIR}
+  Figures saved in: {FIGURES_DIR}
     """)
 
 
