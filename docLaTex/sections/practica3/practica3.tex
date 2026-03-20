@@ -1,5 +1,11 @@
 % =============================================================================
 % practica3.tex --- Chapter: Practice 3
+%
+% Compile standalone:
+%   pdflatex -shell-escape practica3.tex   (run twice for cross-references)
+%
+% Compile as part of the full report:
+%   pdflatex -shell-escape __memoria.tex   (from docLaTex root)
 % =============================================================================
 
 \documentclass[../../__memoria.tex]{subfiles}
@@ -7,12 +13,226 @@
 \begin{document}
 \standalonecover
 
-\chapter{Cuaderno de Laboratorio --- Práctica 3}
+% ── Graphics path relative to THIS file when compiled standalone ─────────────
+% When compiled from __memoria.tex the global \graphicspath already covers
+% {img/} via \subfix. The extra paths below only activate for standalone:
+%   - ../../Imagenes/  → needed for logo_uco (used in fancyhdr header)
+%   - img/             → figures for this practice
+\graphicspath{{\subfix{../../Imagenes/}}{../../Imagenes/}{\subfix{img/}}{img/}}
+
+\chapter{Cuaderno de Laboratorio --- Práctica 3: Metodología de Evaluación y Rigor Científico}
 
 \section*{Objetivo}
-[Descripción del objetivo de la Práctica 3]
+Aprender a realizar evaluaciones honestas en condiciones difíciles, especialmente con datos desbalanceados,
+y detectar errores metodológicos graves como la fuga de datos (\textit{data leakage}).
 
-\section{Introducción}
-[Contenido de la práctica...]
+\section*{Material de partida}
+Se parte de:
+\begin{itemize}
+    \item Un dataset sintético de \textbf{1000 pacientes} con \textbf{5 variables predictoras}.
+    \item Una clase positiva muy minoritaria (\textbf{2\%} de los casos).
+\end{itemize}
+
+% =============================================================================
+\section{Tarea 1 --- La lotería de la partición aleatoria}
+% =============================================================================
+
+\subsection*{Configuración común}
+Modelo usado: \texttt{LogisticRegression} (con \texttt{class\_weight='balanced'})\\
+Métricas usadas: \texttt{Nº positivos en test}, \texttt{\% clase 1}\\
+Semilla(s): \texttt{0, 1, 2, 3, 4} (5 ejecuciones aleatorias)
+
+\vspace{0.3cm}
+\noindent\textbf{Hipótesis inicial (antes de ejecutar):}
+Es probable que el número de positivos en test sea muy inestable.
+Al haber solo un 2\% de casos positivos (20 de 1000), una partición aleatoria
+de 200 ejemplos (20\%) podría capturar por puro azar una cantidad muy variable
+de estos casos, o incluso ninguno, invalidando la representatividad del
+conjunto de test.
+\vspace{0.3cm}
+
+\subsection{Registro de resultados (5 particiones aleatorias)}
+\begin{center}
+\begin{tabular}{|c|c|}
+\hline
+Ejecución & Positivos en test \\
+\hline
+1 & 4 \\
+2 & 3 \\
+3 & 5 \\
+4 & 4 \\
+5 & 3 \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{tarea1_loteria}
+    \caption{Variabilidad del número de ejemplos positivos en el conjunto de test según la semilla aleatoria (partición sin estratificar).}
+    \label{fig:t1_loteria}
+\end{figure}
+
+\noindent\textbf{Análisis:}
+\begin{itemize}
+    \item \textit{¿Ha cambiado mucho el número de positivos en test entre ejecuciones?}
+          Sí, el número oscila entre 3 y 5. Aunque parece una diferencia pequeña en
+          valor absoluto, supone una variación relativa significativa ($\pm 25\%$) en un
+          conjunto de test tan pequeño.
+    \item \textit{¿Sería fiable la evaluación si el azar dejara solo 0 o 1 positivos en test?}
+          No. Con 0 o 1 positivos, métricas como F1-score o Recall para la clase
+          minoritaria serían imposibles de calcular o carecerían de significado
+          estadístico, dando resultados extremos (0 o 100\%) que no reflejan la
+          capacidad real del modelo.
+\end{itemize}
+
+% =============================================================================
+\section{Tarea 2 --- Partición estratificada}
+% =============================================================================
+
+\subsection{Registro por folds (\texttt{StratifiedKFold}, \texorpdfstring{$k=10$}{k=10})}
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Fold & Positivos en test & Tamaño del fold & Proporción clase 1 \\
+\hline
+1  & 2 & 100 & 2{,}0\% \\
+2  & 2 & 100 & 2{,}0\% \\
+3  & 2 & 100 & 2{,}0\% \\
+4  & 2 & 100 & 2{,}0\% \\
+5  & 2 & 100 & 2{,}0\% \\
+6  & 2 & 100 & 2{,}0\% \\
+7  & 2 & 100 & 2{,}0\% \\
+8  & 2 & 100 & 2{,}0\% \\
+9  & 2 & 100 & 2{,}0\% \\
+10 & 2 & 100 & 2{,}0\% \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent Desviación típica de la proporción de clase 1 entre folds: \textbf{0{,}0000\%}
+(prácticamente nula, lo que confirma que la estratificación funciona correctamente).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{tarea2_estratificada}
+    \caption{Proporción de la clase positiva por fold con \texttt{StratifiedKFold}. La línea roja indica la proporción global del dataset (2\%).}
+    \label{fig:t2_estratificada}
+\end{figure}
+
+\noindent\textbf{Análisis:}
+\texttt{StratifiedKFold} garantiza que cada fold mantenga la misma proporción de
+clases que el dataset original (2\%). En datasets muy desbalanceados, esto evita
+que algunos folds se queden sin muestras de la clase minoritaria, asegurando que
+el modelo sea evaluado siempre sobre una distribución representativa y reduciendo
+la varianza debida al azar.
+
+% =============================================================================
+\section{Tarea 3 --- Comparativa de la varianza}
+% =============================================================================
+
+\subsection{Resumen de resultados (10 iteraciones, 10 folds)}
+\begin{center}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+Método & Accuracy media & std(Accuracy) & F1-macro media & std(F1) \\
+\hline
+\texttt{KFold}           & 0{,}5771 & 0{,}0090 & 0{,}3829 & 0{,}0051 \\
+\texttt{StratifiedKFold} & 0{,}5783 & \textbf{0{,}0085} & 0{,}3857 & \textbf{0{,}0050} \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.88\linewidth]{tarea3_varianza}
+    \caption{Distribución de Accuracy y F1-macro a lo largo de 10 iteraciones de validación cruzada. \texttt{StratifiedKFold} produce cajas más estrechas (menor varianza).}
+    \label{fig:t3_varianza}
+\end{figure}
+
+\noindent\textbf{Interpretación:}
+\begin{itemize}
+    \item \textit{¿Qué método produce métricas más estables?}
+          El método \texttt{StratifiedKFold} produce métricas más estables,
+          como se observa en la menor desviación típica (\textit{std})
+          tanto en Accuracy como en F1-macro.
+    \item \textit{¿Dónde se nota más la mejora, en Accuracy o en F1?}
+          La mejora en la estabilidad es notable en ambas métricas, pero el
+          rigor metodológico es especialmente crítico en F1-macro, ya que
+          esta métrica penaliza el mal rendimiento en la clase minoritaria,
+          que es la más sensible a particiones no representativas.
+\end{itemize}
+
+% =============================================================================
+\section{Tarea 4 --- Detección de \textit{data leakage}}
+% =============================================================================
+
+\subsection{Comparativa: con y sin variable trampa}
+\begin{center}
+\begin{tabular}{|l|c|c|}
+\hline
+Escenario & Accuracy & F1-macro \\
+\hline
+Sin variable trampa (\textit{evaluación real})  & 0{,}5850 & 0{,}3887 \\
+Con variable trampa (\texttt{ID\_Hospital\_Filtro}) & \textbf{1{,}0000} & \textbf{1{,}0000} \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\linewidth]{tarea4_leakage}
+    \caption{Efecto del \textit{data leakage}. Las barras rojas corresponden al escenario con la variable trampa; las verdes, al escenario real sin ella.}
+    \label{fig:t4_leakage}
+\end{figure}
+
+\noindent\textbf{Preguntas:}
+\begin{itemize}
+    \item \textit{¿Qué variable está filtrando información del objetivo?}
+          La variable \texttt{ID\_Hospital\allowbreak\_Filtro}.
+    \item \textit{¿Por qué esa variable invalida la evaluación?}
+          Ha sido construida con una correlación perfecta (o casi perfecta) con
+          la clase objetivo. El modelo aprende a usar este ``filtro'' en lugar de
+          las variables clínicas reales, obteniendo un rendimiento del 100\% que
+          es imposible en la práctica real.
+    \item \textit{¿Diferencia entre un modelo ``bueno'' y uno contaminado por leakage?}
+          Un modelo bueno aprende patrones generalizables a partir de predictores
+          legítimos. Un modelo con \textit{leakage} hace trampa: usa información
+          que no estará disponible en producción, por lo que fallará completamente
+          al enfrentarse a nuevos datos.
+\end{itemize}
+
+% =============================================================================
+\section{Reto --- Auditoría metodológica}
+% =============================================================================
+
+\begin{enumerate}
+    \item \textbf{Peligros de la partición aleatoria:} Puede generar conjuntos de
+          test vacíos de clase minoritaria, impidiendo una evaluación estadística
+          significativa y dando una falsa sensación de precisión mediante el
+          ``acierto por mayoría''.
+    \item \textbf{Aporte de la estratificación:} Garantiza la representatividad
+          de la muestra en cada fold, permitiendo comparar modelos de forma justa
+          y estable.
+    \item \textbf{Data leakage:} Hace inútil el experimento porque el modelo no
+          aprende a resolver el problema real, sino a identificar una variable que
+          ya contiene la respuesta, invalidando su uso futuro en producción.
+    \item \textbf{Buenas prácticas:} Usar siempre estratificación, auditar
+          variables en busca de correlaciones sospechosas, emplear métricas
+          robustas (F1, AUC-ROC) y documentar la reproducibilidad mediante
+          semillas y validación cruzada repetida.
+\end{enumerate}
+
+% =============================================================================
+\section{Conclusión final}
+% =============================================================================
+
+La evaluación de modelos de IA no consiste en ejecutar un comando y leer un
+porcentaje: requiere rigor metodológico. En problemas con datos desbalanceados,
+el azar es un adversario que la estratificación ayuda a controlar.
+Además, el \textit{data leakage} es un error silente y catastrófico: métricas
+perfectas son casi siempre señal de un error de diseño, no de un modelo
+excepcional. La honestidad en la evaluación es la base de cualquier sistema de
+IA confiable y reproducible.
 
 \end{document}
