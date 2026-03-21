@@ -1,120 +1,70 @@
 """
-=============================================================================
-HYPERGEOMETRIC PROBABILITY ANALYSIS
-Practice 3: Evaluation Methodology and Scientific Rigor
-Subject: Introduction to Machine Learning
-3rd Year Computer Engineering - 2025/2026
-=============================================================================
+Comprobación estadística — Tarea 1, Práctica 3
+Introducción al Aprendizaje Automático, 2025/2026
 
-This script uses the hypergeometric distribution (scipy.stats.hypergeom)
-to compute the exact probability of obtaining 0 positive cases in a random
-test split, assuming:
-    - Population:          N = 1000 patients
-    - Positive class (K):  20 patients (2% of population)
-    - Test set size (n):   200 patients (test_size = 20%)
+Calcula la probabilidad exacta de obtener 0 (o pocos) positivos
+en el conjunto de test cuando se hace una partición aleatoria
+sin estratificar, usando la distribución hipergeométrica.
 
-The hypergeometric distribution models the number of successes (positives)
-observed when drawing n samples WITHOUT replacement from a finite population
-of N elements containing K successes.
-
-PMF formula:
-    P(X = k) = C(K, k) * C(N-K, n-k) / C(N, n)
-
-where C(a, b) denotes the binomial coefficient "a choose b".
-
-Result interpretation:
-    P(X = 0) > 0  →  there is a non-negligible probability that a random
-    split produces a test set with ZERO positive examples, which would make
-    metrics such as F1-score, Recall, and AUC-ROC undefined or trivially zero.
-=============================================================================
+  N = 1000  (tamaño del dataset)
+  K = 20    (positivos, 2% del total)
+  n = 200   (tamaño del conjunto de test, 20%)
 """
 
 import numpy as np
 from scipy import stats
 
 # ---------------------------------------------------------------------------
-# PARAMETERS
+# Parámetros del problema
 # ---------------------------------------------------------------------------
-N = 1000   # Total population (number of patients)
-K = 20     # Total number of positives in the population (2% of N)
-n = 200    # Test set size (20% of N, i.e. test_size=0.20)
+N = 1000   # pacientes totales
+K = 20     # positivos en el dataset
+n = 200    # ejemplos en el conjunto de test
 
-# ---------------------------------------------------------------------------
-# HYPERGEOMETRIC DISTRIBUTION SETUP
-# ---------------------------------------------------------------------------
-# scipy parametrization: hypergeom(M, n, N) where
-#   M = population size       → our N
-#   n = number of successes   → our K
-#   N = number of draws       → our n
-# We follow scipy's convention to avoid confusion:
+# scipy: hypergeom(M, n, N) → M=población, n=positivos, N=extracciones
 rv = stats.hypergeom(M=N, n=K, N=n)
 
 # ---------------------------------------------------------------------------
-# PROBABILITY CALCULATIONS
+# Probabilidades puntuales
 # ---------------------------------------------------------------------------
-p_zero = rv.pmf(0)      # P(X = 0): zero positives in test set
-p_one  = rv.pmf(1)      # P(X = 1): exactly one positive in test set
-p_two  = rv.pmf(2)      # P(X = 2): exactly two positives in test set
+p_zero        = rv.pmf(0)    # P(X = 0)
+p_one         = rv.pmf(1)    # P(X = 1)
+p_two         = rv.pmf(2)    # P(X = 2)
+p_at_most_one = rv.cdf(1)    # P(X <= 1)
 
-# Expected number of positives in test
-expected_positives = rv.mean()   # = n * K / N = 200 * 20 / 1000 = 4.0
-
-# Standard deviation of the hypergeometric distribution
-std_positives = rv.std()
-
-# Cumulative probability of <= 1 positive (worst-case evaluation scenarios)
-p_at_most_one = rv.cdf(1)
+media = rv.mean()   # = n*K/N = 4.0
+sigma = rv.std()
 
 # ---------------------------------------------------------------------------
-# REPORT
+# Salida
 # ---------------------------------------------------------------------------
-separator = "=" * 70
+print("=" * 65)
+print("  Distribución hipergeométrica — partición aleatoria")
+print("  N={}, K={} positivos, test_size={}".format(N, K, n))
+print("=" * 65)
 
-print(separator)
-print("  HYPERGEOMETRIC PROBABILITY ANALYSIS")
-print("  Random Split with Imbalanced Classes (2% positive rate)")
-print(separator)
+print("\n[Parámetros]")
+print(f"  Media esperada de positivos en test  : {media:.4f}")
+print(f"  Desv. típica                          : {sigma:.4f}")
 
-print("\n[PARAMETERS]")
-print(f"  Population size (N)            : {N} patients")
-print(f"  Total positives (K)            : {K} ({100.0 * K / N:.1f}% of population)")
-print(f"  Test set size (n)              : {n} patients (test_size = {100.0 * n / N:.0f}%)")
-print(f"  Expected positives in test     : {expected_positives:.4f}")
-print(f"  Std. dev. of positives in test : {std_positives:.4f}")
+print("\n[Probabilidades]")
+print(f"  P(X = 0) — ningún positivo en test   : {p_zero:.6f}  ({100*p_zero:.4f}%)")
+print(f"  P(X = 1) — exactamente uno            : {p_one:.6f}  ({100*p_one:.4f}%)")
+print(f"  P(X = 2) — exactamente dos            : {p_two:.6f}  ({100*p_two:.4f}%)")
+print(f"  P(X ≤ 1) — a lo sumo uno              : {p_at_most_one:.6f}  ({100*p_at_most_one:.4f}%)")
 
-print("\n[PROBABILITY MASS FUNCTION — P(X = k)]")
-print(f"  P(X = 0) — zero positives in test  : {p_zero:.6f}  ({100.0 * p_zero:.4f}%)")
-print(f"  P(X = 1) — one positive in test     : {p_one:.6f}  ({100.0 * p_one:.4f}%)")
-print(f"  P(X = 2) — two positives in test    : {p_two:.6f}  ({100.0 * p_two:.4f}%)")
-print(f"  P(X <= 1) — at most one positive    : {p_at_most_one:.6f}  ({100.0 * p_at_most_one:.4f}%)")
-
-print("\n[ANALYSIS]")
+print("\n[Consecuencia]")
 print(
-    f"  With a random split (test_size=20%), there is a {100.0 * p_zero:.4f}% probability\n"
-    f"  that the test set contains ZERO positive examples.\n"
+    f"  Hay un {100*p_zero:.4f}% de probabilidad de que el test quede sin\n"
+    f"  ningún ejemplo positivo. En ese caso, Recall, F1-score\n"
+    f"  y AUC-ROC son indefinidos o carecen de sentido estadístico.\n"
     f"\n"
-    f"  Furthermore, there is a {100.0 * p_at_most_one:.4f}% probability that the test set\n"
-    f"  has AT MOST one positive example.\n"
+    f"  P(X ≤ 1) = {100*p_at_most_one:.4f}% → en casi 1 de cada 15 ejecuciones\n"
+    f"  se obtiene 0 o 1 positivo en test con este dataset.\n"
     f"\n"
-    f"  CONSEQUENCE: When X = 0, the following metrics are mathematically\n"
-    f"  undefined or trivially zero for the positive class:\n"
-    f"      - Recall         (division by zero: 0 true positives / 0 actual positives)\n"
-    f"      - F1-score       (requires Recall to be defined)\n"
-    f"      - AUC-ROC        (constant predictions, area is 0.5 or undefined)\n"
-    f"\n"
-    f"  This formally demonstrates that evaluating a model trained on\n"
-    f"  imbalanced data without STRATIFICATION invalidates the analysis.\n"
-    f"  The stratification constraint guarantees that every test split\n"
-    f"  contains exactly round(K * test_size) = {round(K * n / N)} positive examples."
+    f"  Con estratificación: siempre round({K} * {n}/{N}) = {round(K*n/N)} positivos."
 )
 
-print("\n[LATEX OUTPUT — for inclusion in the report]")
-print("  \\\\[")
-print(f"    P(X=0) = \\\\frac{{\\\\binom{{{K}}}{{0}} \\\\binom{{{N-K}}}{{{n}}}}}{{\\\\binom{{{N}}}{{{n}}}}} \\\\approx {p_zero:.4f}")
-print("  \\\\]")
-
-print(f"\n{separator}")
-print("  CONCLUSION: The probability P(X=0) = {:.6f} ({:.4f}%) is non-negligible.".format(p_zero, 100.0 * p_zero))
-print("  Random splitting WITHOUT stratification is statistically unsound")
-print("  for imbalanced datasets with a low positive rate such as 2%.")
-print(separator)
+print("\n[Fórmula LaTeX para la memoria]")
+print(f"  P(X=0) = binom({K},0)*binom({N-K},{n}) / binom({N},{n}) ≈ {p_zero:.4f}")
+print("=" * 65)

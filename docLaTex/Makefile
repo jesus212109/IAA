@@ -21,6 +21,9 @@ practica2:
 practica3:
 	$(MAKE) -C sections/practica3 all
 
+practica4:
+	$(MAKE) -C sections/practica4 all
+
 # Full clean: remove all build files and PDF outputs recursively
 clean:
 	rm -rf $(BUILD_DIR)
@@ -38,6 +41,7 @@ help:
 	@echo "  make practica1 - Compile Práctica 1"
 	@echo "  make practica2 - Compile Práctica 2"
 	@echo "  make practica3 - Compile Práctica 3"
+	@echo "  make practica4 - Compile Práctica 4"
 	@echo "  make clean    - Deep clean of all temp files"
 
-.PHONY: all clean help practica1 practica2 practica3
+.PHONY: all clean help practica1 practica2 practica3 practica4

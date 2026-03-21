@@ -52,20 +52,18 @@ conjunto de test.
 \vspace{0.3cm}
 
 % ── Análisis matemático: distribución hipergeométrica ────────────────────────
-\subsection{Fundamento matemático: distribución hipergeométrica}
+\subsection{Análisis estadístico de la partición}
 
-La distribución hipergeométrica modela el número de «éxitos» ($X$) obtenidos al
-extraer $n$ elementos \emph{sin reposición} de una población finita de $N$
-elementos con $K$ éxitos en total.
-Su función de masa de probabilidad es:
+Para entender cuánto puede variar el número de positivos en el test,
+calculé la probabilidad exacta usando la distribución hipergeométrica,
+que modela cuántos positivos ($X$) caen en un subconjunto de $n$ elementos
+extaídos sin reposición de una población de $N$ con $K$ positivos totales:
 \[
     P(X = k) = \frac{\dbinom{K}{k}\,\dbinom{N-K}{n-k}}{\dbinom{N}{n}}
 \]
 
-En nuestro caso: $N = 1000$ (pacientes totales), $K = 20$ (positivos),
-$n = 200$ (tamaño del conjunto de test, \texttt{test\_size}=0{,}20).
-La \textbf{esperanza} y la \textbf{desviación típica} del número de positivos en
-el test son:
+Con los valores de la práctica ($N = 1000$, $K = 20$, $n = 200$),
+la media esperada y la desviación típica son:
 \[
     \mathbb{E}[X] = \frac{n \cdot K}{N} = \frac{200 \cdot 20}{1000} = 4{,}00
     \qquad
@@ -73,33 +71,29 @@ el test son:
              \approx 1{,}7718
 \]
 
-\noindent\textbf{Probabilidad de obtener cero positivos en el test:}
+\noindent Evaluando el caso más problemático:
 \[
     P(X=0) = \frac{\dbinom{20}{0}\,\dbinom{980}{200}}{\dbinom{1000}{200}}
            \approx \mathbf{0{,}0110} \quad (1{,}10\%)
 \]
 
-\noindent Además, la probabilidad de obtener \emph{a lo sumo} un positivo
-(situación en que las métricas orientadas a la clase minoritaria son
-estadísticamente inestables o indefinidas) asciende a:
+\noindent Y para el caso de a lo sumo un positivo en test:
 \[
     P(X \leq 1) = P(X=0) + P(X=1) \approx 0{,}0110 + 0{,}0563 = \mathbf{0{,}0673}
     \quad (6{,}73\%)
 \]
 
-\noindent\textbf{Consecuencias formales.}
-Cuando $X = 0$, las siguientes métricas para la clase positiva son
-\emph{matemáticamente indefinidas} o trivialmente inútiles:
+\noindent\textbf{Problemas al calcular métricas.}
+Si $X = 0$, las métricas orientadas a la clase positiva se vuelven inutilizables:
 \begin{itemize}
-    \item \textbf{Recall} $= \text{VP} / ({\text{VP} + \text{FN}}) = 0/0$
-          (división por cero: no hay verdaderos positivos ni falsos negativos
-          que comparar).
-    \item \textbf{F1-score} (requiere Recall definido, luego también queda indefinido).
-    \item \textbf{AUC-ROC} (con predicciones constantes, el área bajo la curva es
-          0{,}5 o directamente indefinida por ausencia de ejemplos positivos reales).
+    \item \textbf{Recall} $= \text{VP} / ({\text{VP} + \text{FN}}) = 0/0$:
+          división por cero al no haber ningún positivo real en el test.
+    \item \textbf{F1-score}: requiere que el Recall esté definido, así que también queda indefinido.
+    \item \textbf{AUC-ROC}: sin ejemplos de ambas clases, la curva ROC no puede
+          construirse y la librería devuelve \texttt{NaN}.
 \end{itemize}
-Esto demuestra \textbf{matemáticamente} que evaluar con 0 positivos en test
-invalida por completo el análisis, independientemente del clasificador empleado.
+En definitiva, si el test se queda sin positivos, da igual qué clasificador
+hayamos entrenado: la evaluación no tiene sentido.
 
 \subsection{Registro de resultados (5 particiones aleatorias)}
 \begin{center}
@@ -311,10 +305,10 @@ Con variable trampa (\texttt{ID\_Hospital\_Filtro}) & \textbf{1{,}0000} & \textb
           ``acierto por mayoría''. La distribución hipergeométrica cuantifica
           formalmente este riesgo: $P(X=0) \approx 1{,}10\%$ y
           $P(X \leq 1) \approx 6{,}73\%$.
-    \item \textbf{Aporte de la estratificación:} Garantiza la representatividad
-          de la muestra en cada fold, permitiendo comparar modelos de forma justa
-          y estable. La evidencia empírica (menor \textit{std} en Accuracy,
-          F1-macro y AUC-ROC) es coherente con la demostración matemática.
+    \item \textbf{Aporte de la estratificación:} Garantiza que todos los folds
+          tengan representación de ambas clases, lo que permite comparar modelos
+          de forma justa. Los resultados obtenidos confirman que la
+          desviación típica baja en Accuracy, F1-macro y AUC-ROC al estratificar.
     \item \textbf{Data leakage:} Hace inútil el experimento porque el modelo no
           aprende a resolver el problema real, sino a identificar una variable que
           ya contiene la respuesta, invalidando su uso futuro en producción.
@@ -328,42 +322,32 @@ Con variable trampa (\texttt{ID\_Hospital\_Filtro}) & \textbf{1{,}0000} & \textb
 \section{Conclusión final}
 % =============================================================================
 
-La evaluación de modelos de IA no consiste en ejecutar un comando y leer un
-porcentaje: requiere rigor metodológico que opere simultáneamente en dos
-planos complementarios.
+Esta práctica me ha dejado claro que evaluar un modelo no es solo ejecutar
+unas líneas de código y mirar la \textit{Accuracy}: con datos desbalanceados,
+hay que tomar decisiones de diseño concretas o los números que obtenemos
+nos van a engañar.
 
-\begin{description}
-    \item[Demostración matemática.]
-    Mediante la \textbf{distribución hipergeométrica} se ha demostrado
-    formalmente que, en una partición aleatoria sobre 1000 pacientes con
-    un 2\% de clase positiva y \texttt{test\_size}=0{,}20, existe una
-    probabilidad de $P(X=0) \approx 1{,}10\%$ de obtener cero positivos
-    en el test, lo que hace que métricas como F1-score, Recall y AUC-ROC
-    sean matemáticamente \emph{indefinidas}. Adicionalmente,
-    $P(X \leq 1) \approx 6{,}73\%$ sitúa a casi uno de cada quince
-    experimentos en una zona de evaluación estadísticamente inestable.
-    Esta prueba formal establece la \textbf{necesidad estructural} de la
-    estratificación: no es una recomendación opcional, sino una condición
-    necesaria para garantizar que el análisis tenga significado riguroso.
+En cuanto a la \textbf{partición}, calculé con la distribución hipergeométrica
+que hay un $P(X=0) \approx 1{,}10\%$ de probabilidad de que el test quede
+sin ningún positivo, y casi un 7\% de terminar con uno solo. En esas
+condiciones, F1-score, Recall y AUC-ROC son directamente indefinidas.
+Eso ya es razón suficiente para usar siempre estratificación: no es
+opcional si queremos que los resultados tengan sentido.
 
-    \item[Demostración empírica.]
-    El análisis de \textbf{AUC-ROC} sobre 10 iteraciones de validación
-    cruzada confirma las predicciones teóricas: \texttt{StratifiedKFold}
-    produce una menor desviación típica en la AUC-ROC respecto a
-    \texttt{KFold estándar}, mostrando que la estratificación reduce la
-    varianza de evaluación también en esta métrica sensible a la clase
-    minoritaria. Junto con los resultados análogos en Accuracy y F1-macro,
-    la evidencia empírica es unánime y coherente con la demostración
-    matemática.
-\end{description}
+Los resultados obtenidos con 10 iteraciones de validación cruzada lo
+confirman: con \texttt{KFold} estándar, la AUC-ROC fue \texttt{NaN} en
+8 de las 10 iteraciones porque algunos folds se quedaron sin positivos;
+con \texttt{StratifiedKFold} siempre fue computable y más estable
+(\textit{std} menor en las tres métricas).
 
-\noindent En suma, la \textbf{necesidad de estratificación} ha sido demostrada
-por partida doble: \emph{matemáticamente}, mediante la cuantificación exacta
-del riesgo de obtener sets de test sin representación positiva; y
-\emph{empíricamente}, mediante la reducción medible de la varianza de la
-AUC-ROC bajo \texttt{StratifiedKFold}. Además, el \textit{data leakage} es un
-error silente y catastrófico: métricas perfectas son casi siempre señal de un
-error de diseño, no de un modelo excepcional. La honestidad en la evaluación
-es la base de cualquier sistema de IA confiable y reproducible.
+En cuanto al \textbf{data leakage}, el caso de \texttt{ID\_Hospital\_Filtro}
+es bastante claro: una variable artificialmente correlacionada con el
+target hace que el modelo alcance un 100\% de Accuracy, lo que en
+la práctica significaría entregar un sistema que falla en cuanto
+se usa con datos reales. La regla práctica que saco de aquí es auditarlas
+siempre antes de entrenar.
+
+En definitiva, sin estratificar y sin eliminar variables trampa,
+entre​garíamos un modelo con métricas ficticias que fallaría en producción.
 
 \end{document}
