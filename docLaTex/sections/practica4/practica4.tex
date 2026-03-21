@@ -28,14 +28,14 @@ Entrenar un clasificador probabilístico para un problema de detección de fraud
 \section*{Descripción del problema}
 Se trabaja con un problema de clasificación binaria sobre el dataset \texttt{fraude\_transacciones.csv}:
 \begin{itemize}
-    \item \textbf{Clase 0}: transacción normal.
-    \item \textbf{Clase 1}: transacción fraudulenta.
+  \item \textbf{Clase 0}: transacción normal.
+  \item \textbf{Clase 1}: transacción fraudulenta.
 \end{itemize}
 
 Los errores tienen costes muy distintos:
 \begin{itemize}
-    \item \textbf{Falso Negativo (FN)}: no detectar un fraude $\rightarrow 200\,\text{€}$
-    \item \textbf{Falso Positivo (FP)}: bloquear una transacción legítima $\rightarrow 10\,\text{€}$
+  \item \textbf{Falso Negativo (FN)}: no detectar un fraude $\rightarrow 200\,\text{€}$
+  \item \textbf{Falso Positivo (FP)}: bloquear una transacción legítima $\rightarrow 10\,\text{€}$
 \end{itemize}
 
 La decisión final no debe evaluarse solo por el número de aciertos, sino por el \textbf{coste económico} asociado a los errores.
@@ -50,23 +50,23 @@ Se ha entrenado una \textbf{Regresión Logística} (\texttt{LogisticRegression},
 \subsection{Matriz de confusión}
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.52\textwidth]{matriz_confusion_umbral_0_5}
-    \caption{Matriz de confusión para el umbral estándar $\tau = 0.5$.}
-    \label{fig:mc_05}
+  \centering
+  \includegraphics[width=0.52\textwidth]{matriz_confusion_umbral_0_5}
+  \caption{Matriz de confusión para el umbral estándar $\tau = 0.5$.}
+  \label{fig:mc_05}
 \end{figure}
 
 A partir de esta matriz se obtienen:
 \begin{itemize}
-    \item Verdaderos Positivos (TP): \textbf{16}
-    \item Verdaderos Negativos (TN): \textbf{501}
-    \item Falsos Positivos (FP): \textbf{1}
-    \item Falsos Negativos (FN): \textbf{22}
+  \item Verdaderos Positivos (TP): \textbf{16}
+  \item Verdaderos Negativos (TN): \textbf{501}
+  \item Falsos Positivos (FP): \textbf{1}
+  \item Falsos Negativos (FN): \textbf{22}
 \end{itemize}
 
 \subsection{Cálculo del coste total}
 \[
-\text{Coste Total} = (FP \cdot 10) + (FN \cdot 200) = (1 \cdot 10) + (22 \cdot 200) = \mathbf{4410\,\text{€}}
+  \text{Coste Total} = (FP \cdot 10) + (FN \cdot 200) = (1 \cdot 10) + (22 \cdot 200) = \mathbf{4410\,\text{€}}
 \]
 
 \subsection{Interpretación}
@@ -80,34 +80,34 @@ El umbral por defecto de 0.5 \textbf{no es razonable} en este contexto. Aunque e
 Se han extraído las probabilidades de la clase fraude para cada observación y se han evaluado umbrales $\tau \in [0, 1]$ en pasos de 0.05. La Tabla~\ref{tab:umbrales_coste} resume los resultados para los primeros tramos y el extremo superior.
 
 \begin{table}[H]
-\centering
-\caption{Resumen de FP, FN y Coste Total para distintos umbrales de decisión.}
-\label{tab:umbrales_coste}
-\begin{tabular}{cccc}
-\toprule
-\textbf{Umbral} & \textbf{FP} & \textbf{FN} & \textbf{Coste Total (€)} \\
-\midrule
-0.00 & 502 & 0  & 5020 \\
-0.05 & 112 & 9  & \textbf{2920} \\
-0.10 & 42  & 14 & 3220 \\
-0.15 & 22  & 15 & 3220 \\
-0.20 & 13  & 15 & 3130 \\
-0.25 & 9   & 16 & 3290 \\
-0.30 & 4   & 17 & 3440 \\
-0.40 & 1   & 20 & 4010 \\
-0.50 & 1   & 22 & 4410 \\
-1.00 & 0   & 38 & 7600 \\
-\bottomrule
-\end{tabular}
+  \centering
+  \caption{Resumen de FP, FN y Coste Total para distintos umbrales de decisión.}
+  \label{tab:umbrales_coste}
+  \begin{tabular}{cccc}
+    \toprule
+    \textbf{Umbral} & \textbf{FP} & \textbf{FN} & \textbf{Coste Total (€)} \\
+    \midrule
+    0.00            & 502         & 0           & 5020                     \\
+    0.05            & 112         & 9           & \textbf{2920}            \\
+    0.10            & 42          & 14          & 3220                     \\
+    0.15            & 22          & 15          & 3220                     \\
+    0.20            & 13          & 15          & 3130                     \\
+    0.25            & 9           & 16          & 3290                     \\
+    0.30            & 4           & 17          & 3440                     \\
+    0.40            & 1           & 20          & 4010                     \\
+    0.50            & 1           & 22          & 4410                     \\
+    1.00            & 0           & 38          & 7600                     \\
+    \bottomrule
+  \end{tabular}
 \end{table}
 
 \subsection{Observaciones}
 Existe un claro compromiso (\textit{trade-off}) entre los dos tipos de error al variar $\tau$:
 \begin{itemize}
-    \item \textbf{Cuando el umbral baja} (hacia 0): se exige menos confianza para clasificar como fraude. Caen los Falsos Negativos (detectamos más fraudes), pero aumentan drásticamente los Falsos Positivos (bloqueamos más transacciones legítimas).
-    \item \textbf{Cuando el umbral sube} (hacia 1): las alertas son mucho más selectivas. Los Falsos Positivos desaparecen, pero los Falsos Negativos se disparan (dejamos escapar la mayoría de los fraudes).
+  \item \textbf{Cuando el umbral baja} (hacia 0): se exige menos confianza para clasificar como fraude. Caen los Falsos Negativos (detectamos más fraudes), pero aumentan drásticamente los Falsos Positivos (bloqueamos más transacciones legítimas).
+  \item \textbf{Cuando el umbral sube} (hacia 1): las alertas son mucho más selectivas. Los Falsos Positivos desaparecen, pero los Falsos Negativos se disparan (dejamos escapar la mayoría de los fraudes).
 \end{itemize}
-El umbral no es una constante sagrada: es una \textbf{decisión de diseño} que depende del contexto del problema y de la penalización relativa de cada tipo de error.
+El umbral de decisión debe ajustarse según la penalización económica de cada error, en lugar de asumir un valor estático por defecto.
 
 % =============================================================================
 \section{Tarea 3 --- Optimización del coste}
@@ -116,15 +116,15 @@ El umbral no es una constante sagrada: es una \textbf{decisión de diseño} que 
 \subsection{Gráfica de coste frente a umbral}
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.78\textwidth]{coste_vs_umbral}
-    \caption{Coste total (€) en función del umbral de decisión. El punto óptimo se alcanza en $\tau^* = 0.05$.}
-    \label{fig:coste_umbral}
+  \centering
+  \includegraphics[width=0.78\textwidth]{coste_vs_umbral}
+  \caption{Coste total (€) en función del umbral de decisión. El punto óptimo se alcanza en $\tau^* = 0.05$.}
+  \label{fig:coste_umbral}
 \end{figure}
 
 \subsection{Umbral óptimo}
 \[
-\tau^* = 0.05 \qquad \text{Coste mínimo} = 2920\,\text{€}
+  \tau^* = 0.05 \qquad \text{Coste mínimo} = 2920\,\text{€}
 \]
 
 \subsection{Interpretación}
@@ -137,52 +137,38 @@ El umbral óptimo ($\tau^* = 0.05$) es muy inferior a 0.5. Esto tiene todo el se
 \subsection{Curva ROC}
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.62\textwidth]{curva_roc}
-    \caption{Curva ROC del clasificador. AUC-ROC $= 0.8442$.}
-    \label{fig:roc}
+  \centering
+  \includegraphics[width=0.62\textwidth]{curva_roc}
+  \caption{Curva ROC del clasificador. AUC-ROC $= 0.8442$.}
+  \label{fig:roc}
 \end{figure}
 
 \subsection{Curva Precision-Recall}
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.62\textwidth]{curva_precision_recall}
-    \caption{Curva Precision-Recall del clasificador. Average Precision $= 0.6551$.}
-    \label{fig:pr}
+  \centering
+  \includegraphics[width=0.62\textwidth]{curva_precision_recall}
+  \caption{Curva Precision-Recall del clasificador. Average Precision $= 0.6551$.}
+  \label{fig:pr}
 \end{figure}
 
 \subsection{Discusión}
-En este problema con dataset desbalanceado (los fraudes son la clase minoritaria frente a un volumen masivo de transacciones normales), la \textbf{Curva Precision-Recall es más informativa} que la ROC.
-
-La curva ROC puede resultar engañosa porque el False Positive Rate usa como denominador el inmenso total de negativos. Con tantos negativos, un aumento notable de FP apenas desplaza el FPR, manteniendo artificial­mente alto el AUC-ROC. La curva PR, en cambio, mide directamente la Precisión (TP / (TP + FP)), que cae rápidamente al aumentar los falsos positivos, reflejando con fidelidad cuán útil es el modelo para el departamento de seguridad a la hora de recuperar la clase minoritaria.
+Con un dataset desbalanceado, la curva Precision-Recall resulta más adecuada que la ROC para valorar la capacidad real del clasificador. El motivo es estructural: el \textit{False Positive Rate} de la curva ROC toma como denominador el total de negativos, que en este problema es muy numeroso. Como consecuencia, incrementos apreciables de falsos positivos apenas desplazan el FPR y el AUC-ROC se mantiene elevado (0.8442) pese a que el modelo comete errores relevantes sobre la clase fraude. La curva PR evita este efecto porque la Precisión (TP~$/$(TP$+$FP)) cae en cuanto aumentan los FP, lo que la hace sensible exactamente a la calidad de recuperación de la clase minoritaria que interesa controlar.
 
 % =============================================================================
 \section{Decisión final de ingeniería}
 % =============================================================================
 
-Recomiendo abandonar el umbral por defecto (0.5) y fijar $\tau = 0.05$ en producción. Con este umbral el coste esperado desciende de 4410\,€ a 2920\,€ sobre el conjunto de prueba. Si bien el número de bloqueos erróneos aumenta (de 1 a 112 FP), el coste unitario de un FP es veinte veces menor que el de un FN, por lo que la reducción de fraudes no detectados (de 22 a 9 FN) compensa con creces esa molestia operativa. El cliente legítimo bloqueado puede ser informado y desbloqueado en segundos a través de una alerta por SMS o app; el fraude consumado genera pérdidas directas e irrecuperables para la entidad.
+A la vista de los resultados, se propone fijar $\tau = 0.05$ en lugar del umbral por defecto. Con este valor el coste total desciende de 4410\,€ a 2920\,€ sobre el conjunto de prueba, una reducción del 34\%. El incremento en falsos positivos (de 1 a 112) es considerable, pero su coste unitario (10\,€) es veinte veces inferior al de un falso negativo (200\,€), de modo que la operación resulta económicamente ventajosa: se pasa de 22~FN a 9~FN, y el ahorro por fraudes detectados supera con amplitud el coste adicional por bloqueos erróneos.
 
-Esta decisión se apoya en:
-\begin{itemize}
-    \item La matriz de costes asimétrica (FN 20$\times$ más caro que FP).
-    \item La gráfica Coste vs.\ Umbral, que muestra el mínimo global en $\tau^* = 0.05$.
-    \item La Curva Precision-Recall, más informativa para clases desbalanceadas.
-    \item El contexto de negocio: la prioridad de un sistema antifraude es detectar fraudes, no minimizar alarmas.
-\end{itemize}
+Cabe señalar que este umbral se ha determinado exclusivamente a partir de la función de coste definida en la práctica. En un entorno real debería validarse sobre datos de producción y recalibrarse periódicamente si la distribución de transacciones varía.
 
 % =============================================================================
 \section{Conclusión final}
 % =============================================================================
 
-Esta práctica ha evidenciado que \textbf{en clasificación no todos los errores valen lo mismo}. Un modelo evaluado únicamente por su exactitud global puede parecer muy bueno mientras deja pasar sistemáticamente los errores más costosos.
+La práctica pone de manifiesto que la elección del umbral de decisión no es una cuestión trivial: fijar $\tau = 0.5$ sin análisis previo generó un coste de 4410\,€, frente a los 2920\,€ obtenidos con el umbral óptimo. Hemos verificado que el valor que minimiza el coste total se desplaza hacia la izquierda respecto al punto de equilibrio porque la penalización por FN (200\,€) es desproporcionadamente mayor que la de FP (10\,€): a medida que se baja el umbral, el ahorro por fraudes adicionales detectados supera el coste extra de los bloqueos erróneos, hasta que ambos efectos se igualan en torno a $\tau^* = 0.05$.
 
-Las conclusiones principales son:
-\begin{enumerate}
-    \item El umbral de decisión no es fijo ni universal: es un parámetro de diseño que debe elegirse en función del impacto económico de cada tipo de error.
-    \item Bajar el umbral reduce FN a costa de más FP; subirlo hace lo contrario. Existe un único umbral que minimiza el coste total esperado.
-    \item En datasets desbalanceados, la curva Precision-Recall refleja mejor la utilidad real del modelo que la curva ROC.
-    \item Una evaluación rigurosa debe incorporar siempre el contexto y los costes del dominio, no solo métricas genéricas como la exactitud.
-\end{enumerate}
+Asimismo, se comprueba que en problemas con clases fuertemente desbalanceadas el AUC-ROC puede inducir a conclusiones optimistas, mientras que la curva Precision-Recall refleja con mayor fidelidad la capacidad del modelo para recuperar la clase minoritaria sin disparar el número de falsas alarmas. Ambos resultados subrayan que la evaluación de un clasificador en producción debe incorporar necesariamente los costes asociados al dominio y no limitarse a métricas genéricas.
 
 \end{document}
