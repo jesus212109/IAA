@@ -1,0 +1,11 @@
+\babel@toc {spanish}{}\relax 
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {3.1}{\ignorespaces Comparativa de estabilidad de métricas: KFold estándar vs.\ StratifiedKFold (10 iteraciones $\times $ 10 folds).}}{26}{table.3.1}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {4.1}{\ignorespaces Resumen de FP, FN y Coste Total para distintos umbrales de decisión.}}{32}{table.4.1}%
+\addvspace {10\p@ }
+\contentsline {table}{\numberline {5.1}{\ignorespaces Comparación de exactitud según el número de neuronas en la capa oculta.}}{40}{table.5.1}%
+\contentsline {table}{\numberline {5.2}{\ignorespaces Comparación entre activaciones Sigmoide y ReLU (arquitectura MLP(20)).}}{43}{table.5.2}%
+\contentsline {table}{\numberline {5.3}{\ignorespaces Comparación de arquitecturas MLP en el dataset de dígitos.}}{44}{table.5.3}%

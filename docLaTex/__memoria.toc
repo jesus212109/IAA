@@ -1,0 +1,87 @@
+\babel@toc {spanish}{}\relax 
+\contentsline {chapter}{Resumen}{II}{chapter*.1}%
+\contentsline {chapter}{Abstract}{III}{chapter*.2}%
+\contentsline {chapter}{\'{I}ndice de figuras}{V}{chapter*.4}%
+\contentsline {chapter}{\'{I}ndice de tablas}{VI}{chapter*.5}%
+\contentsline {chapter}{\numberline {1}Cuaderno de Laboratorio --- Práctica 1: La Física del Aprendizaje Automático}{1}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Tarea 1 --- Importancia de la tasa de aprendizaje ($\alpha $)}{1}{section.1.1}%
+\contentsline {subsection}{\numberline {1.1.1}Escenario A ($\alpha _{slow}$): convergencia lenta}{1}{subsection.1.1.1}%
+\contentsline {subsection}{\numberline {1.1.2}Escenario B ($\alpha _{opt}$): ``curva de codo''}{2}{subsection.1.1.2}%
+\contentsline {subsection}{\numberline {1.1.3}Escenario C ($\alpha _{osc}$): oscilación amortiguada}{3}{subsection.1.1.3}%
+\contentsline {subsection}{\numberline {1.1.4}Escenario D ($\alpha _{fail}$): divergencia}{4}{subsection.1.1.4}%
+\contentsline {section}{\numberline {1.2}Tarea 2 --- Compromiso del mini-batch}{6}{section.1.2}%
+\contentsline {subsection}{\numberline {1.2.1}Batch completo}{6}{subsection.1.2.1}%
+\contentsline {subsection}{\numberline {1.2.2}Mini-batch (32 o 16)}{7}{subsection.1.2.2}%
+\contentsline {subsection}{\numberline {1.2.3}Estocástico puro (batch = 1)}{8}{subsection.1.2.3}%
+\contentsline {subsection}{\numberline {1.2.4}Tiempo de ejecución --- Estocástico puro (batch = 1)}{9}{subsection.1.2.4}%
+\contentsline {subsection}{\numberline {1.2.5}Tiempo de ejecución --- Mini-batch (batch = 32)}{9}{subsection.1.2.5}%
+\contentsline {subsection}{\numberline {1.2.6}Tiempo de ejecución --- Batch completo (batch = 500)}{10}{subsection.1.2.6}%
+\contentsline {section}{\numberline {1.3}El reto --- ``Ajuste de precisión'' (criterio de parada)}{10}{section.1.3}%
+\contentsline {section}{\numberline {1.4}Conclusiones finales}{10}{section.1.4}%
+\contentsline {chapter}{\numberline {2}Cuaderno de Laboratorio --- Práctica 2: Selección de Modelos y Regularización}{12}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Tarea 1 --- Estabilidad de la Validación Cruzada (K-Fold)}{12}{section.2.1}%
+\contentsline {subsection}{\numberline {2.1.1}Experimento A --- K = 2 (Validación simple): variabilidad entre ejecuciones}{13}{subsection.2.1.1}%
+\contentsline {subsection}{\numberline {2.1.2}Experimento B --- K = 10 (estándar): RMSE más estable}{14}{subsection.2.1.2}%
+\contentsline {subsection}{\numberline {2.1.3}Experimento C --- K = 100 (Leave-One-Out): coste vs. precisión}{14}{subsection.2.1.3}%
+\contentsline {subsection}{\numberline {2.1.4}Resumen comparativo (K = 2 vs 10 vs 100)}{15}{subsection.2.1.4}%
+\contentsline {section}{\numberline {2.2}Tarea 2 --- Regularización Ridge vs. Lasso (K = 10)}{16}{section.2.2}%
+\contentsline {subsection}{\numberline {2.2.1}Ridge (L2) --- $\lambda = 0.1,\, 10,\, 100$}{16}{subsection.2.2.1}%
+\contentsline {subsection}{\numberline {2.2.2}Lasso (L1) --- $\lambda = 0.1,\, 10,\, 100$}{17}{subsection.2.2.2}%
+\contentsline {subsection}{\numberline {2.2.3}El dilema de la complejidad --- $\lambda $ demasiado alto}{19}{subsection.2.2.3}%
+\contentsline {section}{\numberline {2.3}Reto --- El “Cazador de Variables”}{20}{section.2.3}%
+\contentsline {section}{\numberline {2.4}Conclusiones finales}{21}{section.2.4}%
+\contentsline {chapter}{\numberline {3}Cuaderno de Laboratorio --- Práctica 3: Metodología de Evaluación y Rigor Científico}{22}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Tarea 1 --- La lotería de la partición aleatoria}{22}{section.3.1}%
+\contentsline {subsection}{\numberline {3.1.1}Análisis estadístico de la partición}{23}{subsection.3.1.1}%
+\contentsline {subsection}{\numberline {3.1.2}Registro de resultados (5 particiones aleatorias)}{24}{subsection.3.1.2}%
+\contentsline {section}{\numberline {3.2}Tarea 2 --- Partición estratificada}{25}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Registro por folds (\texttt {StratifiedKFold}, $k=10$)}{25}{subsection.3.2.1}%
+\contentsline {section}{\numberline {3.3}Tarea 3 --- Comparativa de la varianza}{26}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}Resumen de resultados (10 iteraciones, 10 folds)}{26}{subsection.3.3.1}%
+\contentsline {section}{\numberline {3.4}Tarea 4 --- Detección de \textit {data leakage}}{27}{section.3.4}%
+\contentsline {subsection}{\numberline {3.4.1}Comparativa: con y sin variable trampa}{27}{subsection.3.4.1}%
+\contentsline {section}{\numberline {3.5}Reto --- Auditoría metodológica}{28}{section.3.5}%
+\contentsline {section}{\numberline {3.6}Conclusión final}{29}{section.3.6}%
+\contentsline {chapter}{\numberline {4}Cuaderno de Laboratorio --- Práctica 4: Clasificación y el Valor del Error (Matriz de Costes)}{30}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Tarea 1 --- Análisis con el umbral por defecto ($\tau = 0.5$)}{31}{section.4.1}%
+\contentsline {subsection}{\numberline {4.1.1}Modelo utilizado}{31}{subsection.4.1.1}%
+\contentsline {subsection}{\numberline {4.1.2}Matriz de confusión}{31}{subsection.4.1.2}%
+\contentsline {subsection}{\numberline {4.1.3}Cálculo del coste total}{32}{subsection.4.1.3}%
+\contentsline {subsection}{\numberline {4.1.4}Interpretación}{32}{subsection.4.1.4}%
+\contentsline {section}{\numberline {4.2}Tarea 2 --- Estudio de probabilidades y umbrales}{32}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Análisis de distintos umbrales}{32}{subsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.2.2}Observaciones}{32}{subsection.4.2.2}%
+\contentsline {section}{\numberline {4.3}Tarea 3 --- Optimización del coste}{33}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}Gráfica de coste frente a umbral}{33}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.2}Umbral óptimo}{33}{subsection.4.3.2}%
+\contentsline {subsection}{\numberline {4.3.3}Interpretación}{34}{subsection.4.3.3}%
+\contentsline {section}{\numberline {4.4}Tarea 4 --- Curvas ROC y Precision-Recall}{34}{section.4.4}%
+\contentsline {subsection}{\numberline {4.4.1}Curva ROC}{34}{subsection.4.4.1}%
+\contentsline {subsection}{\numberline {4.4.2}Curva Precision-Recall}{35}{subsection.4.4.2}%
+\contentsline {subsection}{\numberline {4.4.3}Discusión}{35}{subsection.4.4.3}%
+\contentsline {section}{\numberline {4.5}Decisión final de ingeniería}{35}{section.4.5}%
+\contentsline {section}{\numberline {4.6}Conclusión final}{36}{section.4.6}%
+\contentsline {chapter}{\numberline {5}Cuaderno de Laboratorio --- Práctica 5: Arquitectura de Redes Neuronales (Perceptrón Multicapa)}{37}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Tarea 1 --- El Perceptrón Simple: límites de un modelo lineal}{38}{section.5.1}%
+\contentsline {subsection}{\numberline {5.1.1}Modelo utilizado}{38}{subsection.5.1.1}%
+\contentsline {subsection}{\numberline {5.1.2}Frontera de decisión obtenida}{38}{subsection.5.1.2}%
+\contentsline {subsection}{\numberline {5.1.3}Matriz de confusión}{39}{subsection.5.1.3}%
+\contentsline {subsection}{\numberline {5.1.4}Por qué una combinación lineal falla ante esta geometría}{39}{subsection.5.1.4}%
+\contentsline {section}{\numberline {5.2}Tarea 2 --- Diseñando la capa oculta: efecto del número de neuronas}{40}{section.5.2}%
+\contentsline {subsection}{\numberline {5.2.1}Configuraciones evaluadas}{40}{subsection.5.2.1}%
+\contentsline {subsection}{\numberline {5.2.2}Fronteras de decisión}{40}{subsection.5.2.2}%
+\contentsline {subsection}{\numberline {5.2.3}Tabla de resultados}{40}{subsection.5.2.3}%
+\contentsline {subsection}{\numberline {5.2.4}Análisis: \textit {underfitting} y capacidad del modelo}{40}{subsection.5.2.4}%
+\contentsline {section}{\numberline {5.3}Tarea 3 --- Funciones de activación: Sigmoide \textit {vs.} ReLU}{41}{section.5.3}%
+\contentsline {subsection}{\numberline {5.3.1}Configuración del experimento}{41}{subsection.5.3.1}%
+\contentsline {subsection}{\numberline {5.3.2}Fronteras de decisión}{42}{subsection.5.3.2}%
+\contentsline {subsection}{\numberline {5.3.3}Curvas de convergencia (pérdida de entrenamiento)}{42}{subsection.5.3.3}%
+\contentsline {subsection}{\numberline {5.3.4}Tabla comparativa}{43}{subsection.5.3.4}%
+\contentsline {subsection}{\numberline {5.3.5}Discusión: saturación, gradiente y velocidad de convergencia}{43}{subsection.5.3.5}%
+\contentsline {section}{\numberline {5.4}Tarea 4 --- El reto de los dígitos escritos a mano}{44}{section.5.4}%
+\contentsline {subsection}{\numberline {5.4.1}Descripción del dataset}{44}{subsection.5.4.1}%
+\contentsline {subsection}{\numberline {5.4.2}Experimentos realizados}{44}{subsection.5.4.2}%
+\contentsline {subsection}{\numberline {5.4.3}Matríz de confusión de la arquitectura elegida}{45}{subsection.5.4.3}%
+\contentsline {subsection}{\numberline {5.4.4}Justificación de la arquitectura elegida: MLP(20)}{45}{subsection.5.4.4}%
+\contentsline {paragraph}{\numberline {5.4.4.0.1}Red ancha frente a red profunda.}{46}{paragraph.5.4.4.0.1}%
+\contentsline {section}{\numberline {5.5}Conclusión final}{46}{section.5.5}%

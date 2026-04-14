@@ -1,0 +1,3 @@
+modelo,arquitectura,activacion,acc_test,iteraciones,loss_final
+"MLP(20,)-logistic","(20,)",logistic,0.8400,485,0.3071
+"MLP(20,)-relu","(20,)",relu,0.8533,406,0.2870

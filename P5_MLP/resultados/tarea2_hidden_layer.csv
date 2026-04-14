@@ -1,0 +1,4 @@
+modelo,arquitectura,acc_train,acc_test,iteraciones
+"MLP(2,)","(2,)",0.8429,0.8200,648
+"MLP(5,)","(5,)",0.8686,0.8400,726
+"MLP(20,)","(20,)",0.8600,0.8533,406
