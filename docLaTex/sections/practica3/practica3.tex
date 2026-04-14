@@ -29,8 +29,8 @@ y detectar errores metodológicos graves como la fuga de datos (\textit{data lea
 \section*{Material de partida}
 Se parte de:
 \begin{itemize}
-    \item Un dataset sintético de \textbf{1000 pacientes} con \textbf{5 variables predictoras}.
-    \item Una clase positiva muy minoritaria (\textbf{2\%} de los casos), es decir, $K = 20$ de $N = 1000$.
+  \item Un dataset sintético de \textbf{1000 pacientes} con \textbf{5 variables predictoras}.
+  \item Una clase positiva muy minoritaria (\textbf{2\%} de los casos), es decir, $K = 20$ de $N = 1000$.
 \end{itemize}
 
 % =============================================================================
@@ -43,91 +43,68 @@ Métricas usadas: \texttt{Nº positivos en test}, \texttt{\% clase 1}\\
 Semilla(s): \texttt{0, 1, 2, 3, 4} (5 ejecuciones aleatorias)
 
 \vspace{0.3cm}
-\noindent\textbf{Hipótesis inicial (antes de ejecutar):}
-Es probable que el número de positivos en test sea muy inestable.
-Al haber solo un 2\% de casos positivos (20 de 1000), una partición aleatoria
-de 200 ejemplos (20\%) podría capturar por puro azar una cantidad muy variable
-de estos casos, o incluso ninguno, invalidando la representatividad del
-conjunto de test.
+\noindent\textbf{Hipótesis inicial:}
+Es probable que el número de positivos en test sea muy inestable. Al haber solo un 2\% de casos positivos (20 de 1000), un split aleatorio del 20\% (200 ejemplos) podría coger muy pocos positivos por puro azar, o incluso ninguno. Esto dejaría el test inservible.
 \vspace{0.3cm}
 
-% ── Análisis matemático: distribución hipergeométrica ────────────────────────
+% --- Statistical analysis section ---
 \subsection{Análisis estadístico de la partición}
 
-Para entender cuánto puede variar el número de positivos en el test,
-calculé la probabilidad exacta usando la distribución hipergeométrica,
-que modela cuántos positivos ($X$) caen en un subconjunto de $n$ elementos
-extaídos sin reposición de una población de $N$ con $K$ positivos totales:
-\[
-    P(X = k) = \frac{\dbinom{K}{k}\,\dbinom{N-K}{n-k}}{\dbinom{N}{n}}
-\]
+Para comprobar el riesgo real de hacer una mala partición, he calculado la probabilidad usando la distribución hipergeométrica. Teniendo $N = 1000$ pacientes, $K = 20$ positivos en total, y sacando una muestra para test de $n = 200$:
 
-Con los valores de la práctica ($N = 1000$, $K = 20$, $n = 200$),
-la media esperada y la desviación típica son:
-\[
-    \mathbb{E}[X] = \frac{n \cdot K}{N} = \frac{200 \cdot 20}{1000} = 4{,}00
-    \qquad
-    \sigma_X = \sqrt{\frac{n \cdot K \cdot (N-K) \cdot (N-n)}{N^2 (N-1)}}
-             \approx 1{,}7718
-\]
+Lo normal (la media esperada) es que caigan 4 positivos en test:
+$$
+  \mathbb{E}[X] = \frac{200 \cdot 20}{1000} = 4
+$$
 
-\noindent Evaluando el caso más problemático:
-\[
-    P(X=0) = \frac{\dbinom{20}{0}\,\dbinom{980}{200}}{\dbinom{1000}{200}}
-           \approx \mathbf{0{,}0110} \quad (1{,}10\%)
-\]
+Pero, ¿qué pasa si tenemos mala suerte? Calculando la probabilidad de que no caiga \textbf{ningún} positivo ($X=0$):
+$$
+  P(X=0) = \frac{\dbinom{20}{0}\,\dbinom{980}{200}}{\dbinom{1000}{200}} \approx 0{,}0110 \quad (1{,}10\%)
+$$
 
-\noindent Y para el caso de a lo sumo un positivo en test:
-\[
-    P(X \leq 1) = P(X=0) + P(X=1) \approx 0{,}0110 + 0{,}0563 = \mathbf{0{,}0673}
-    \quad (6{,}73\%)
-\]
+Si sumamos la probabilidad de sacar 0 o 1 positivo, el riesgo sube a casi un 7\%:
+$$
+  P(X \leq 1) \approx 0{,}0110 + 0{,}0563 = 0{,}0673 \quad (6{,}73\%)
+$$
 
-\noindent\textbf{Problemas al calcular métricas.}
-Si $X = 0$, las métricas orientadas a la clase positiva se vuelven inutilizables:
+\noindent\textbf{¿Por qué es un problema?}
+Si en el test no hay positivos ($X = 0$), las métricas se rompen:
 \begin{itemize}
-    \item \textbf{Recall} $= \text{VP} / ({\text{VP} + \text{FN}}) = 0/0$:
-          división por cero al no haber ningún positivo real en el test.
-    \item \textbf{F1-score}: requiere que el Recall esté definido, así que también queda indefinido.
-    \item \textbf{AUC-ROC}: sin ejemplos de ambas clases, la curva ROC no puede
-          construirse y la librería devuelve \texttt{NaN}.
+  \item \textbf{Recall}: No se puede calcular ($0/0$) porque no hay verdaderos positivos ni falsos negativos reales.
+  \item \textbf{F1-score}: Al depender del Recall, también da error.
+  \item \textbf{AUC-ROC}: La librería devuelve \texttt{NaN} porque necesita ejemplos de ambas clases para pintar la curva.
 \end{itemize}
-En definitiva, si el test se queda sin positivos, da igual qué clasificador
-hayamos entrenado: la evaluación no tiene sentido.
+Conclusión: un mal split aleatorio puede hacer que la evaluación no sirva para nada, sin importar qué modelo usemos.
 
+% --- Execution results section ---
 \subsection{Registro de resultados (5 particiones aleatorias)}
 \begin{center}
-\begin{tabular}{|c|c|c|}
-\hline
-Ejecución & Positivos en test & \% clase 1 en test \\
-\hline
-1 & 4 & 2{,}0\% \\
-2 & 3 & 1{,}5\% \\
-3 & 5 & 2{,}5\% \\
-4 & 4 & 2{,}0\% \\
-5 & 3 & 1{,}5\% \\
-\hline
-\end{tabular}
+  \begin{tabular}{|c|c|c|}
+    \hline
+    Ejecución & Positivos en test & \% clase 1 en test \\
+    \hline
+    1         & 4                 & 2{,}0\%            \\
+    2         & 3                 & 1{,}5\%            \\
+    3         & 5                 & 2{,}5\%            \\
+    4         & 4                 & 2{,}0\%            \\
+    5         & 3                 & 1{,}5\%            \\
+    \hline
+  \end{tabular}
 \end{center}
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.85\linewidth]{tarea1_loteria}
-    \caption{Variabilidad del número de ejemplos positivos en el conjunto de test según la semilla aleatoria (partición sin estratificar). La línea roja indica el valor esperado teórico $\mathbb{E}[X]=4$.}
-    \label{fig:t1_loteria}
+  \centering
+  \includegraphics[width=0.85\linewidth]{tarea1_loteria}
+  \caption{Variabilidad del número de ejemplos positivos en el conjunto de test según la semilla. La línea roja indica el valor esperado teórico (4).}
+  \label{fig:t1_loteria}
 \end{figure}
 
-\noindent\textbf{Análisis:}
+\noindent\textbf{Análisis de los resultados:}
 \begin{itemize}
-    \item \textit{¿Ha cambiado mucho el número de positivos en test entre ejecuciones?}
-          Sí, el número oscila entre 3 y 5 (desv.\ típica empírica $= 0{,}84$). Aunque
-          parece una diferencia pequeña en valor absoluto, supone una variación
-          relativa significativa ($\pm 25\%$) en un conjunto de test tan pequeño.
-    \item \textit{¿Sería fiable la evaluación si el azar dejara solo 0 o 1 positivos en test?}
-          No. Como demuestra la distribución hipergeométrica, existe una probabilidad
-          de $P(X \leq 1) \approx 6{,}73\%$ de que esto ocurra. Con 0 positivos,
-          métricas como F1-score, Recall o AUC-ROC son matemáticamente indefinidas,
-          y con 1 solo positivo carecen de significado estadístico.
+  \item \textit{¿Ha cambiado mucho el número de positivos en test entre ejecuciones?}
+        Sí, el número oscila entre 3 y 5 en mis ejecuciones. Aunque numéricamente parezca poco, en un test tan pequeño supone una variación del $\pm 25\%$, lo que altera bastante las métricas.
+  \item \textit{¿Sería fiable la evaluación si el azar dejara solo 0 o 1 positivos en test?}
+        Para nada. Como he demostrado antes, hay un $\approx 6{,}73\%$ de probabilidad de que ocurra. Con 0 positivos las métricas dan error matemático, y con 1 solo positivo el resultado dependería al 100\% de acertar o fallar en un único paciente, perdiendo todo el rigor estadístico.
 \end{itemize}
 
 % =============================================================================
@@ -136,32 +113,32 @@ Ejecución & Positivos en test & \% clase 1 en test \\
 
 \subsection{Registro por folds (\texttt{StratifiedKFold}, \texorpdfstring{$k=10$}{k=10})}
 \begin{center}
-\begin{tabular}{|c|c|c|c|}
-\hline
-Fold & Positivos en test & Tamaño del fold & Proporción clase 1 \\
-\hline
-1  & 2 & 100 & 2{,}0\% \\
-2  & 2 & 100 & 2{,}0\% \\
-3  & 2 & 100 & 2{,}0\% \\
-4  & 2 & 100 & 2{,}0\% \\
-5  & 2 & 100 & 2{,}0\% \\
-6  & 2 & 100 & 2{,}0\% \\
-7  & 2 & 100 & 2{,}0\% \\
-8  & 2 & 100 & 2{,}0\% \\
-9  & 2 & 100 & 2{,}0\% \\
-10 & 2 & 100 & 2{,}0\% \\
-\hline
-\end{tabular}
+  \begin{tabular}{|c|c|c|c|}
+    \hline
+    Fold & Positivos en test & Tamaño del fold & Proporción clase 1 \\
+    \hline
+    1    & 2                 & 100             & 2{,}0\%            \\
+    2    & 2                 & 100             & 2{,}0\%            \\
+    3    & 2                 & 100             & 2{,}0\%            \\
+    4    & 2                 & 100             & 2{,}0\%            \\
+    5    & 2                 & 100             & 2{,}0\%            \\
+    6    & 2                 & 100             & 2{,}0\%            \\
+    7    & 2                 & 100             & 2{,}0\%            \\
+    8    & 2                 & 100             & 2{,}0\%            \\
+    9    & 2                 & 100             & 2{,}0\%            \\
+    10   & 2                 & 100             & 2{,}0\%            \\
+    \hline
+  \end{tabular}
 \end{center}
 
 \noindent Desviación típica de la proporción de clase 1 entre folds: \textbf{0{,}0000\%}
 (prácticamente nula, lo que confirma que la estratificación funciona correctamente).
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.85\linewidth]{tarea2_estratificada}
-    \caption{Proporción de la clase positiva por fold con \texttt{StratifiedKFold}. La línea roja indica la proporción global del dataset (2\%).}
-    \label{fig:t2_estratificada}
+  \centering
+  \includegraphics[width=0.85\linewidth]{tarea2_estratificada}
+  \caption{Proporción de la clase positiva por fold con \texttt{StratifiedKFold}. La línea roja indica la proporción global del dataset (2\%).}
+  \label{fig:t2_estratificada}
 \end{figure}
 
 \noindent\textbf{Análisis:}
@@ -177,35 +154,34 @@ la varianza debida al azar.
 
 \subsection{Resumen de resultados (10 iteraciones, 10 folds)}
 
-La tabla~\ref{tab:t3_varianza} recoge la media y la desviación típica de las
+La tabla~\ref{tab:comparativa_metricas} recoge la media y la desviación típica de las
 tres métricas calculadas mediante \texttt{cross\_val\_score} durante 10
 iteraciones independientes de validación cruzada con 10 \textit{folds}.
-La tercera métrica, \textbf{AUC-ROC}, se añade en esta versión mejorada del
-análisis para reforzar las conclusiones sobre la necesidad de estratificación.
+He añadido la métrica AUC-ROC para reforzar las conclusiones sobre la necesidad de estratificación.
 
 \begin{table}[H]
-\centering
-\caption{Comparativa de estabilidad de métricas: KFold estándar vs.\ StratifiedKFold (10 iteraciones $\times$ 10 folds).}
-\label{tab:t3_varianza}
-\begin{tabular}{|l|c|c|c|c|c|c|}
-\hline
-\multirow{2}{*}{\textbf{Método}}
-  & \multicolumn{2}{c|}{\textbf{Accuracy}}
-  & \multicolumn{2}{c|}{\textbf{F1-macro}}
-  & \multicolumn{2}{c|}{\textbf{AUC-ROC}} \\
-\cline{2-7}
-  & Media & \textit{std} & Media & \textit{std} & Media & \textit{std} \\
-\hline
-\texttt{KFold}
-  & 0{,}5771 & 0{,}0090
-  & 0{,}3829 & 0{,}0051
-  & \multicolumn{2}{c|}{\textbf{N/D} (\textit{8/10 iters.}$^{\dagger}$)} \\
-\texttt{StratifiedKFold}
-  & 0{,}5783 & \textbf{0{,}0085}
-  & 0{,}3857 & \textbf{0{,}0050}
-  & \textbf{0{,}5283} & \textbf{0{,}0253} \\
-\hline
-\end{tabular}
+  \centering
+  \caption{Comparativa de estabilidad de métricas: KFold estándar vs.\ StratifiedKFold (10 iteraciones $\times$ 10 folds).}
+  \label{tab:comparativa_metricas}
+  \begin{tabular}{|l|c|c|c|c|c|c|}
+    \hline
+    \multirow{2}{*}{\textbf{Método}}
+     & \multicolumn{2}{c|}{\textbf{Accuracy}}
+     & \multicolumn{2}{c|}{\textbf{F1-macro}}
+     & \multicolumn{2}{c|}{\textbf{AUC-ROC}}                                                                                                  \\
+    \cline{2-7}
+     & Media                                                                & \textit{std}      & Media & \textit{std} & Media & \textit{std} \\
+    \hline
+    \texttt{KFold}
+     & 0{,}5771                                                             & 0{,}0090
+     & 0{,}3829                                                             & 0{,}0051
+     & \multicolumn{2}{c|}{\textbf{N/D} (\textit{8/10 iters.}$^{\dagger}$)}                                                                   \\
+    \texttt{StratifiedKFold}
+     & 0{,}5783                                                             & \textbf{0{,}0085}
+     & 0{,}3857                                                             & \textbf{0{,}0050}
+     & \textbf{0{,}5283}                                                    & \textbf{0{,}0253}                                               \\
+    \hline
+  \end{tabular}
 \end{table}
 
 \noindent\small$^{\dagger}$\,
@@ -222,37 +198,37 @@ matemáticamente indefinida en la mayoría de los experimentos.
 \normalsize
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.95\linewidth]{tarea3_varianza}
-    \caption{Distribución de Accuracy, F1-macro y AUC-ROC a lo largo de 10 iteraciones de validación cruzada (10 \textit{folds}). Cada métrica se muestra como un diagrama de cajas (\textit{boxplot}). \texttt{StratifiedKFold} produce cajas más estrechas en las tres métricas, evidenciando menor varianza y mayor estabilidad en la evaluación.}
-    \label{fig:t3_varianza}
+  \centering
+  \includegraphics[width=0.95\linewidth]{tarea3_varianza}
+  \caption{Distribución de Accuracy, F1-macro y AUC-ROC a lo largo de 10 iteraciones de validación cruzada (10 \textit{folds}). Cada métrica se muestra como un diagrama de cajas (\textit{boxplot}). \texttt{StratifiedKFold} produce cajas más estrechas en las tres métricas, evidenciando menor varianza y mayor estabilidad en la evaluación.}
+  \label{fig:t3_varianza}
 \end{figure}
 
 \noindent\textbf{Interpretación:}
 \begin{itemize}
-    \item \textit{¿Qué método produce métricas más estables?}
-          El método \texttt{StratifiedKFold} produce métricas más estables,
-          como se observa en la menor desviación típica (\textit{std})
-          en Accuracy y F1-macro; pero la diferencia más llamativa se produce
-          en \textbf{AUC-ROC}.
-    \item \textit{¿Dónde se nota más la mejora?}
-          En AUC-ROC, sin duda. Con \texttt{KFold estándar}, la métrica es
-          \textbf{indefinida (\texttt{NaN})} en 8 de las 10 iteraciones, porque
-          algunos folds quedan vacíos de ejemplos positivos. Solo por azar,
-          en 2 iteraciones se obtiene un valor numérico ($\approx 0{,}49$),
-          que además es desfavorable (cercano a una clasificación aleatoria).
-          Con \texttt{StratifiedKFold}, la AUC-ROC es siempre computable:
-          media $= 0{,}5283$, desv.\ típica $= 0{,}0253$, en las 10 iteraciones.
-    \item \textbf{La AUC-ROC reafirma empíricamente la necesidad de
+  \item \textit{¿Qué método produce métricas más estables?}
+        El método \texttt{StratifiedKFold} produce métricas más estables,
+        como se observa en la menor desviación típica (\textit{std})
+        en Accuracy y F1-macro; pero la diferencia más llamativa se produce
+        en \textbf{AUC-ROC}.
+  \item \textit{¿Dónde se nota más la mejora?}
+        En AUC-ROC, sin duda. Con \texttt{KFold estándar}, la métrica es
+        \textbf{indefinida (\texttt{NaN})} en 8 de las 10 iteraciones, porque
+        algunos folds quedan vacíos de ejemplos positivos. Solo por azar,
+        en 2 iteraciones se obtiene un valor numérico ($\approx 0{,}49$),
+        que además es desfavorable (cercano a una clasificación aleatoria).
+        Con \texttt{StratifiedKFold}, la AUC-ROC es siempre computable:
+        media $= 0{,}5283$, desv.\ típica $= 0{,}0253$, en las 10 iteraciones.
+  \item \textbf{La AUC-ROC reafirma empíricamente la necesidad de
           estratificar:} el hecho de que \texttt{KFold} haga la métrica
-          indefinida en el 80\% de los experimentos no es un artefacto
-          numérico, sino la \emph{manifestación directa} del problema
-          demostrado matemáticamente en la Tarea~1 mediante la distribución
-          hipergeométrica: cuando los folds no están estratificados, es
-          probable que algunos queden sin representantes de la clase
-          positiva, haciendo imposible cualquier evaluación orientada a
-          esa clase. La AUC-ROC, al ser la métrica más exigente en ese
-          sentido, lo pone de manifiesto de forma inequívoca.
+        indefinida en el 80\% de los experimentos no es un artefacto
+        numérico, sino la \emph{manifestación directa} del problema
+        demostrado matemáticamente en la Tarea~1 mediante la distribución
+        hipergeométrica: cuando los folds no están estratificados, es
+        probable que algunos queden sin representantes de la clase
+        positiva, haciendo imposible cualquier evaluación orientada a
+        esa clase. La AUC-ROC, al ser la métrica más exigente en ese
+        sentido, lo pone de manifiesto de forma inequívoca.
 \end{itemize}
 
 % =============================================================================
@@ -261,37 +237,36 @@ matemáticamente indefinida en la mayoría de los experimentos.
 
 \subsection{Comparativa: con y sin variable trampa}
 \begin{center}
-\begin{tabular}{|l|c|c|}
-\hline
-Escenario & Accuracy & F1-macro \\
-\hline
-Sin variable trampa (\textit{evaluación real})  & 0{,}5850 & 0{,}3887 \\
-Con variable trampa (\texttt{ID\_Hospital\_Filtro}) & \textbf{1{,}0000} & \textbf{1{,}0000} \\
-\hline
-\end{tabular}
+  \begin{tabular}{|l|c|c|}
+    \hline
+    Escenario                                           & Accuracy          & F1-macro          \\
+    \hline
+    Sin variable trampa (\textit{evaluación real})      & 0{,}5850          & 0{,}3887          \\
+    Con variable trampa (\texttt{ID\_Hospital\_Filtro}) & \textbf{1{,}0000} & \textbf{1{,}0000} \\
+    \hline
+  \end{tabular}
 \end{center}
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.85\linewidth]{tarea4_leakage}
-    \caption{Efecto del \textit{data leakage}. Las barras rojas corresponden al escenario con la variable trampa; las verdes, al escenario real sin ella.}
-    \label{fig:t4_leakage}
+  \centering
+  \includegraphics[width=0.85\linewidth]{tarea4_leakage}
+  \caption{Efecto del \textit{data leakage}. Las barras rojas corresponden al escenario con la variable trampa; las verdes, al escenario real sin ella.}
+  \label{fig:t4_leakage}
 \end{figure}
 
 \noindent\textbf{Preguntas:}
 \begin{itemize}
-    \item \textit{¿Qué variable está filtrando información del objetivo?}
-          La variable \texttt{ID\_Hospital\allowbreak\_Filtro}.
-    \item \textit{¿Por qué esa variable invalida la evaluación?}
-          Ha sido construida con una correlación perfecta (o casi perfecta) con
-          la clase objetivo. El modelo aprende a usar este ``filtro'' en lugar de
-          las variables clínicas reales, obteniendo un rendimiento del 100\% que
-          es imposible en la práctica real.
-    \item \textit{¿Diferencia entre un modelo ``bueno'' y uno contaminado por leakage?}
-          Un modelo bueno aprende patrones generalizables a partir de predictores
-          legítimos. Un modelo con \textit{leakage} hace trampa: usa información
-          que no estará disponible en producción, por lo que fallará completamente
-          al enfrentarse a nuevos datos.
+  \item \textit{¿Qué variable está filtrando información del objetivo?}
+        La variable \texttt{ID\_Hospital\allowbreak\_Filtro}.
+  \item \textit{¿Por qué esa variable invalida la evaluación?}
+        Ha sido construida con una correlación perfecta (o casi perfecta) con
+        la clase objetivo. El modelo aprende a usar este ``filtro'' en lugar de
+        las variables clínicas reales, obteniendo un rendimiento del 100\% que
+        es imposible en la práctica real.
+  \item \textit{¿Diferencia entre un modelo ``bueno'' y uno contaminado por leakage?}
+        A diferencia de un modelo legítimo, uno con leakage simplemente está
+        haciendo trampa usando información que no estará disponible en producción,
+        por lo que su 100\% de acierto es un espejismo.
 \end{itemize}
 
 % =============================================================================
@@ -299,23 +274,13 @@ Con variable trampa (\texttt{ID\_Hospital\_Filtro}) & \textbf{1{,}0000} & \textb
 % =============================================================================
 
 \begin{enumerate}
-    \item \textbf{Peligros de la partición aleatoria:} Puede generar conjuntos de
-          test vacíos de clase minoritaria, impidiendo una evaluación estadística
-          significativa y dando una falsa sensación de precisión mediante el
-          ``acierto por mayoría''. La distribución hipergeométrica cuantifica
-          formalmente este riesgo: $P(X=0) \approx 1{,}10\%$ y
-          $P(X \leq 1) \approx 6{,}73\%$.
-    \item \textbf{Aporte de la estratificación:} Garantiza que todos los folds
-          tengan representación de ambas clases, lo que permite comparar modelos
-          de forma justa. Los resultados obtenidos confirman que la
-          desviación típica baja en Accuracy, F1-macro y AUC-ROC al estratificar.
-    \item \textbf{Data leakage:} Hace inútil el experimento porque el modelo no
-          aprende a resolver el problema real, sino a identificar una variable que
-          ya contiene la respuesta, invalidando su uso futuro en producción.
-    \item \textbf{Buenas prácticas:} Usar siempre estratificación, auditar
-          variables en busca de correlaciones sospechosas, emplear métricas
-          robustas (F1, AUC-ROC) y documentar la reproducibilidad mediante
-          semillas y validación cruzada repetida.
+  \item \textbf{Partición aleatoria:} Como hemos comprobado, corremos el riesgo de dejar el test sin apenas casos positivos, lo que invalida cualquier métrica que intentemos calcular.
+  \item \textbf{Estratificación:} Es la solución directa al problema anterior, ya que nos garantiza una representación mínima de la clase minoritaria en cada fold para poder evaluar de forma justa.
+  \item \textbf{Fuga de datos (Leakage):} Invalida por completo el experimento. El modelo no aprende, solo usa la variable trampa como atajo, por lo que fallará estrepitosamente en el mundo real.
+  \item \textbf{Buenas prácticas:} Usar siempre estratificación, auditar
+        variables en busca de correlaciones sospechosas, emplear métricas
+        robustas (F1, AUC-ROC) y documentar la reproducibilidad mediante
+        semillas y validación cruzada repetida.
 \end{enumerate}
 
 % =============================================================================
@@ -347,7 +312,6 @@ la práctica significaría entregar un sistema que falla en cuanto
 se usa con datos reales. La regla práctica que saco de aquí es auditarlas
 siempre antes de entrenar.
 
-En definitiva, sin estratificar y sin eliminar variables trampa,
-entre​garíamos un modelo con métricas ficticias que fallaría en producción.
+
 
 \end{document}
