@@ -4,8 +4,3 @@
 # WSL/NTFS metadata files
 *Zone.Identifier
 **/*.Identifier
-
-# Course slides
-Diapositivas-P*.pdf
-**/Diapositivas-P*.pdf
-
