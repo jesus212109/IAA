@@ -4,3 +4,34 @@
 # WSL/NTFS metadata files
 *Zone.Identifier
 **/*.Identifier
+
+# LaTeX build artifacts
+**/build/
+**/_minted-*/
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.glo
+*.idx
+*.ilg
+*.ind
+*.ist
+*.log
+*.nav
+*.out
+*.snm
+*.synctex.gz
+*.toc
+*.lof
+*.lot
+*.bcf
+*.run.xml
+*.synctex(busy)
+*.synctex.gz(busy)
+
+# Python
+**/__pycache__/
+*.py[cod]
+*$py.class
