@@ -9,15 +9,15 @@
 
 \begin{document}
 \standalonecover
+\pagestyle{cuerpo}
 
-\chapter{Cuaderno de Laboratorio --- Práctica 1: La Física del Aprendizaje Automático}
-\chaptermark{Práctica 1}
+\chapter[Práctica 1: La Física del AA]{Cuaderno de Laboratorio --- Práctica 1: La Física del Aprendizaje Automático}
 
 \section*{Objetivo}
 Comprender la dinámica de la optimización mediante gradiente descendente y el impacto de los hiperparámetros en la convergencia del algoritmo.
 
 % -----------------------------------------------------------------------------
-\section{Tarea 1 --- Importancia de la tasa de aprendizaje (\texorpdfstring{$\alpha$}{alpha})}
+\section[Tarea 1: Tasa de aprendizaje]{Tarea 1 --- Importancia de la tasa de aprendizaje (\texorpdfstring{$\alpha$}{alpha})}
 % -----------------------------------------------------------------------------
 
 \subsection{Escenario A (\texorpdfstring{$\alpha_{slow}$}{alpha-slow}): convergencia lenta}
@@ -64,7 +64,7 @@ La función de coste diverge de forma monótona ascendente porque el coeficiente
 
 % -----------------------------------------------------------------------------
 \newpage
-\section{Tarea 2 --- Compromiso del mini-batch}
+\section[Tarea 2: Mini-batch]{Tarea 2 --- Compromiso del mini-batch}
 % -----------------------------------------------------------------------------
 
 Usa tu $\alpha_{opt}$ y compara los siguientes esquemas de procesamiento:
@@ -124,7 +124,7 @@ Usa tu $\alpha_{opt}$ y compara los siguientes esquemas de procesamiento:
 \end{figure}
 
 % -----------------------------------------------------------------------------
-\section{El reto --- ``Ajuste de precisión'' (criterio de parada)}
+\section[Reto: Criterio de parada]{El reto --- ``Ajuste de precisión'' (criterio de parada)}
 % -----------------------------------------------------------------------------
 
 Implementa empíricamente el criterio de tolerancia algorítmica:
@@ -141,7 +141,7 @@ Para analizar las trayectorias asintóticas del sistema a largo plazo, se establ
 \end{figure}
 
 % -----------------------------------------------------------------------------
-\section{Conclusiones finales}
+\section[Conclusiones]{Conclusiones finales}
 % -----------------------------------------------------------------------------
 
 El presente cuaderno de laboratorio corrobora categóricamente que la estabilidad e integridad de la convergencia global de un estimador iterativo requiere una rigurosa sintonización analítica de sus hiperparámetros numéricos. Un factor paramétrico $\alpha$ marginal asegura la convergencia matemática, pero lo hace a expensas de un elevado lastre temporal infranqueable, mientras su hipertrofia causa la irremediable divergencia iterativa por retroproyección fuera del sumidero global. Por ello, el $\alpha$ óptimo impone un compromiso técnico de descenso inicial abrupto y mitigación suave sobre el vecindario absoluto.

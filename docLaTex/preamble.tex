@@ -66,6 +66,10 @@
 
 % ── Section titles ───────────────────────────────────────────────────────────
 \usepackage{titlesec}
+% Remove "Capítulo X" from chapter titles
+\titleformat{\chapter}[hang]
+  {\normalfont\huge\bfseries}{}{0pt}{\huge}
+\titlespacing*{\chapter}{0pt}{-20pt}{40pt}
 
 % ── PDF & hyperlinks ─────────────────────────────────────────────────────────
 \usepackage{pdfpages}
@@ -185,8 +189,8 @@
   \fancyhf{}
   \fancyfoot[L]{\Autor}
   \fancyfoot[R]{- \thepage\ -}
-  \fancyhead[L]{\leftmark}
-  \fancyhead[R]{\includegraphics[height=1.8cm]{logo_uco}}
+  \fancyhead[L]{\rightmark}
+  \fancyhead[R]{\includegraphics[height=1.1cm]{logo_uco}}
   \renewcommand{\headrulewidth}{0.4pt}
   \renewcommand{\footrulewidth}{0.4pt}
 }
@@ -196,7 +200,7 @@
   \fancyfoot[L]{\Autor}
   \fancyfoot[R]{- \thepage\ -}
   \fancyhead[L]{\Titulo}
-  \fancyhead[R]{\includegraphics[height=1.8cm]{logo_uco}}
+  \fancyhead[R]{}
   \renewcommand{\headrulewidth}{0.4pt}
   \renewcommand{\footrulewidth}{0.4pt}
 }
@@ -205,9 +209,9 @@
   \fancyhf{}
   \fancyfoot[L]{\Autor}
   \fancyfoot[R]{- \thepage\ -}
-  \fancyhead[L]{\leftmark}
-  \fancyhead[R]{\includegraphics[height=1.8cm]{logo_uco}}
-  \renewcommand{\headrulewidth}{0.4pt}
+  \fancyhead[L]{}
+  \fancyhead[R]{}
+  \renewcommand{\headrulewidth}{0pt}
   \renewcommand{\footrulewidth}{0.4pt}
 }
 

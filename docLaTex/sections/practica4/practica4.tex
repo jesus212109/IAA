@@ -12,15 +12,27 @@
 
 \begin{document}
 \standalonecover
+\pagestyle{cuerpo}
 
-% ── Graphics path relative to THIS file when compiled standalone ─────────────
-% When compiled from __memoria.tex the global \graphicspath already covers
-% {img/} via \subfix. The extra paths below only activate for standalone:
-%   - ../../Imagenes/  → needed for logo_uco (used in fancyhdr header)
-%   - img/             → figures for this practice
+% --- Ajustes locales para P4: quitar "Capítulo X" ---
+\titleformat{\chapter}[hang]{\normalfont\huge\bfseries}{}{0pt}{\huge}
+\titlespacing*{\chapter}{0pt}{-20pt}{40pt}
+
+% Primera página del capítulo: sin cabecero
+\fancypagestyle{plain}{
+  \fancyhf{}
+  \fancyfoot[L]{\Autor}
+  \fancyfoot[R]{- \thepage\ -}
+  \fancyhead[L]{}
+  \fancyhead[R]{}
+  \renewcommand{\headrulewidth}{0pt}
+  \renewcommand{\footrulewidth}{0.4pt}
+}
+\thispagestyle{plain}
+
 \graphicspath{{\subfix{../../Imagenes/}}{../../Imagenes/}{\subfix{img/}}{img/}}
 
-\chapter{Cuaderno de Laboratorio --- Práctica 4: Clasificación y el Valor del Error (Matriz de Costes)}
+\chapter[Práctica 4: Clasificación y Matriz de Costes]{Cuaderno de Laboratorio --- Práctica 4: Clasificación y el Valor del Error (Matriz de Costes)}
 
 \section*{Objetivo}
 Entrenar un clasificador probabilístico para un problema de detección de fraude bancario y estudiar cómo el umbral de decisión afecta a los errores cometidos y al coste total. El objetivo central no es únicamente medir el rendimiento predictivo, sino comprender el impacto económico real de las decisiones del modelo a partir de una \textbf{matriz de costes asimétrica}.
@@ -41,7 +53,7 @@ Los errores tienen costes muy distintos:
 La decisión final no debe evaluarse solo por el número de aciertos, sino por el \textbf{coste económico} asociado a los errores.
 
 % =============================================================================
-\section{Tarea 1 --- Análisis con el umbral por defecto (\texorpdfstring{$\tau = 0.5$}{tau=0.5})}
+\section[Tarea 1: Umbral por defecto]{Tarea 1 --- Análisis con el umbral por defecto (\texorpdfstring{$\tau = 0.5$}{tau=0.5})}
 % =============================================================================
 
 \subsection{Modelo utilizado}
@@ -56,7 +68,7 @@ Se ha entrenado una \textbf{Regresión Logística} (\texttt{LogisticRegression},
   \label{fig:mc_05}
 \end{figure}
 
-A partir de esta matriz se obtienen:
+A partir de la matriz de confusión detallada en la Figura~\ref{fig:mc_05}, se obtienen los siguientes valores:
 \begin{itemize}
   \item Verdaderos Positivos (TP): \textbf{16}
   \item Verdaderos Negativos (TN): \textbf{501}
@@ -73,7 +85,7 @@ A partir de esta matriz se obtienen:
 El umbral por defecto de 0.5 \textbf{no es razonable} en este contexto. Aunque el modelo comete muy pocos falsos positivos (solo 1), deja pasar 22 transacciones fraudulentas. Dado que el coste de un falso negativo (200\,€) es veinte veces el de un falso positivo (10\,€), el impacto económico resulta muy elevado. En un sistema de detección de fraude es fundamental minimizar los errores más caros; usar este umbral sin revisarlo sería un error de diseño grave.
 
 % =============================================================================
-\section{Tarea 2 --- Estudio de probabilidades y umbrales}
+\section[Tarea 2: Probabilidades y Umbrales]{Tarea 2 --- Estudio de probabilidades y umbrales}
 % =============================================================================
 
 \subsection{Análisis de distintos umbrales}
@@ -109,20 +121,30 @@ Existe un claro compromiso (\textit{trade-off}) entre los dos tipos de error al 
 \end{itemize}
 El umbral de decisión debe ajustarse según la penalización económica de cada error, en lugar de asumir un valor estático por defecto.
 
+{\sloppy
+Desde una perspectiva de ingeniería, disponer de las probabilidades en crudo (por ejemplo, un 0.30 de probabilidad de fraude) nos otorga un control total sobre la lógica de negocio. 
+
+Como ingeniero, ante la asimetría de costes mencionada (donde perder 200\,€ por un fraude no detectado duele mucho más que los 10\,€ de un bloqueo erróneo), se puede decidir de forma proactiva: ``No voy a esperar a que el modelo esté un 50\% seguro para actuar; voy a bloquear cualquier transacción que supere el 20\% de probabilidad''. Al bajar el umbral a $\tau = 0.20$, esa transacción con un 0.30 de probabilidad ahora es clasificada correctamente como fraude, permitiendo su bloqueo a tiempo.
+
+En definitiva, al extraer las probabilidades es el diseñador del sistema quien decide dónde situar la línea de corte para equilibrar las pérdidas económicas entre Falsos Positivos (10\,€) y Falsos Negativos (200\,€), optimizando el sistema para el impacto real en el negocio.
+\par}
+
+
 % =============================================================================
-\section{Tarea 3 --- Optimización del coste}
+\section[Tarea 3: Optimización del coste]{Tarea 3 --- Optimización del coste}
 % =============================================================================
 
 \subsection{Gráfica de coste frente a umbral}
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.78\textwidth]{coste_vs_umbral}
-  \caption{Coste total (€) en función del umbral de decisión. El punto óptimo se alcanza en $\tau^* = 0.05$.}
+\includegraphics[width=0.78\textwidth]{coste_vs_umbral}
+  \caption{Coste total (€) en función del umbral de decisión. Como se aprecia en la Figura~\ref{fig:coste_umbral}, el punto óptimo se alcanza en $\tau^* = 0.05$.}
   \label{fig:coste_umbral}
 \end{figure}
 
 \subsection{Umbral óptimo}
+En base a la gráfica anterior, identificamos el punto de menor coste:
 \[
   \tau^* = 0.05 \qquad \text{Coste mínimo} = 2920\,\text{€}
 \]
@@ -131,7 +153,7 @@ El umbral de decisión debe ajustarse según la penalización económica de cada
 El umbral óptimo ($\tau^* = 0.05$) es muy inferior a 0.5. Esto tiene todo el sentido dada la fuerte asimetría de la matriz de costes: el coste de un FN (200\,€) es 20 veces el de un FP (10\,€). Para minimizar el coste total conviene ser muy sensible a los fraudes, aunque eso suponga aceptar más falsos positivos. La estrategia más razonable para el banco es \textbf{conservadora}: es preferible molestar puntualmente a un cliente legítimo mediante un bloqueo temporal que permitir que un fraude se consume sin ser detectado.
 
 % =============================================================================
-\section{Tarea 4 --- Curvas ROC y Precision-Recall}
+\section[Tarea 4: Curvas ROC y PR]{Tarea 4 --- Curvas ROC y Precision-Recall}
 % =============================================================================
 
 \subsection{Curva ROC}
@@ -153,7 +175,8 @@ El umbral óptimo ($\tau^* = 0.05$) es muy inferior a 0.5. Esto tiene todo el se
 \end{figure}
 
 \subsection{Discusión}
-Con un dataset desbalanceado, la curva Precision-Recall resulta más adecuada que la ROC para valorar la capacidad real del clasificador. El motivo es estructural: el \textit{False Positive Rate} de la curva ROC toma como denominador el total de negativos, que en este problema es muy numeroso. Como consecuencia, incrementos apreciables de falsos positivos apenas desplazan el FPR y el AUC-ROC se mantiene elevado (0.8442) pese a que el modelo comete errores relevantes sobre la clase fraude. La curva PR evita este efecto porque la Precisión (TP~$/$(TP$+$FP)) cae en cuanto aumentan los FP, lo que la hace sensible exactamente a la calidad de recuperación de la clase minoritaria que interesa controlar.
+Al analizar un clasificador sobre un dataset desbalanceado, la curva Precision-Recall suele ser mucho más informativa que la ROC (Figura~\ref{fig:roc} frente a Figura~\ref{fig:pr}). El motivo es estructural: el \textit{False Positive Rate} de la curva ROC toma como denominador el total de negativos, que en este problema es muy numeroso. Como consecuencia, incrementos apreciables de falsos positivos apenas desplazan el FPR y el AUC-ROC se mantiene elevado (0.8442) pese a que el modelo comete errores relevantes sobre la clase fraude. La curva PR evita este efecto porque la Precisión (TP / (TP + FP)) cae en cuanto aumentan los FP, lo que la hace sensible exactamente a la calidad de recuperación de la clase minoritaria que interesa controlar.
+
 
 % =============================================================================
 \section{Decisión final de ingeniería}

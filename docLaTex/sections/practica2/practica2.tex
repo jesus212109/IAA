@@ -6,8 +6,9 @@
 
 \begin{document}
 \standalonecover
+\pagestyle{cuerpo}
 
-\chapter{Cuaderno de Laboratorio --- Práctica 2: Selección de Modelos y Regularización}
+\chapter[Práctica 2: Selección de Modelos]{Cuaderno de Laboratorio --- Práctica 2: Selección de Modelos y Regularización}
 \chaptermark{Práctica 2}
 
 \section*{Objetivo}
@@ -18,7 +19,7 @@ Dominar el protocolo de \textbf{Validación Cruzada (K-Fold)} y comprender cómo
 % =========================================================
 % TAREA 1
 % =========================================================
-\section{Tarea 1 --- Estabilidad de la Validación Cruzada (K-Fold)}
+\section[Tarea 1: Estabilidad K-Fold]{Tarea 1 --- Estabilidad de la Validación Cruzada (K-Fold)}
 
 \subsection*{Configuración común}
 Modelo usado: \textbf{Regresión Lineal (Ridge con $\lambda \approx 0$)} (regresión lineal sin regularización)\\
@@ -119,7 +120,7 @@ K & RMSE & Comentario de estabilidad/coste \\
 % =========================================================
 % TAREA 2
 % =========================================================
-\section{Tarea 2 --- Regularización Ridge vs. Lasso (K = 10)}
+\section[Tarea 2: Ridge vs. Lasso]{Tarea 2 --- Regularización Ridge vs. Lasso (K = 10)}
 
 \subsection*{Configuración}
 Fijamos K = 10 y comparamos:
@@ -243,7 +244,7 @@ Tras realizar un ajuste paramétrico fino, $\lambda = 0.5$ demuestra ser el punt
 % =========================================================
 % CONCLUSIONES
 % =========================================================
-\section{Conclusiones finales}
+\section[Conclusiones]{Conclusiones finales}
 Resume en 8--12 líneas lo aprendido sobre:
 \begin{itemize}
     \item Estabilidad de K-Fold al variar K (K=2 vs K=10 vs LOOCV).

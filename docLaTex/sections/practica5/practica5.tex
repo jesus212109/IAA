@@ -2,16 +2,17 @@
 
 \begin{document}
 \standalonecover
+\pagestyle{cuerpo}
 
 % ── Configuración de rutas de imágenes (Homogénea con P4) ─────────────────────
 \graphicspath{{\subfix{../../Imagenes/}}{../../Imagenes/}{\subfix{img/}}{img/}}
 
-\chapter{Arquitectura de Redes Neuronales: El Perceptrón Multicapa}
+\chapter[Práctica 5: Perceptrón Multicapa]{Arquitectura de Redes Neuronales: El Perceptrón Multicapa}
 
 En esta práctica exploramos el funcionamiento del Perceptrón Multicapa (MLP) para profundizar en la lógica que permite a estas redes aprender fronteras de decisión no lineales. A diferencia del perceptrón simple, que se ve limitado por su naturaleza lineal, el MLP nos permite abordar problemas de clasificación complejos mediante la introducción de capas ocultas. Analizaremos cómo la selección de hiperparámetros, como el número de neuronas y la función de activación, condiciona tanto la convergencia como la capacidad de generalización del modelo.
 
 % =============================================================================
-\section{La barrera de la linealidad: El Perceptrón Simple}
+\section[Tarea 1: Barrera de linealidad]{La barrera de la linealidad: El Perceptrón Simple}
 % =============================================================================
 
 Para evaluar las limitaciones de los modelos lineales, utilizamos un dataset tipo \texttt{make\_moons} con 500 muestras y un 25\,\% de ruido. Como primera aproximación, entrenamos un MLP sin capas ocultas. En esencia, esta configuración actúa como un clasificador lineal básico que intenta separar las clases mediante un único hiperplano.
@@ -37,7 +38,7 @@ Para evaluar las limitaciones de los modelos lineales, utilizamos un dataset tip
 Como se observa en la Figura~\ref{fig:t1_front}, el modelo se ve limitado a trazar una línea recta que es incapaz de adaptarse a la curvatura de las lunas. El acierto obtenido demuestra que, independientemente del entrenamiento, existe una barrera geométrica insalvable para cualquier modelo lineal ante datos que no son linealmente separables.
 
 % =============================================================================
-\section{Impacto de la capacidad en la capa oculta}
+\section[Tarea 2: Capacidad capa oculta]{Impacto de la capacidad en la capa oculta}
 % =============================================================================
 
 La solución pasa por introducir una capa intermedia que proyecte los datos a un espacio donde la separación sea factible. En este experimento, analizamos cómo influye el número de neuronas ocultas ($N_h$) en la morfología de la frontera de decisión.
@@ -79,7 +80,7 @@ La solución pasa por introducir una capa intermedia que proyecte los datos a un
 Es notable que al disponer de 20 neuronas, la red no solo captura mejor la esencia de los datos, sino que converge de manera más ágil. Esto sugiere que dotar al modelo de una capacidad adecuada facilita al algoritmo de optimización encontrar soluciones satisfactorias sin quedar atrapado en valles de pérdida ineficientes.
 
 % =============================================================================
-\section{Dinámica de Aprendizaje: ReLU vs. Sigmoide}
+\section[Tarea 3: ReLU vs. Sigmoide]{Dinámica de Aprendizaje: ReLU vs. Sigmoide}
 % =============================================================================
 
 Fijando la arquitectura en 20 neuronas, comparamos la función logística con ReLU. Evaluamos la velocidad de convergencia y la estabilidad del entrenamiento mediante las curvas de pérdida.
@@ -102,7 +103,7 @@ Fijando la arquitectura en 20 neuronas, comparamos la función logística con Re
 A pesar de que ambas funciones logran resultados similares en test, ReLU destaca por su eficiencia. La función sigmoide tiende a saturarse, lo que ralentiza la actualización de pesos, mientras que ReLU favorece un flujo de gradiente más dinámico, permitiendo una convergencia más rápida.
 
 % =============================================================================
-\section{Reconocimiento de Dígitos y Parsimonia}
+\section[Reto: Dígitos y Parsimonia]{Reconocimiento de Dígitos y Parsimonia}
 % =============================================================================
 
 El reto final consiste en clasificar el dataset \texttt{load\_digits} buscando superar el 95\,\% de acierto con la mínima complejidad estructural.

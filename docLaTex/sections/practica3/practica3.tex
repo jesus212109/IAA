@@ -12,15 +12,12 @@
 
 \begin{document}
 \standalonecover
+\pagestyle{cuerpo}
 
 % ── Graphics path relative to THIS file when compiled standalone ─────────────
-% When compiled from __memoria.tex the global \graphicspath already covers
-% {img/} via \subfix. The extra paths below only activate for standalone:
-%   - ../../Imagenes/  → needed for logo_uco (used in fancyhdr header)
-%   - img/             → figures for this practice
 \graphicspath{{\subfix{../../Imagenes/}}{../../Imagenes/}{\subfix{img/}}{img/}}
 
-\chapter{Cuaderno de Laboratorio --- Práctica 3: Metodología de Evaluación y Rigor Científico}
+\chapter[Práctica 3: Metodología y Rigor]{Cuaderno de Laboratorio --- Práctica 3: Metodología de Evaluación y Rigor Científico}
 
 \section*{Objetivo}
 Aprender a realizar evaluaciones honestas en condiciones difíciles, especialmente con datos desbalanceados,
@@ -34,7 +31,7 @@ Se parte de:
 \end{itemize}
 
 % =============================================================================
-\section{Tarea 1 --- La lotería de la partición aleatoria}
+\section[Tarea 1: Lotería de la partición]{Tarea 1 --- La lotería de la partición aleatoria}
 % =============================================================================
 
 \subsection*{Configuración común}
@@ -108,7 +105,7 @@ Conclusión: un mal split aleatorio puede hacer que la evaluación no sirva para
 \end{itemize}
 
 % =============================================================================
-\section{Tarea 2 --- Partición estratificada}
+\section[Tarea 2: Partición estratificada]{Tarea 2 --- Partición estratificada}
 % =============================================================================
 
 \subsection{Registro por folds (\texttt{StratifiedKFold}, \texorpdfstring{$k=10$}{k=10})}
@@ -149,7 +146,7 @@ el modelo sea evaluado siempre sobre una distribución representativa y reducien
 la varianza debida al azar.
 
 % =============================================================================
-\section{Tarea 3 --- Comparativa de la varianza}
+\section[Tarea 3: Comparativa de varianza]{Tarea 3 --- Comparativa de la varianza}
 % =============================================================================
 
 \subsection{Resumen de resultados (10 iteraciones, 10 folds)}
@@ -232,7 +229,7 @@ matemáticamente indefinida en la mayoría de los experimentos.
 \end{itemize}
 
 % =============================================================================
-\section{Tarea 4 --- Detección de \textit{data leakage}}
+\section[Tarea 4: Data Leakage]{Tarea 4 --- Detección de \textit{data leakage}}
 % =============================================================================
 
 \subsection{Comparativa: con y sin variable trampa}
@@ -270,7 +267,7 @@ matemáticamente indefinida en la mayoría de los experimentos.
 \end{itemize}
 
 % =============================================================================
-\section{Reto --- Auditoría metodológica}
+\section[Reto: Auditoría Metodológica]{Reto --- Auditoría metodológica}
 % =============================================================================
 
 \begin{enumerate}
@@ -284,7 +281,7 @@ matemáticamente indefinida en la mayoría de los experimentos.
 \end{enumerate}
 
 % =============================================================================
-\section{Conclusión final}
+\section[Conclusión final]{Conclusión final}
 % =============================================================================
 
 Esta práctica me ha dejado claro que evaluar un modelo no es solo ejecutar
