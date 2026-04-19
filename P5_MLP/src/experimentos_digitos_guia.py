@@ -31,6 +31,7 @@ def build_model(hidden_layer_sizes: tuple[int, ...], activation: str = "relu") -
                     hidden_layer_sizes=hidden_layer_sizes,
                     activation=activation,
                     solver="adam",
+                    alpha=1e-4,
                     max_iter=2500,
                     random_state=RANDOM_STATE,
                 ),

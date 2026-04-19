@@ -9,13 +9,13 @@
 
 \chapter[Práctica 5: Perceptrón Multicapa]{Arquitectura de Redes Neuronales: El Perceptrón Multicapa}
 
-En esta práctica exploramos el funcionamiento del Perceptrón Multicapa (MLP) para profundizar en la lógica que permite a estas redes aprender fronteras de decisión no lineales. A diferencia del perceptrón simple, que se ve limitado por su naturaleza lineal, el MLP nos permite abordar problemas de clasificación complejos mediante la introducción de capas ocultas. Analizaremos cómo la selección de hiperparámetros, como el número de neuronas y la función de activación, condiciona tanto la convergencia como la capacidad de generalización del modelo.
+En esta práctica vamos a ver cómo funciona realmente el Perceptrón Multicapa (MLP) y cómo logra aprender fronteras de decisión que no son simples líneas rectas. A diferencia del perceptrón simple, el MLP resuelve problemas mucho más complejos gracias a las capas ocultas. Durante las tareas, hemos probado distintos ajustes (como el número de neuronas y la función de activación) para ver cómo afectan a la rapidez con la que aprende el modelo y a lo bien que generaliza.
 
 % =============================================================================
-\section[Tarea 1: Barrera de linealidad]{La barrera de la linealidad: El Perceptrón Simple}
+\section[Tarea 1: Barrera de linealidad]{Tarea 1: La barrera de la linealidad --- El Perceptrón Simple}
 % =============================================================================
 
-Para evaluar las limitaciones de los modelos lineales, utilizamos un dataset tipo \texttt{make\_moons} con 500 muestras y un 25\,\% de ruido. Como primera aproximación, entrenamos un MLP sin capas ocultas. En esencia, esta configuración actúa como un clasificador lineal básico que intenta separar las clases mediante un único hiperplano.
+En esta primera tarea, hemos probado un Perceptrón simple (un modelo puro, sin capas ocultas, usando la arquitectura \texttt{hidden\_layer\_sizes=()}) contra el dataset sintético \texttt{make\_moons}. Al entrenarlo saca en test alrededor de un 82\,\%. Puede parecer un buen número de primeras, pero basta con mirar las gráficas para darse cuenta de que el modelo falla sistemáticamente en las mismas zonas.
 
 \subsection{Resultados y Análisis Estructural}
 
@@ -35,13 +35,16 @@ Para evaluar las limitaciones de los modelos lineales, utilizamos un dataset tip
   \caption{Evaluación del rendimiento en un perceptrón de una sola capa.}
 \end{figure}
 
-Como se observa en la Figura~\ref{fig:t1_front}, el modelo se ve limitado a trazar una línea recta que es incapaz de adaptarse a la curvatura de las lunas. El acierto obtenido demuestra que, independientemente del entrenamiento, existe una barrera geométrica insalvable para cualquier modelo lineal ante datos que no son linealmente separables.
+Viendo la frontera de decisión (Figura~\ref{fig:t1_front}), el motivo de esto está muy claro. Nuestros datos tienen forma de dos medias lunas entrelazadas (como un yin-yang), pero lo que ha aprendido el modelo es a trazar una recta que corta las figuras de forma totalmente plana. Matemáticamente es imposible que una sola línea recta separe perfectamente estas dos clases, y de ahí salen los errores de la matriz de confusión (Figura~\ref{fig:t1_conf}).
 
+El fallo aquí no es que el modelo necesite entrenar más tiempo, es una limitación de diseño en la propia red. Como no tiene capas ocultas, el Perceptrón simple solo saca combinaciones lineales de los datos. Resumiendo: solo puede dibujar rectas, hiperplanos, y figuras planas.
+
+Básicamente, tenemos un problema de \textit{underfitting} de manual por ser un modelo demasiado simple. Si queremos separar distribuciones que no se pueden cruzar con tiralíneas, el modelo necesita aprender patrones no lineales, y para eso hacen falta capas ocultas.
 % =============================================================================
-\section[Tarea 2: Capacidad capa oculta]{Impacto de la capacidad en la capa oculta}
+\section[Tarea 2: Capacidad capa oculta]{Tarea 2: Impacto de la capacidad en la capa oculta}
 % =============================================================================
 
-La solución pasa por introducir una capa intermedia que proyecte los datos a un espacio donde la separación sea factible. En este experimento, analizamos cómo influye el número de neuronas ocultas ($N_h$) en la morfología de la frontera de decisión.
+Visto que el modelo lineal se queda corto, el siguiente paso ha sido añadir una capa oculta al MLP para que pueda manejar curvas. Hemos probado tres tamaños distintos (2, 5 y 20 neuronas) para ver visualmente cómo va cambiando la frontera a medida que le damos más músculo analítico.
 
 \begin{figure}[H]
   \centering
@@ -68,72 +71,151 @@ La solución pasa por introducir una capa intermedia que proyecte los datos a un
   \label{tab:t2_metricas}
   \begin{tabular}{lccc}
     \toprule
-    \textbf{Arquitectura} & \textbf{Acc. Test} & \textbf{Iteraciones} & \textbf{Observación} \\
+    \textbf{Arquitectura} & \textbf{Acc. Test} & \textbf{Iteraciones} & \textbf{Observación}           \\
     \midrule
-    MLP(2)  & 0.8200 & 648 & Capacidad insuficiente \\
-    MLP(5)  & 0.8400 & 726 & Mayor esfuerzo de optimización \\
-    MLP(20) & 0.8533 & 406 & Convergencia eficiente \\
+    MLP(2)                & 0.8200             & 648                  & Capacidad insuficiente         \\
+    MLP(5)                & 0.8400             & 726                  & Mayor esfuerzo de optimización \\
+    MLP(20)               & 0.8533             & 406                  & Convergencia eficiente         \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-Es notable que al disponer de 20 neuronas, la red no solo captura mejor la esencia de los datos, sino que converge de manera más ágil. Esto sugiere que dotar al modelo de una capacidad adecuada facilita al algoritmo de optimización encontrar soluciones satisfactorias sin quedar atrapado en valles de pérdida ineficientes.
+\subsection*{Configuración con 2 neuronas}
+Con solo dos neuronas el modelo es algo más flexible que la recta pura de antes, pero sigue quedándose a medias. Si miramos la gráfica, la frontera solo forma una especie de ``V''. No tiene soltura suficiente para rodear las lunas enteras, así que seguimos cayendo en \textit{underfitting}.
+
+\subsection*{Configuración con 5 neuronas}
+Saltando a 5 neuronas, la cosa cambia mucho y ya casi capta la forma del problema. No obstante, se nota a simple vista que la frontera no es curva lisa. Como estamos usando la activación ReLU, lo que hace el modelo realmente es juntar varios trozos rectos (los 5 «codos» de las neuronas) para intentar envolver las lunas. Arregla el problema inicial, pero visualmente queda con un polígono a trompicones típico de la ReLU.
+
+\subsection*{Configuración con 20 neuronas}
+Con 20 neuronas le sobra capacidad para dibujar la frontera usando todos esos tramos lineales pequeñitos que se funden. Lo curioso es que, en un problema 2D tan simple, meter 20 neuronas no ha provocado que el modelo memorice como loco y la frontera empiece a hacer ``islas'' raras atrapando ruido (\textit{overfitting}). Sigue generalizando bien, de hecho la precisión en train (86.00\,\%) y test (85.33\,\%) son casi la misma, aunque aquí la ganancia respecto a la anterior empieza a ser residual.
+
+\subsection*{Conclusión}
+Queda comprobado que meter capas ocultas le quita el cepo lineal a la red, adaptándola a la forma real del problema (en nuestro caso usando cachos rectos que es como opera ReLU). La clave de todo es el equilibrio: no pasarnos de simples como para arrastrar \textit{underfitting}, pero tampoco inflar el número de neuronas cuando una red ligera lo saca casi igual y no consume tanto.
 
 % =============================================================================
-\section[Tarea 3: ReLU vs. Sigmoide]{Dinámica de Aprendizaje: ReLU vs. Sigmoide}
+\section[Tarea 3: ReLU vs. Sigmoide]{Tarea 3: Dinámica de Aprendizaje --- ReLU vs. Sigmoide}
 % =============================================================================
 
-Fijando la arquitectura en 20 neuronas, comparamos la función logística con ReLU. Evaluamos la velocidad de convergencia y la estabilidad del entrenamiento mediante las curvas de pérdida.
+Manteniendo fija la capa de 20 neuronas, hemos puesto cara a cara dos funciones de activación míticas: la típica curva logística (\textit{Sigmoide}) y la clásica lineal de hoy en día (\textit{ReLU}). Queríamos ver cuánto cambia el contorno dibujado y la velocidad de entrenamiento solo con cambiar la activación bajo la misma red.
+
+\subsection{Fronteras de decisión}
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.48\textwidth}
+    \includegraphics[width=\textwidth]{tarea3_activation_logistic}
+    \caption{Frontera con Sigmoide.}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.48\textwidth}
+    \includegraphics[width=\textwidth]{tarea3_activation_relu}
+    \caption{Frontera con ReLU.}
+  \end{subfigure}
+  \caption{Comparación visual de la frontera de decisión según la activación.}
+  \label{fig:t3_front}
+\end{figure}
+
+Las dos activaciones separan las lunas más o menos igual de bien, pero haciendo trampas de diferente manera. La Sigmoide saca fronteras mucho más suaves y bonitas, que fluyen más, gracias a sus transiciones entre 0 y 1. ReLU, como ya vimos, tira de lógica de trozos rectos y se vuelve mucho más angulosa, pero funcionalmente cumple igual.
+
+\subsection{Curvas de pérdida y velocidad de convergencia}
 
 \begin{figure}[H]
   \centering
   \begin{subfigure}[b]{0.48\textwidth}
     \includegraphics[width=\textwidth]{tarea3_loss_curve_logistic}
-    \caption{Pérdida con Sigmoide.}
+    \caption{Curva de pérdida con Sigmoide.}
   \end{subfigure}
   \hfill
   \begin{subfigure}[b]{0.48\textwidth}
     \includegraphics[width=\textwidth]{tarea3_loss_curve_relu}
-    \caption{Pérdida con ReLU.}
+    \caption{Curva de pérdida con ReLU.}
   \end{subfigure}
   \caption{Comparativa de la velocidad de aprendizaje.}
   \label{fig:t3_loss}
 \end{figure}
 
-A pesar de que ambas funciones logran resultados similares en test, ReLU destaca por su eficiencia. La función sigmoide tiende a saturarse, lo que ralentiza la actualización de pesos, mientras que ReLU favorece un flujo de gradiente más dinámico, permitiendo una convergencia más rápida.
-
-% =============================================================================
-\section[Reto: Dígitos y Parsimonia]{Reconocimiento de Dígitos y Parsimonia}
-% =============================================================================
-
-El reto final consiste en clasificar el dataset \texttt{load\_digits} buscando superar el 95\,\% de acierto con la mínima complejidad estructural.
-
 \begin{table}[H]
   \centering
-  \caption{Métricas obtenidas para distintas arquitecturas de dígitos.}
-  \label{tab:t4_digitos}
+  \caption{Métricas comparativas por función de activación (arquitectura \texttt{(20,)}).}
+  \label{tab:t3_activaciones}
   \begin{tabular}{lcccc}
     \toprule
-    \textbf{Arquitectura} & \textbf{Parámetros aprox.} & \textbf{Acc. Test} & \textbf{Iteraciones} & \textbf{Meta} \\
+    \textbf{Activación} & \textbf{Acc. Train} & \textbf{Acc. Test} & \textbf{Iteraciones} & \textbf{Loss final} \\
     \midrule
-    MLP(20)     & 1.500 & 0.9644 & 276 & $\checkmark$ \\
-    MLP(50)     & 3.800 & 0.9711 & 180 & $\checkmark$ \\
-    MLP(100)    & 7.500 & 0.9800 & 147 & $\checkmark$ \\
-    MLP(50,20)  & 4.500 & 0.9756 & 131 & $\checkmark$ \\
+    Sigmoide (logistic) & 0.8657              & 0.8400             & 485                  & 0.3071              \\
+    ReLU                & 0.8600              & 0.8533             & 406                  & 0.2870              \\
     \bottomrule
   \end{tabular}
 \end{table}
 
+\subsection*{Análisis}
+
+Viendo los números (Tabla~\ref{tab:t3_activaciones}) comprobamos lo que ya se dejaba ver en las curvas (Figura~\ref{fig:t3_loss}): ReLU vuela y llega al tope en \textbf{406 iteraciones}, ganándole un 16\% limpio a las \textbf{485} que se chupa la Sigmoide.
+
+El motivo por el que la Sigmoide da más pereza computacional se llama \textit{vanishing gradient}. Al aplastar siempre su salida entre $(0, 1)$, si entran valores muy extremos la curva se plana muchísimo, casi a cero. Eso hunde el \textit{backpropagation} (al multiplicar valores de cero) y frena el aprendizaje. ReLU por su parte tiene siempre la derivada plantada en 1 para lo positivo; el gradiente no se estanca durante las pasadas y el ajuste corre libremente.
+
+Al fin y al cabo, a nivel generalización ambas sacan sobre un \textasciitilde{}84-85\% en prueba porque lunas 2D es algo asequible. Pero está claro que en cuanto se meta esto en deep-learning fuerte de más capas, el atasco en la Sigmoide mataría el sistema, siendo ese el motivo por el cual ReLU arrasó y es hoy la respuesta fácil con keras o sklearn en arquitecturas reales.
+
+% =============================================================================
+\section[Tarea 4: Dígitos y Parsimonia]{Tarea 4: Reconocimiento de Dígitos y Parsimonia}
+% =============================================================================
+
+El último mini-reto era unificar conceptos probando a clasificar el dataset de imágenes \texttt{load\_digits}. Teníamos que superar sí o sí el 95\,\% en test tirando por la navaja de Ockham (el modelo que rinda más fácil sin comer recursos). Hemos pasado una barrida de seis configuraciones de capas.
+
+\begin{table}[H]
+  \centering
+  \caption{Métricas obtenidas para distintas arquitecturas en el dataset de dígitos.}
+  \label{tab:t4_digitos}
+  \begin{tabular}{lccccc}
+    \toprule
+    \textbf{Arquitectura} & \textbf{Acc. Train} & \textbf{Acc. Test} & \textbf{Iteraciones} & \textbf{Profundidad} & \textbf{Meta} \\
+    \midrule
+    MLP(20)               & 1.0000              & 0.9644             & 276                  & 1 capa               & $\checkmark$  \\
+    MLP(50)               & 1.0000              & 0.9711             & 180                  & 1 capa               & $\checkmark$  \\
+    MLP(100)              & 1.0000              & 0.9800             & 147                  & 1 capa               & $\checkmark$  \\
+    MLP(30, 15)           & 1.0000              & 0.9600             & 161                  & 2 capas              & $\checkmark$  \\
+    MLP(50, 20)           & 1.0000              & 0.9756             & 131                  & 2 capas              & $\checkmark$  \\
+    MLP(64, 32)           & 1.0000              & 0.9667             & 110                  & 2 capas              & $\checkmark$  \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Análisis de sobreajuste}
+
+Lo más llamativo al ver la Tabla~\ref{tab:t4_digitos} es que ni una sola métrica perdona un mísero 1\%: literal \textbf{todas las variantes alcanzan el 100\,\% sobre los datos de validación de entrenamiento} (\texttt{acc\_train = 1.0000}). Se saben todas las fotos de memoria, haciendo puramente \textit{overfitting}. Nos salva que las predicciones con los datos sin catalogar caen un ridículo margen de error al rededor del 3\% y retienen todo lo bueno generalizando.
+
+Es algo esperable en un array de solo 1.350 filas y redes que tienen miles de nodos para tragárselo. Por suerte lo atenuamos de entrada dejando el parámetro de `sklearn` \texttt{alpha=1e-4} apretando la norma L2 en los pesos más inflados del grafo.
+
 \subsection{Elección del modelo: Principio de Parsimonia}
-Aunque las arquitecturas de 50 o 100 neuronas ofrecen mejoras marginales, hemos seleccionado la configuración **MLP(20)** como la solución definitiva. Atendiendo al principio de parsimonia, esta red supera el objetivo del 95\,\% minimizando el número de parámetros. En ingeniería, seleccionar el modelo más simple que cumple con el rendimiento exigido es la mejor estrategia para asegurar la robustez y la generalización.
+
+Sabemos que si le tiramos la salvajada de $MLP(100)$ te levanta un 98\,\%, pero hay que guardar coherencia: elegimos a pies juntillas la variante \textbf{MLP(20)}. Simple y llánamente fue la primera de las pequeñas en llegar a la cuota del 95\,\% empleando \textasciitilde{}1.500 parámetros de nada (contra los más de 7.500 de la más grande). Nos viene que ni pintado para mantener control extra de escalabilidad frente al futuro a menos potencia computacional requerida.
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.55\textwidth]{tarea4_mejor_arquitectura}
-  \caption{Matriz de confusión de la arquitectura MLP(20). El desempeño es casi impecable en todas las clases.}
+  \includegraphics[width=0.58\textwidth]{tarea4_mejor_arquitectura}
+  \caption{Matriz de confusión de la arquitectura \textbf{MLP(20)}. El desempeño es casi impecable en todas las clases; los escasos errores se concentran en pares de dígitos visualmente similares.}
 \end{figure}
 
-\section*{Consideraciones Finales}
-Este estudio experimental confirma la necesidad de las capas ocultas para modelar problemas no lineales. Hemos comprobado la superioridad práctica de ReLU y la importancia de buscar siempre la solución más parsimoniosa. 
+\section*{Propuesta Ejecutiva de Despliegue}
+
+\textbf{A la atención de:} Dirección Operativa / Product Owner \\
+\textbf{De:} Equipo de Data Science e Ingeniería ML \\
+\textbf{Asunto:} Recomendación para el pase a producción del clasificador de dígitos
+
+A la vista del tracking final de los experimentos, traemos los resultados para decidir qué motor pasar a entorno productivo con tal de agilizar nuestro pipeline actual:
+
+\subsubsection*{1. Modelo Seleccionado}
+Nuestra firma va para poner en despliegue vivo el modelo \textbf{MLP(20)} (que es un esquema plano de 20 neuronas en oculta y relus). Se asienta establemente en \textbf{96.44\,\%} de fiabilidad validada frente a sets que no había atacado nunca, batiendo holgadamente la cota para darnos la luz verde del 95\,\%.
+
+\subsubsection*{2. Justificación Técnica: Principio de Parsimonia}
+Hemos apostado por rascar peso en red antes que arañar algún cero más de exactitud que no rentaba. Es cierto que forzando el servidor a una red de cien en bloque $MLP(100)$ habríamos trepado a un 98\%, pero nuestra variante gasta casi \textbf{cinco veces menos tamaño final en binario y params}. A final de mes en el hardware eso nos regala:
+\begin{itemize}
+  \item \textbf{Tiempos de latencia absurdamente bajos:} Para clavar las respuestas asíncronas HTTP/REST de inmediato.
+  \item \textbf{Muy poca RAM consumida:} Abriendo opciones sin refactors gordos a empaquetarlo localmente en endpoints móviles / IoT a posteriori gracias al margen.
+  \item \textbf{Mejor mantenibilidad sin desastres por Data-Drift:} A menos lio numérico y más simple, sabemos que se va a desviar con menos estruendo cuando empiecen los ruidos y artefactos pesados fuera de laboratorio atacando las capturas diariarias de los clientes.
+\end{itemize}
+
+\subsubsection*{3. Consideraciones de Despliegue}
+Vale aclarar que esto es en cristalera; las pruebas arrojan tasas perfectas de match sobre sets vírgenes por sobreaprender internamente (train acc 100\,\%), y aunque nuestra rutina L2 le corta las alas al overfit y salva los trastos generalizando, recomendamos el típico \textbf{shadow deploy para curarnos en salud} al salir al ecosistema ruidoso real durante los tres primeros días de margen que arranquemos servicio en sombra, lo vemos contra los targets reales offline, y, si nadie suelta las alarmas redirigimos vivo.
 
 \end{document}

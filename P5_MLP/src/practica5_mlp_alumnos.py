@@ -253,6 +253,7 @@ def task_3_activation_comparison() -> None:
                 "modelo": result.name,
                 "arquitectura": result.hidden_layers,
                 "activacion": result.activation,
+                "acc_train": f"{result.acc_train:.4f}",
                 "acc_test": f"{result.acc_test:.4f}",
                 "iteraciones": result.n_iter,
                 "loss_final": f"{result.final_loss:.4f}",
