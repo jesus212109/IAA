@@ -9,13 +9,13 @@
 
 \chapter[Práctica 5: Perceptrón Multicapa]{Arquitectura de Redes Neuronales: El Perceptrón Multicapa}
 
-En esta práctica vamos a ver cómo funciona realmente el Perceptrón Multicapa (MLP) y cómo logra aprender fronteras de decisión que no son simples líneas rectas. A diferencia del perceptrón simple, el MLP resuelve problemas mucho más complejos gracias a las capas ocultas. Durante las tareas, hemos probado distintos ajustes (como el número de neuronas y la función de activación) para ver cómo afectan a la rapidez con la que aprende el modelo y a lo bien que generaliza.
+En esta práctica se explora el funcionamiento del Perceptrón Multicapa (MLP) y su capacidad para modelar fronteras de decisión no lineales. A diferencia del perceptrón simple, el MLP aborda problemas de clasificación más complejos mediante la introducción de capas ocultas. A lo largo del documento se analizan distintos hiperparámetros, como el número de neuronas y la función de activación, y su impacto en la convergencia y generalización del modelo.
 
 % =============================================================================
 \section[Tarea 1: Barrera de linealidad]{Tarea 1: La barrera de la linealidad --- El Perceptrón Simple}
 % =============================================================================
 
-En esta primera tarea, hemos probado un Perceptrón simple (un modelo puro, sin capas ocultas, usando la arquitectura \texttt{hidden\_layer\_sizes=()}) contra el dataset sintético \texttt{make\_moons}. Al entrenarlo saca en test alrededor de un 82\,\%. Puede parecer un buen número de primeras, pero basta con mirar las gráficas para darse cuenta de que el modelo falla sistemáticamente en las mismas zonas.
+Para iniciar el estudio, se ha evaluado el rendimiento de un Perceptrón simple (un modelo sin capas ocultas, definido con \texttt{hidden\_layer\_sizes=()}) aplicado al dataset sintético \texttt{make\_moons}. Aunque tras el entrenamiento se alcanza una precisión en test de aproximadamente un 82\,\%, el análisis visual de las gráficas revela que el modelo falla de manera sistemática en ciertas regiones complejas.
 
 \subsection{Resultados y Análisis Estructural}
 
@@ -35,16 +35,16 @@ En esta primera tarea, hemos probado un Perceptrón simple (un modelo puro, sin 
   \caption{Evaluación del rendimiento en un perceptrón de una sola capa.}
 \end{figure}
 
-Viendo la frontera de decisión (Figura~\ref{fig:t1_front}), el motivo de esto está muy claro. Nuestros datos tienen forma de dos medias lunas entrelazadas (como un yin-yang), pero lo que ha aprendido el modelo es a trazar una recta que corta las figuras de forma totalmente plana. Matemáticamente es imposible que una sola línea recta separe perfectamente estas dos clases, y de ahí salen los errores de la matriz de confusión (Figura~\ref{fig:t1_conf}).
+Al observar la frontera de decisión (Figura~\ref{fig:t1_front}), la causa del error se hace evidente. El dataset presenta dos clases distribuidas en forma de lunas entrelazadas, pero el modelo ha trazado un límite de separación completamente recto. Matemáticamente, es imposible separar estas dos clases con un solo hiperplano, lo que explica la distribución de fallos en la matriz de confusión (Figura~\ref{fig:t1_conf}).
 
-El fallo aquí no es que el modelo necesite entrenar más tiempo, es una limitación de diseño en la propia red. Como no tiene capas ocultas, el Perceptrón simple solo saca combinaciones lineales de los datos. Resumiendo: solo puede dibujar rectas, hiperplanos, y figuras planas.
+Este comportamiento no indica una falta de entrenamiento, sino una limitación inherente a la arquitectura. Al no disponer de capas ocultas, un perceptrón simple solo puede generar combinaciones lineales de las entradas, restringiendo su capacidad a la creación de fronteras lineales.
 
-Básicamente, tenemos un problema de \textit{underfitting} de manual por ser un modelo demasiado simple. Si queremos separar distribuciones que no se pueden cruzar con tiralíneas, el modelo necesita aprender patrones no lineales, y para eso hacen falta capas ocultas.
+Se concluye que el modelo padece un grado severo de \textit{underfitting} debido a su simplicidad. Para clasificar correctamente distribuciones que no son linealmente separables, es necesario dotar a la red de representaciones no lineales mediante el uso de capas ocultas.
 % =============================================================================
 \section[Tarea 2: Capacidad capa oculta]{Tarea 2: Impacto de la capacidad en la capa oculta}
 % =============================================================================
 
-Visto que el modelo lineal se queda corto, el siguiente paso ha sido añadir una capa oculta al MLP para que pueda manejar curvas. Hemos probado tres tamaños distintos (2, 5 y 20 neuronas) para ver visualmente cómo va cambiando la frontera a medida que le damos más músculo analítico.
+Una vez constatada la limitación del modelo lineal, se procede a introducir una capa oculta en el MLP para proporcionarle capacidad de decisión no lineal. Se han evaluado tres configuraciones distintas (2, 5 y 20 neuronas) para ilustrar visualmente la adaptación de la frontera de decisión a medida que aumenta la complejidad de la red.
 
 \begin{figure}[H]
   \centering
@@ -81,22 +81,22 @@ Visto que el modelo lineal se queda corto, el siguiente paso ha sido añadir una
 \end{table}
 
 \subsection*{Configuración con 2 neuronas}
-Con solo dos neuronas el modelo es algo más flexible que la recta pura de antes, pero sigue quedándose a medias. Si miramos la gráfica, la frontera solo forma una especie de ``V''. No tiene soltura suficiente para rodear las lunas enteras, así que seguimos cayendo en \textit{underfitting}.
+Con dos neuronas, la red adquiere una ligera flexibilidad respecto al límite estático de la tarea anterior. No obstante, al observar la gráfica se aprecia que la frontera forma un ángulo sencillo en forma de pico. La capa carece de los parámetros suficientes para contornear la distribución, manteniendo la red un problema general de \textit{underfitting}.
 
 \subsection*{Configuración con 5 neuronas}
-Saltando a 5 neuronas, la cosa cambia mucho y ya casi capta la forma del problema. No obstante, se nota a simple vista que la frontera no es curva lisa. Como estamos usando la activación ReLU, lo que hace el modelo realmente es juntar varios trozos rectos (los 5 «codos» de las neuronas) para intentar envolver las lunas. Arregla el problema inicial, pero visualmente queda con un polígono a trompicones típico de la ReLU.
+Al escalar a 5 neuronas, el MLP consigue envolver ambas clases con mucha mayor efectividad. Resulta evidente en la representación que la frontera no es suavemente curva: al emplear la función de activación ReLU, la forma se delimita ensamblando segmentos de recta por cada neurona oculta. Este comportamiento resuelve las carencias iniciales, dando lugar a un contorno poligonal característico de redes con pocos nodos y activadas por ReLU.
 
 \subsection*{Configuración con 20 neuronas}
-Con 20 neuronas le sobra capacidad para dibujar la frontera usando todos esos tramos lineales pequeñitos que se funden. Lo curioso es que, en un problema 2D tan simple, meter 20 neuronas no ha provocado que el modelo memorice como loco y la frontera empiece a hacer ``islas'' raras atrapando ruido (\textit{overfitting}). Sigue generalizando bien, de hecho la precisión en train (86.00\,\%) y test (85.33\,\%) son casi la misma, aunque aquí la ganancia respecto a la anterior empieza a ser residual.
+Finalmente con 20 neuronas, la convergencia visual es notable y se logran definir tramos liminares que asemejan una transición mucho más precisa y suave. A pesar de incrementar la capacidad de la red para una simulación bidimensional relativamente breve, el modelo derivado no incurre en \textit{overfitting} (sobreajuste), dado que evita perfilar curvas anómalas o abarcar puntos errantes generados por el ruido paramétrico; por otra parte las métricas confirman estos supuestos marcando precisión en train (86.00\,\%) y test (85.33\,\%) prácticamente similares, apuntando a buena capacidad de generalización aunque con mejoras reducidas con respecto al ejemplo de los 5 nodos.
 
 \subsection*{Conclusión}
-Queda comprobado que meter capas ocultas le quita el cepo lineal a la red, adaptándola a la forma real del problema (en nuestro caso usando cachos rectos que es como opera ReLU). La clave de todo es el equilibrio: no pasarnos de simples como para arrastrar \textit{underfitting}, pero tampoco inflar el número de neuronas cuando una red ligera lo saca casi igual y no consume tanto.
+Se confirma visualmente cómo el agregado de nodos de red en la capa oculta soluciona la barrera lineal inicial en la práctica, adaptando el proceso natural de clasificación a formas geométricas más complejas y fidedignas (en este caso logradas superponiendo perfiles rectos aportados por las activaciones ReLU). Estructuralmente hablando se pone de manifiesto una regla clásica sobre configuraciones base: deben poseer densidad suficiente para eludir problemas de subajuste y simultáneamente ajustarse en mesura evitando sobredimensionar su consumo a expensas de beneficios ínfimos en eficacia.
 
 % =============================================================================
 \section[Tarea 3: ReLU vs. Sigmoide]{Tarea 3: Dinámica de Aprendizaje --- ReLU vs. Sigmoide}
 % =============================================================================
 
-Manteniendo fija la capa de 20 neuronas, hemos puesto cara a cara dos funciones de activación míticas: la típica curva logística (\textit{Sigmoide}) y la clásica lineal de hoy en día (\textit{ReLU}). Queríamos ver cuánto cambia el contorno dibujado y la velocidad de entrenamiento solo con cambiar la activación bajo la misma red.
+Manteniendo una arquitectura uniforme basada en una capa oculta de 20 neuronas, se expone ahora la comparativa entre la función logística (\textit{Sigmoide}) y la unidad lineal rectificada (\textit{ReLU}). El fin de este ejercicio es medir la eficacia en la separación y los tiempos de entrenamiento modificando únicamente el selector de activación de la red.
 
 \subsection{Fronteras de decisión}
 
@@ -115,7 +115,7 @@ Manteniendo fija la capa de 20 neuronas, hemos puesto cara a cara dos funciones 
   \label{fig:t3_front}
 \end{figure}
 
-Las dos activaciones separan las lunas más o menos igual de bien, pero haciendo trampas de diferente manera. La Sigmoide saca fronteras mucho más suaves y bonitas, que fluyen más, gracias a sus transiciones entre 0 y 1. ReLU, como ya vimos, tira de lógica de trozos rectos y se vuelve mucho más angulosa, pero funcionalmente cumple igual.
+Ambas funciones resuelven de forma adecuada la separación no lineal, aunque exhiben trazados característicos acordes a sus formulaciones algebraicas. La curva Sigmoide plantea una barrera orgánica como fruto de su definición dentro del intervalo $(0, 1)$, mientras que el corte de la función ReLU vuelve a imponer polígonos funcionales de transiciones estrictas y acotadas.
 
 \subsection{Curvas de pérdida y velocidad de convergencia}
 
@@ -150,17 +150,17 @@ Las dos activaciones separan las lunas más o menos igual de bien, pero haciendo
 
 \subsection*{Análisis}
 
-Viendo los números (Tabla~\ref{tab:t3_activaciones}) comprobamos lo que ya se dejaba ver en las curvas (Figura~\ref{fig:t3_loss}): ReLU vuela y llega al tope en \textbf{406 iteraciones}, ganándole un 16\% limpio a las \textbf{485} que se chupa la Sigmoide.
+El comportamiento inferido desde la representación gráfica (Figura~\ref{fig:t3_loss}) se corrobora en las métricas resultantes (Tabla~\ref{tab:t3_activaciones}): dada la comparativa en la iteración sobre este conjunto, al finalizar su rutina de ajuste el modelo inicializado con ReLU emplea un conteo de \textbf{406 iteraciones}, aventajando el cierre registrado por su homólogo activado bajo función Sigmoide programado a \textbf{485} ejecuciones cíclicas en sus épocas conjuntas.
 
-El motivo por el que la Sigmoide da más pereza computacional se llama \textit{vanishing gradient}. Al aplastar siempre su salida entre $(0, 1)$, si entran valores muy extremos la curva se plana muchísimo, casi a cero. Eso hunde el \textit{backpropagation} (al multiplicar valores de cero) y frena el aprendizaje. ReLU por su parte tiene siempre la derivada plantada en 1 para lo positivo; el gradiente no se estanca durante las pasadas y el ajuste corre libremente.
+Esta diferencia operativa se explica frecuentemente citando los problemas subyacentes derivados del atenuamiento por \textit{vanishing gradient} (desvanecimiento del gradiente). Valores fuertemente alejados de su eje derivado obligan a la topología Sigmoidal a tender repetitivamente al valor de contigüidad base próximo a nivel estadístico asintótico cero; esto degrada las actualizaciones aplicadas operando en \textit{backpropagation} con demoras remarcables para sus capas iniciales. Operando en su dominio positivo por otro lado, un hiperplano modelado a partir de nodos ReLU devuelve como valor de respuesta directa su propia constante limitando derivativamente retenciones para los pasos posteriores del escalado algorítmico, y favoreciendo ciclos uniformes sin congelación de coeficientes.
 
-Al fin y al cabo, a nivel generalización ambas sacan sobre un \textasciitilde{}84-85\% en prueba porque lunas 2D es algo asequible. Pero está claro que en cuanto se meta esto en deep-learning fuerte de más capas, el atasco en la Sigmoide mataría el sistema, siendo ese el motivo por el cual ReLU arrasó y es hoy la respuesta fácil con keras o sklearn en arquitecturas reales.
+Al limitarse las iteraciones propuestas dentro de simulaciones genéricas y relativamente fáciles, el contraste frente a generalizaciones (pruebas aplicadas) ofrece una desviación moderada a la hora de arrojar aproximaciones válidas en los rangos cercanos a \textasciitilde{}84-85\,\% para dos dimensiones. Aún así bajo arquitecturas formales complejas en escalas múltiples el desequilibrio matemático originado en bases sigmoidales produce caídas críticas justificadas para que se de total normalidad y aceptación al uso genérico y normalizado de unidades ReLU.
 
 % =============================================================================
-\section[Tarea 4: Dígitos y Parsimonia]{Tarea 4: Reconocimiento de Dígitos y Parsimonia}
+\section[Tarea 4: Análisis en Dígitos]{Tarea 4: Reconocimiento de Dígitos y Simplicidad de la Arquitectura}
 % =============================================================================
 
-El último mini-reto era unificar conceptos probando a clasificar el dataset de imágenes \texttt{load\_digits}. Teníamos que superar sí o sí el 95\,\% en test tirando por la navaja de Ockham (el modelo que rinda más fácil sin comer recursos). Hemos pasado una barrida de seis configuraciones de capas.
+Como prueba final de diseño de un MLP, el objetivo planteado fue superar una precisión impuesta en validación por encima del 95\,\% (o superior) sobre la base de datos de imagen matricial \texttt{load\_digits}, manteniendo siempre las dimensiones volumétricas de la topología en sus promedios factibles estables. Para ello, se iteraron de forma escalada un grupo de seis conjuntos diferentes sobre las activaciones probadas usando el optimizador estandarizado Adam.
 
 \begin{table}[H]
   \centering
@@ -182,13 +182,13 @@ El último mini-reto era unificar conceptos probando a clasificar el dataset de 
 
 \subsection{Análisis de sobreajuste}
 
-Lo más llamativo al ver la Tabla~\ref{tab:t4_digitos} es que ni una sola métrica perdona un mísero 1\%: literal \textbf{todas las variantes alcanzan el 100\,\% sobre los datos de validación de entrenamiento} (\texttt{acc\_train = 1.0000}). Se saben todas las fotos de memoria, haciendo puramente \textit{overfitting}. Nos salva que las predicciones con los datos sin catalogar caen un ridículo margen de error al rededor del 3\% y retienen todo lo bueno generalizando.
+Al revisar los resultados en la Tabla~\ref{tab:t4_digitos}, se destaca una tendencia generalizada al ajuste total frente al subconjunto de entrenamiento, donde \textbf{todas las variantes registran de partida un índice asimilado de un cien por ciento} (\texttt{acc\_train = 1.0000}) dentro del volumen del dominio de validación. Esta asimetría manifiesta una fuerte tendencia experimental al sobreaprendizaje o curva de memorizado; no obstante es destacable de igual valor que tras este pico anómalo, la respuesta expuesta para evaluación generalista mantiene varianzas marginales promediando rangos paralelos a sus márgenes inferiores (rango variable desde 2 a 5 puntos absolutos sobre el muestreo test).
 
-Es algo esperable en un array de solo 1.350 filas y redes que tienen miles de nodos para tragárselo. Por suerte lo atenuamos de entrada dejando el parámetro de `sklearn` \texttt{alpha=1e-4} apretando la norma L2 en los pesos más inflados del grafo.
+Dicho de otro modo, esta curva inicial en redes de excesiva resolución bajo series controladas de unos escasos miles de matrices (1.350 \textit{samples}), es previsible y tratada a un margen favorable, tras dejar aplicado en este test un parámetro de amortiguamiento interno dentro de modulo de origen (`sklearn` configurado en \texttt{alpha=1e-4}) obligando mediante norma L2 a impedir que este modelo rebasase los índices del factor paramétrico perdiendo por efecto correlativo viabilidad real para su correcta validación general en la red artificial.
 
-\subsection{Elección del modelo: Principio de Parsimonia}
+\subsection{Elección del modelo}
 
-Sabemos que si le tiramos la salvajada de $MLP(100)$ te levanta un 98\,\%, pero hay que guardar coherencia: elegimos a pies juntillas la variante \textbf{MLP(20)}. Simple y llánamente fue la primera de las pequeñas en llegar a la cuota del 95\,\% empleando \textasciitilde{}1.500 parámetros de nada (contra los más de 7.500 de la más grande). Nos viene que ni pintado para mantener control extra de escalabilidad frente al futuro a menos potencia computacional requerida.
+Aun cuando arquitecturas densas en series ampliadas probadas de gran capa ($MLP(100)$) recogen en el último ciclo variaciones asimétricas arrojando hasta el 98\,\%, en un criterio general técnico orientado al desarrollo de sistemas eficientes la elección para este clasificador designaría como idónea a las capacidades del bloque de características \textbf{MLP(20)}. Este marco de partida representa a grandes rasgos un sistema primario en orden para consolidar por entero el bloque de requerimientos fijados aportando más del 95\,\% empleando no un volumen sino parte de una fracción general contrapuesta de base calculada en \textasciitilde{}1.500 parámetros teóricos reales si esto se contrapone con sus equivalentes de test ampliado bajo cuotas equivalentes que escalan y demandan de sus topologías sobre los teóricos aproximados 7.500 procesos elementales.
 
 \begin{figure}[H]
   \centering
@@ -196,26 +196,26 @@ Sabemos que si le tiramos la salvajada de $MLP(100)$ te levanta un 98\,\%, pero 
   \caption{Matriz de confusión de la arquitectura \textbf{MLP(20)}. El desempeño es casi impecable en todas las clases; los escasos errores se concentran en pares de dígitos visualmente similares.}
 \end{figure}
 
-\section*{Propuesta Ejecutiva de Despliegue}
+\section*{Propuesta Técnica de Despliegue}
 
-\textbf{A la atención de:} Dirección Operativa / Product Owner \\
-\textbf{De:} Equipo de Data Science e Ingeniería ML \\
-\textbf{Asunto:} Recomendación para el pase a producción del clasificador de dígitos
+\textbf{A la atención de:} Equipo de Dirección \\
+\textbf{De:} Área de Ingeniería y Data Science \\
+\textbf{Asunto:} Recomendación de arquitectura para integración productiva
 
-A la vista del tracking final de los experimentos, traemos los resultados para decidir qué motor pasar a entorno productivo con tal de agilizar nuestro pipeline actual:
+Finalizada la validación experimental, se procede a formular la propuesta técnica de despliegue para el nuevo sistema clasificador destinado a automatizar y agilizar el procesamiento interno:
 
 \subsubsection*{1. Modelo Seleccionado}
-Nuestra firma va para poner en despliegue vivo el modelo \textbf{MLP(20)} (que es un esquema plano de 20 neuronas en oculta y relus). Se asienta establemente en \textbf{96.44\,\%} de fiabilidad validada frente a sets que no había atacado nunca, batiendo holgadamente la cota para darnos la luz verde del 95\,\%.
+Tras contrastar diferentes arquitecturas, se emite recomendación para desplegar de forma base el modelo \textbf{MLP(20)} conformado por una capa discreta regular. Alcanza de modo formal su techo nominal probando el \textbf{96.44\,\%} de fiabilidad referida validada sobre conjuntos nuevos testados de serie analizada final, cumpliendo con certidumbre el requerimiento mínimo planteado para su consideración teórica o pase práctico general (95\,\%).
 
-\subsubsection*{2. Justificación Técnica: Principio de Parsimonia}
-Hemos apostado por rascar peso en red antes que arañar algún cero más de exactitud que no rentaba. Es cierto que forzando el servidor a una red de cien en bloque $MLP(100)$ habríamos trepado a un 98\%, pero nuestra variante gasta casi \textbf{cinco veces menos tamaño final en binario y params}. A final de mes en el hardware eso nos regala:
+\subsubsection*{2. Justificación Técnica Estructural}
+Las validaciones demuestran la superior fiabilidad en marcos limitados sin la incursión no medida al implementar esquemas extendidos sin ganancial de impacto analítico. Pese a que una aproximación orientada de red $MLP(100)$ genera repeticiones finales estimadas en \textasciitilde{}98\,\%, esta consume una aproximación contrapuesta con factor multiplicado exigiendo al hardware operando con volúmenes aumentados paramétricos de cinco ejes estructurales. Contar en base base con capas más restringidas pero igualmente eficientes repercute con margen para este tipo de topologías resultando en:
 \begin{itemize}
-  \item \textbf{Tiempos de latencia absurdamente bajos:} Para clavar las respuestas asíncronas HTTP/REST de inmediato.
-  \item \textbf{Muy poca RAM consumida:} Abriendo opciones sin refactors gordos a empaquetarlo localmente en endpoints móviles / IoT a posteriori gracias al margen.
-  \item \textbf{Mejor mantenibilidad sin desastres por Data-Drift:} A menos lio numérico y más simple, sabemos que se va a desviar con menos estruendo cuando empiecen los ruidos y artefactos pesados fuera de laboratorio atacando las capturas diariarias de los clientes.
+  \item \textbf{Mejores tasas de respuesta general (Latencia):} Entregas más estables durante el proceso continuo para llamadas cruzadas contra servidores API.
+  \item \textbf{Consumos minoritarios operando memoria:} Asegurando con ello compatibilidades a un alto nivel de exigencia frente a integradores finales u otros desarrollos nativos y empotrados operados en ramas (Edge Computing).
+  \item \textbf{Gestión y respuesta a la deriva del tiempo (Data Drift):} Los volúmenes sobre entrenados bajo una sobrepoblación computacional experimentan inestabilidades graves perdiendo todo margen analítico contra oscilaciones visuales derivadas bajo las integraciones de producción externa y de calle con mayor volumen de alteraciones estáticas a asimilar de la serie procesada en tiempo de muestreo real.
 \end{itemize}
 
-\subsubsection*{3. Consideraciones de Despliegue}
-Vale aclarar que esto es en cristalera; las pruebas arrojan tasas perfectas de match sobre sets vírgenes por sobreaprender internamente (train acc 100\,\%), y aunque nuestra rutina L2 le corta las alas al overfit y salva los trastos generalizando, recomendamos el típico \textbf{shadow deploy para curarnos en salud} al salir al ecosistema ruidoso real durante los tres primeros días de margen que arranquemos servicio en sombra, lo vemos contra los targets reales offline, y, si nadie suelta las alarmas redirigimos vivo.
+\subsubsection*{3. Consideraciones de Monitorización}
+A fin de delimitar su evaluación estática general resulta imperativo reiterar el índice sobreaprendido del clasificador en un cien por ciento base sobre los muestreos directos iniciales. A pesar que, los modelos formales en bloque compensan con efectividad la generalización validada tras el test recurriendo de base al modelo paramétrico limitador aportado por su propia penalidad interna de norma L2 en coeficientes asimilados, la viabilidad estructural debe completarse por una inserción formal evaluada bajo una modalidad tipo \textbf{shadow deployment} (modo en sombra) estandarizado. Durante sus periodos tempranos esto validara en curso comparado el flujo directo natural a ser resuelto validando su generalización estática frente al tráfico real no supervisado del mundo de producción en vivo sin riesgo operacional a gran escala.
 
 \end{document}
