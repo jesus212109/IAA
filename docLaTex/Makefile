@@ -4,10 +4,10 @@
 
 MAIN = __memoria.tex
 BUILD_DIR = build
-LATEXMK = latexmk -cd -shell-escape -interaction=nonstopmode
+LATEXMK = latexmk -cd -shell-escape -outdir=$(BUILD_DIR) -interaction=nonstopmode
 
 # Default target: compile the full document
-all:
+all: practica1 practica2 practica3 practica4 practica5 practica6
 	@mkdir -p $(BUILD_DIR)
 	$(LATEXMK) $(MAIN)
 
@@ -23,6 +23,12 @@ practica3:
 
 practica4:
 	$(MAKE) -C sections/practica4 all
+
+practica5:
+	$(MAKE) -C sections/practica5 all
+
+practica6:
+	$(MAKE) -C sections/practica6 all
 
 # Full clean: remove all build files and PDF outputs recursively
 clean:
@@ -42,6 +48,8 @@ help:
 	@echo "  make practica2 - Compile Práctica 2"
 	@echo "  make practica3 - Compile Práctica 3"
 	@echo "  make practica4 - Compile Práctica 4"
+	@echo "  make practica5 - Compile Práctica 5"
+	@echo "  make practica6 - Compile Práctica 6"
 	@echo "  make clean    - Deep clean of all temp files"
 
-.PHONY: all clean help practica1 practica2 practica3 practica4
+.PHONY: all clean help practica1 practica2 practica3 practica4 practica5 practica6
