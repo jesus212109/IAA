@@ -1,0 +1,78 @@
+
+Columnas detectadas en el CSV:
+['Category', 'Message']
+
+================================================================================
+INFORMACIÓN BÁSICA DEL DATASET
+================================================================================
+Número total de mensajes: 5572
+
+Distribución de clases:
+Category
+ham     4825
+spam     747
+Name: count, dtype: int64
+
+Primeros 5 mensajes:
+  Category                                            Message  label_num
+0      ham  Go until jurong point, crazy.. Available only ...          0
+1      ham                      Ok lar... Joking wif u oni...          0
+2     spam  Free entry in 2 a wkly comp to win FA Cup fina...          1
+3      ham  U dun say so early hor... U c already then say...          0
+4      ham  Nah I don't think he goes to usf, he lives aro...          0
+
+================================================================================
+INFORMACIÓN DEL VOCABULARIO
+================================================================================
+Tamaño del vocabulario: 7387 palabras únicas.
+
+================================================================================
+PROBABILIDADES A PRIORI
+================================================================================
+P(ham)  = 0.8660
+P(spam) = 0.1340
+
+================================================================================
+EVALUACIÓN DEL MODELO
+================================================================================
+Métricas de Clasificación:
+              precision    recall  f1-score   support
+
+         ham       0.98      1.00      0.99      1206
+        spam       0.99      0.89      0.94       187
+
+    accuracy                           0.98      1393
+   macro avg       0.99      0.95      0.96      1393
+weighted avg       0.98      0.98      0.98      1393
+
+
+Matriz de confusión:
+[[1204    2]
+ [  20  167]]
+
+Figura guardada en: /home/jesus/IAA/P6_NaiveBayes/matriz_confusion_spam_base.png
+
+================================================================================
+PALABRAS MÁS CARACTERÍSTICAS DEL SPAM
+================================================================================
+    word  logP(word|spam)  logP(word|ham)  spam_minus_ham
+0  claim        -5.476707      -10.903715        5.427008
+1  prize        -5.772171      -10.903715        5.131544
+2   150p        -5.979810      -10.903715        4.923905
+3   tone        -6.193384      -10.903715        4.710330
+4     18        -6.320136      -10.903715        4.583579
+
+================================================================================
+CLASIFICACIÓN DE MENSAJES DE PRUEBA
+================================================================================
+                                             message  ...   P(spam)
+0  Hi, are we still meeting tomorrow at the library?  ...  0.000001
+1  Congratulations! You have won a free vacation....  ...  1.000000
+2  Hello, we have a special offer for you if you ...  ...  0.025662
+
+[3 rows x 4 columns]
+
+================================================================================
+PREGUNTA FINAL
+================================================================================
+Explica qué ocurre si intentas clasificar una palabra como 'oferta' cuando no ha aparecido en el entrenamiento y cómo ayuda el suavizado de Laplace en ese caso.

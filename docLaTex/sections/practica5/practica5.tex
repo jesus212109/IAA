@@ -87,10 +87,10 @@ Con dos neuronas, la red adquiere una ligera flexibilidad respecto al límite es
 Al escalar a 5 neuronas, el MLP consigue envolver ambas clases con mucha mayor efectividad. Resulta evidente en la representación que la frontera no es suavemente curva: al emplear la función de activación ReLU, la forma se delimita ensamblando segmentos de recta por cada neurona oculta. Este comportamiento resuelve las carencias iniciales, dando lugar a un contorno poligonal característico de redes con pocos nodos y activadas por ReLU.
 
 \subsection*{Configuración con 20 neuronas}
-Finalmente con 20 neuronas, la convergencia visual es notable y se logran definir tramos liminares que asemejan una transición mucho más precisa y suave. A pesar de incrementar la capacidad de la red para una simulación bidimensional relativamente breve, el modelo derivado no incurre en \textit{overfitting} (sobreajuste), dado que evita perfilar curvas anómalas o abarcar puntos errantes generados por el ruido paramétrico; por otra parte las métricas confirman estos supuestos marcando precisión en train (86.00\,\%) y test (85.33\,\%) prácticamente similares, apuntando a buena capacidad de generalización aunque con mejoras reducidas con respecto al ejemplo de los 5 nodos.
+Finalmente, con 20 neuronas, la convergencia visual es notable, logrando definir una frontera de decisión mucho más precisa que se adapta al contorno de ambas clases sin ser excesivamente irregular. A pesar de incrementar la capacidad de la red, el modelo no incurre en \textit{overfitting}, ya que evita adaptarse al ruido estadístico de los datos. Esto se confirma al observar que las métricas de \textit{train} (86.00\%) y \textit{test} (85.33\%) son prácticamente idénticas, mostrando una buena capacidad de generalización, aunque la mejora respecto a la configuración de 5 neuronas es marginal.
 
 \subsection*{Conclusión}
-Se confirma visualmente cómo el agregado de nodos de red en la capa oculta soluciona la barrera lineal inicial en la práctica, adaptando el proceso natural de clasificación a formas geométricas más complejas y fidedignas (en este caso logradas superponiendo perfiles rectos aportados por las activaciones ReLU). Estructuralmente hablando se pone de manifiesto una regla clásica sobre configuraciones base: deben poseer densidad suficiente para eludir problemas de subajuste y simultáneamente ajustarse en mesura evitando sobredimensionar su consumo a expensas de beneficios ínfimos en eficacia.
+Se confirma visualmente que añadir neuronas a la capa oculta permite superar la limitación del perceptrón simple, dotando al modelo de la capacidad para trazar fronteras de decisión complejas (en este caso, aproximando curvas mediante la superposición de segmentos rectos generados por la activación ReLU). Este comportamiento ilustra el compromiso fundamental en el diseño de arquitecturas: la red debe tener suficientes neuronas para evitar el \textit{underfitting}, pero sin sobredimensionarse, para no penalizar el coste computacional a cambio de mejoras insignificantes en la precisión.
 
 % =============================================================================
 \section[Tarea 3: ReLU vs. Sigmoide]{Tarea 3: Dinámica de Aprendizaje --- ReLU vs. Sigmoide}
@@ -115,7 +115,7 @@ Manteniendo una arquitectura uniforme basada en una capa oculta de 20 neuronas, 
   \label{fig:t3_front}
 \end{figure}
 
-Ambas funciones resuelven de forma adecuada la separación no lineal, aunque exhiben trazados característicos acordes a sus formulaciones algebraicas. La curva Sigmoide plantea una barrera orgánica como fruto de su definición dentro del intervalo $(0, 1)$, mientras que el corte de la función ReLU vuelve a imponer polígonos funcionales de transiciones estrictas y acotadas.
+Ambas funciones resuelven de forma adecuada la separación no lineal, aunque exhiben trazados característicos acordes a sus formulaciones algebraicas. La función Sigmoide genera una frontera de decisión suave y continua debido a su naturaleza asintótica en el intervalo (0, 1). Por el contrario, la activación ReLU produce un límite definido por la intersección de segmentos rectos, generando contornos más abruptos y poligonales.
 
 \subsection{Curvas de pérdida y velocidad de convergencia}
 
@@ -150,17 +150,17 @@ Ambas funciones resuelven de forma adecuada la separación no lineal, aunque exh
 
 \subsection*{Análisis}
 
-El comportamiento inferido desde la representación gráfica (Figura~\ref{fig:t3_loss}) se corrobora en las métricas resultantes (Tabla~\ref{tab:t3_activaciones}): dada la comparativa en la iteración sobre este conjunto, al finalizar su rutina de ajuste el modelo inicializado con ReLU emplea un conteo de \textbf{406 iteraciones}, aventajando el cierre registrado por su homólogo activado bajo función Sigmoide programado a \textbf{485} ejecuciones cíclicas en sus épocas conjuntas.
+El comportamiento visualizado en la Figura~\ref{fig:t3_loss} se corrobora con las métricas (Tabla~\ref{tab:t3_activaciones}). Al finalizar el entrenamiento, el modelo con ReLU converge en 406 iteraciones, aventajando claramente a su homólogo con función Sigmoide, que necesita 485 iteraciones para alcanzar el mismo criterio de parada.
 
-Esta diferencia operativa se explica frecuentemente citando los problemas subyacentes derivados del atenuamiento por \textit{vanishing gradient} (desvanecimiento del gradiente). Valores fuertemente alejados de su eje derivado obligan a la topología Sigmoidal a tender repetitivamente al valor de contigüidad base próximo a nivel estadístico asintótico cero; esto degrada las actualizaciones aplicadas operando en \textit{backpropagation} con demoras remarcables para sus capas iniciales. Operando en su dominio positivo por otro lado, un hiperplano modelado a partir de nodos ReLU devuelve como valor de respuesta directa su propia constante limitando derivativamente retenciones para los pasos posteriores del escalado algorítmico, y favoreciendo ciclos uniformes sin congelación de coeficientes.
+Esta diferencia de rendimiento se debe al problema del desvanecimiento del gradiente (\textit{vanishing gradient}). La función Sigmoide satura sus salidas en los extremos (0 y 1), lo que provoca que su derivada tienda a cero. Durante el \textit{backpropagation}, al multiplicar estos gradientes casi nulos, la actualización de los pesos en las primeras capas se paraliza, ralentizando la convergencia. Por el contrario, la función ReLU tiene una derivada constante de 1 para cualquier valor positivo. Esto permite que el error fluya hacia atrás sin atenuarse, evitando la congelación de los coeficientes y logrando una convergencia mucho más rápida (406 iteraciones frente a 485). 
 
-Al limitarse las iteraciones propuestas dentro de simulaciones genéricas y relativamente fáciles, el contraste frente a generalizaciones (pruebas aplicadas) ofrece una desviación moderada a la hora de arrojar aproximaciones válidas en los rangos cercanos a \textasciitilde{}84-85\,\% para dos dimensiones. Aún así bajo arquitecturas formales complejas en escalas múltiples el desequilibrio matemático originado en bases sigmoidales produce caídas críticas justificadas para que se de total normalidad y aceptación al uso genérico y normalizado de unidades ReLU.
+Aunque en este problema bidimensional sencillo ambas funciones logran resultados aceptables (entorno al 84-85\%), en arquitecturas multicapa más profundas la saturación de la Sigmoide provoca caídas críticas de rendimiento, siendo esta la razón por la que ReLU es el estándar actual.
 
 % =============================================================================
 \section[Tarea 4: Análisis en Dígitos]{Tarea 4: Reconocimiento de Dígitos y Simplicidad de la Arquitectura}
 % =============================================================================
 
-Como prueba final de diseño de un MLP, el objetivo planteado fue superar una precisión impuesta en validación por encima del 95\,\% (o superior) sobre la base de datos de imagen matricial \texttt{load\_digits}, manteniendo siempre las dimensiones volumétricas de la topología en sus promedios factibles estables. Para ello, se iteraron de forma escalada un grupo de seis conjuntos diferentes sobre las activaciones probadas usando el optimizador estandarizado Adam.
+Como prueba final de diseño de un MLP, el objetivo es alcanzar una precisión superior al 95\% en la clasificación del dataset de dígitos escritos a mano (\texttt{load\_digits}), manteniendo la arquitectura de la red lo más simple posible. Para ello, se han evaluado seis configuraciones diferentes, variando la profundidad (número de capas) y la anchura (neuronas por capa), todas ellas entrenadas utilizando el optimizador Adam.
 
 \begin{table}[H]
   \centering
@@ -182,13 +182,17 @@ Como prueba final de diseño de un MLP, el objetivo planteado fue superar una pr
 
 \subsection{Análisis de sobreajuste}
 
-Al revisar los resultados en la Tabla~\ref{tab:t4_digitos}, se destaca una tendencia generalizada al ajuste total frente al subconjunto de entrenamiento, donde \textbf{todas las variantes registran de partida un índice asimilado de un cien por ciento} (\texttt{acc\_train = 1.0000}) dentro del volumen del dominio de validación. Esta asimetría manifiesta una fuerte tendencia experimental al sobreaprendizaje o curva de memorizado; no obstante es destacable de igual valor que tras este pico anómalo, la respuesta expuesta para evaluación generalista mantiene varianzas marginales promediando rangos paralelos a sus márgenes inferiores (rango variable desde 2 a 5 puntos absolutos sobre el muestreo test).
+Al analizar la Tabla~\ref{tab:t4_digitos}, se observa que todas las arquitecturas alcanzan un 100\% de precisión en entrenamiento (\texttt{acc\_train} = 1.0000). Esta asimetría frente a los resultados de test indica un claro sobreajuste (\textit{overfitting}) inicial. Es un comportamiento previsible: estamos aplicando redes con alta capacidad de representación sobre un conjunto de datos relativamente pequeño (aprox. 1.350 muestras de validación cruzada). 
 
-Dicho de otro modo, esta curva inicial en redes de excesiva resolución bajo series controladas de unos escasos miles de matrices (1.350 \textit{samples}), es previsible y tratada a un margen favorable, tras dejar aplicado en este test un parámetro de amortiguamiento interno dentro de modulo de origen (`sklearn` configurado en \texttt{alpha=1e-4}) obligando mediante norma L2 a impedir que este modelo rebasase los índices del factor paramétrico perdiendo por efecto correlativo viabilidad real para su correcta validación general en la red artificial.
+A pesar de memorizar el conjunto de entrenamiento, el modelo no pierde su capacidad de generalización (manteniendo un 96-98\% en test). Esto se logra gracias al término de regularización L2 implementado por defecto en Scikit-Learn (\texttt{alpha=1e-4}), que penaliza el crecimiento descontrolado de los pesos y evita que la red se ajuste al ruido estadístico. 
+
+Cabe destacar el papel crítico de este hiperparámetro en el compromiso entre capacidad y generalización. Si eliminásemos esta regularización (\texttt{alpha=0}), la frontera de decisión se volvería excesivamente irregular, adaptándose a cada punto de ruido y desplomando la precisión en test. Por el contrario, si aplicásemos una penalización demasiado estricta (ej. \texttt{alpha=10}), forzaríamos los pesos a valores cercanos a cero. Esto limitaría artificialmente la capacidad expresiva de la red y provocaría un \textit{underfitting} severo, devolviéndonos a un escenario de fallo similar al observado con el perceptrón simple en la Tarea 1.
 
 \subsection{Elección del modelo}
 
-Aun cuando arquitecturas densas en series ampliadas probadas de gran capa ($MLP(100)$) recogen en el último ciclo variaciones asimétricas arrojando hasta el 98\,\%, en un criterio general técnico orientado al desarrollo de sistemas eficientes la elección para este clasificador designaría como idónea a las capacidades del bloque de características \textbf{MLP(20)}. Este marco de partida representa a grandes rasgos un sistema primario en orden para consolidar por entero el bloque de requerimientos fijados aportando más del 95\,\% empleando no un volumen sino parte de una fracción general contrapuesta de base calculada en \textasciitilde{}1.500 parámetros teóricos reales si esto se contrapone con sus equivalentes de test ampliado bajo cuotas equivalentes que escalan y demandan de sus topologías sobre los teóricos aproximados 7.500 procesos elementales.
+Al evaluar la topología a partir de los datos de la Tabla~\ref{tab:t4_digitos}, surge el debate clásico: ¿es preferible ensanchar una sola capa o añadir profundidad con una segunda capa? En problemas complejos de visión artificial, extraer características jerárquicas con redes profundas es vital. Sin embargo, para este dataset concreto (\texttt{load\_digits}, imágenes de 8x8 píxeles), añadir una segunda capa oculta (como en MLP(30, 15) o MLP(64, 32)) no aporta una ventaja competitiva real frente a ensanchar una sola. De hecho, las topologías de dos capas logran precisiones similares (entorno al 96-97\%) pero complican la arquitectura de forma innecesaria. Para este nivel de complejidad, la experimentación demuestra que una sola capa ancha es suficiente para capturar las no linealidades sin dificultar el entrenamiento.
+
+Aunque el modelo MLP(100) alcanza la precisión más alta (98.00\%), bajo un criterio de ingeniería eficiente la opción óptima es el modelo MLP(20). Esta arquitectura más simple supera holgadamente el requisito del 95\% de precisión planteado en la práctica, pero siendo mucho más ligera computacionalmente. Para ponerlo en perspectiva, el clasificador MLP(20) solo necesita optimizar alrededor de 1.500 parámetros frente a los más de 7.500 que exige la arquitectura de 100 neuronas, logrando una eficacia prácticamente idéntica con una quinta parte del coste estructural.
 
 \begin{figure}[H]
   \centering
@@ -196,26 +200,17 @@ Aun cuando arquitecturas densas en series ampliadas probadas de gran capa ($MLP(
   \caption{Matriz de confusión de la arquitectura \textbf{MLP(20)}. El desempeño es casi impecable en todas las clases; los escasos errores se concentran en pares de dígitos visualmente similares.}
 \end{figure}
 
-\section*{Propuesta Técnica de Despliegue}
+\subsection*{1.5. Propuesta Técnica de Despliegue}
 
-\textbf{A la atención de:} Equipo de Dirección \\
-\textbf{De:} Área de Ingeniería y Data Science \\
-\textbf{Asunto:} Recomendación de arquitectura para integración productiva
+Finalizada la validación experimental, se exponen las decisiones de diseño recomendadas para la integración del modelo clasificador en un entorno de producción:
 
-Finalizada la validación experimental, se procede a formular la propuesta técnica de despliegue para el nuevo sistema clasificador destinado a automatizar y agilizar el procesamiento interno:
+\textbf{1. Arquitectura recomendada}
+La configuración idónea es el modelo \textbf{MLP(20)}, compuesto por una única capa oculta de 20 neuronas y activado mediante la función \textbf{ReLU}. Se descarta el uso de un modelo lineal (cero capas ocultas) porque es estructuralmente incapaz de resolver fronteras de decisión complejas. La función ReLU se establece como el estándar preferido frente a la Sigmoide, ya que mitiga el desvanecimiento del gradiente y logra una convergencia más estable. Con esta configuración, el sistema alcanza un 96.44\% de precisión, superando el objetivo técnico del 95\%.
 
-\subsubsection*{1. Modelo Seleccionado}
-Tras contrastar diferentes arquitecturas, se emite recomendación para desplegar de forma base el modelo \textbf{MLP(20)} conformado por una capa discreta regular. Alcanza de modo formal su techo nominal probando el \textbf{96.44\,\%} de fiabilidad referida validada sobre conjuntos nuevos testados de serie analizada final, cumpliendo con certidumbre el requerimiento mínimo planteado para su consideración teórica o pase práctico general (95\,\%).
+\textbf{2. Justificación de simplicidad vs. profundidad}
+Aunque el incremento a 100 neuronas mejora la precisión ligeramente (hasta un $\sim$98\%), supone multiplicar por cinco la cantidad de parámetros de la red. En un entorno real, esta ganancia marginal no compensa el sobrecoste computacional. Mantener la topología en 20 neuronas proporciona latencias más bajas y un menor consumo de memoria, facilitando su posible ejecución en arquitecturas de recursos limitados (\textit{Edge Computing}). Además, al limitar la capacidad de la red, se reduce el riesgo de \textit{overfitting}, haciendo que el modelo sea más robusto frente a variaciones en los datos de producción (\textit{Data Drift}).
 
-\subsubsection*{2. Justificación Técnica Estructural}
-Las validaciones demuestran la superior fiabilidad en marcos limitados sin la incursión no medida al implementar esquemas extendidos sin ganancial de impacto analítico. Pese a que una aproximación orientada de red $MLP(100)$ genera repeticiones finales estimadas en \textasciitilde{}98\,\%, esta consume una aproximación contrapuesta con factor multiplicado exigiendo al hardware operando con volúmenes aumentados paramétricos de cinco ejes estructurales. Contar en base base con capas más restringidas pero igualmente eficientes repercute con margen para este tipo de topologías resultando en:
-\begin{itemize}
-  \item \textbf{Mejores tasas de respuesta general (Latencia):} Entregas más estables durante el proceso continuo para llamadas cruzadas contra servidores API.
-  \item \textbf{Consumos minoritarios operando memoria:} Asegurando con ello compatibilidades a un alto nivel de exigencia frente a integradores finales u otros desarrollos nativos y empotrados operados en ramas (Edge Computing).
-  \item \textbf{Gestión y respuesta a la deriva del tiempo (Data Drift):} Los volúmenes sobre entrenados bajo una sobrepoblación computacional experimentan inestabilidades graves perdiendo todo margen analítico contra oscilaciones visuales derivadas bajo las integraciones de producción externa y de calle con mayor volumen de alteraciones estáticas a asimilar de la serie procesada en tiempo de muestreo real.
-\end{itemize}
-
-\subsubsection*{3. Consideraciones de Monitorización}
-A fin de delimitar su evaluación estática general resulta imperativo reiterar el índice sobreaprendido del clasificador en un cien por ciento base sobre los muestreos directos iniciales. A pesar que, los modelos formales en bloque compensan con efectividad la generalización validada tras el test recurriendo de base al modelo paramétrico limitador aportado por su propia penalidad interna de norma L2 en coeficientes asimilados, la viabilidad estructural debe completarse por una inserción formal evaluada bajo una modalidad tipo \textbf{shadow deployment} (modo en sombra) estandarizado. Durante sus periodos tempranos esto validara en curso comparado el flujo directo natural a ser resuelto validando su generalización estática frente al tráfico real no supervisado del mundo de producción en vivo sin riesgo operacional a gran escala.
+\textbf{3. Estrategia de monitorización}
+Debido a la tendencia inicial de la red a memorizar el conjunto de entrenamiento, se recomienda desplegar el modelo inicialmente bajo la modalidad de \textit{shadow deployment} (despliegue en sombra). Esto permitirá evaluar la fiabilidad de sus predicciones frente al tráfico de datos real en tiempo de ejecución, pero sin impactar los procesos operativos hasta confirmar su total estabilización.
 
 \end{document}
