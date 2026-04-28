@@ -1,6 +1,8 @@
 **/.vscode
 **/__MACOSX
 
+**/*.lnk
+
 # WSL/NTFS metadata files
 *Zone.Identifier
 **/*.Identifier

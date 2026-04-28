@@ -7,7 +7,7 @@ BUILD_DIR = build
 LATEXMK = latexmk -cd -shell-escape -outdir=$(BUILD_DIR) -interaction=nonstopmode
 
 # Default target: compile the full document
-all: practica1 practica2 practica3 practica4 practica5 practica6
+all: practica1 practica2 practica3 practica4 practica5 practica6 practica7
 	@mkdir -p $(BUILD_DIR)
 	$(LATEXMK) $(MAIN)
 
@@ -30,6 +30,9 @@ practica5:
 practica6:
 	$(MAKE) -C sections/practica6 all
 
+practica7:
+	$(MAKE) -C sections/practica7 all
+
 # Full clean: remove all build files and PDF outputs recursively
 clean:
 	rm -rf $(BUILD_DIR)
@@ -50,6 +53,7 @@ help:
 	@echo "  make practica4 - Compile Práctica 4"
 	@echo "  make practica5 - Compile Práctica 5"
 	@echo "  make practica6 - Compile Práctica 6"
+	@echo "  make practica7 - Compile Práctica 7"
 	@echo "  make clean    - Deep clean of all temp files"
 
-.PHONY: all clean help practica1 practica2 practica3 practica4 practica5 practica6
+.PHONY: all clean help practica1 practica2 practica3 practica4 practica5 practica6 practica7

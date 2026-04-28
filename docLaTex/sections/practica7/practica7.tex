@@ -1,0 +1,97 @@
+% =============================================================================
+% practica7.tex --- Chapter: Practice 7
+% =============================================================================
+
+\documentclass[../../__memoria.tex]{subfiles}
+
+\begin{document}
+\standalonecover
+\pagestyle{cuerpo}
+
+\chapter[Práctica 7: Modelos de Ensambles]{Cuaderno de Laboratorio --- Práctica 7: La Inteligencia Colectiva (Modelos de Ensambles)}
+
+\section*{Introducción}
+En esta práctica se aborda un problema de clasificación binaria utilizando el conjunto de datos \textit{Breast Cancer Wisconsin}, el cual contiene características extraídas de imágenes digitales de aspiraciones con aguja fina de masas mamarias. El objetivo principal es diagnosticar tumores como benignos o malignos empleando tres enfoques distintos: un Árbol de Decisión solitario, Random Forest (Bagging) y Gradient Boosting.
+
+% -----------------------------------------------------------------------------
+\section[Tarea 1: Árbol Solitario]{Tarea 1 --- Árbol Solitario (Baseline)}
+% -----------------------------------------------------------------------------
+
+En primer lugar, se evaluó un Árbol de Decisión estándar sin límite de profundidad (\texttt{max\_depth=None}). 
+
+\textbf{Resultados obtenidos:}
+\begin{itemize}
+    \item \textit{Accuracy} en entrenamiento: 1.0000
+    \item \textit{Accuracy} en test: 0.9231
+\end{itemize}
+
+\textbf{Análisis de Sobreajuste:}
+La brecha entre el rendimiento perfecto en entrenamiento (100\%) y la caída en test (92.31\%) es un claro síntoma de sobreajuste (\textit{overfitting}). Al no limitar la profundidad del árbol, el algoritmo continúa dividiendo el espacio de características hasta crear particiones diminutas (nodos hoja puros) que contienen incluso una única muestra. Esto provoca una extrema sensibilidad al ruido inherente de los datos de entrenamiento. En consecuencia, el modelo no solo ``memoriza'' el conjunto de datos, sino que pierde drásticamente su capacidad de generalización frente a instancias no vistas, ya que modela excepciones en lugar de patrones reales de la distribución subyacente.
+
+% -----------------------------------------------------------------------------
+\section[Tarea 2: Random Forest]{Tarea 2 --- Bagging y Random Forest}
+% -----------------------------------------------------------------------------
+
+Para mitigar los problemas de alta varianza del árbol simple, se aplicó un ensamblado de tipo \textit{Bagging} mediante Random Forest, evaluando el rendimiento en función de la cantidad de estimadores (árboles).
+
+\begin{center}
+  \includegraphics[width=0.85\linewidth]{img/rf_accuracy.png}
+\end{center}
+
+\textbf{Análisis de Generalización y Saturación:}
+La figura ilustra cómo el \textit{accuracy} en el conjunto de test mejora drásticamente de 0.923 (1 árbol) a 0.958 (100 árboles). Esta mejora se debe a que Random Forest entrena múltiples árboles descorrelacionados sobre submuestras aleatorias (\textit{bootstrap}) y promedia sus predicciones (consenso). Esto reduce significativamente la varianza global sin incrementar el sesgo, mitigando el sobreajuste. Se observa, además, que la curva de rendimiento se satura a partir de los 50 árboles (estabilizándose en torno al 0.951 -- 0.958). Esto ocurre porque el ensamble alcanza un punto donde añadir más árboles no aporta diversidad adicional significativa a las votaciones, incurriendo únicamente en mayor coste computacional sin apenas mejoras en el error de generalización.
+
+% -----------------------------------------------------------------------------
+\section[Tarea 3: Boosting]{Tarea 3 --- El poder del Boosting}
+% -----------------------------------------------------------------------------
+
+Posteriormente, se evaluó el algoritmo Gradient Boosting.
+
+\textbf{Paralelo (RF) vs Secuencial (Boosting):}
+A diferencia de Random Forest, que entrena árboles independientes de forma estrictamente paralela, Gradient Boosting construye los árboles de manera secuencial. Cada nuevo estimador se entrena para corregir los errores residuales (gradiente de la función de pérdida) cometidos por el conjunto de árboles anteriores. 
+
+\textbf{Rendimiento y Coste:}
+\begin{itemize}
+    \item \textit{Accuracy} en test: 0.9580
+    \item Tiempo de entrenamiento: $\approx$ 0.2512 segundos.
+\end{itemize}
+Gradient Boosting igualó el excelente rendimiento de Random Forest en test (95.8\%), pero con un proceso de entrenamiento iterativo que, por su naturaleza secuencial, no se beneficia de la misma paralelización, resultando en un tiempo de ejecución ligeramente superior o que exige mayor cuidado paramétrico.
+
+\textbf{Importancia de Variables:}
+Las 3 variables más determinantes identificadas por el modelo fueron:
+\begin{enumerate}
+    \item \texttt{worst radius} (importancia: $\approx$ 55.9\%)
+    \item \texttt{worst concave points} (importancia: $\approx$ 13.2\%)
+    \item \texttt{worst perimeter} (importancia: $\approx$ 12.8\%)
+\end{enumerate}
+
+\textbf{Interpretación Clínica:} Estas características reflejan las dimensiones y la morfología del perímetro del núcleo celular. Las células malignas suelen presentar deformidades estructurales acusadas (radios amplios y perímetros irregulares) y una gran cantidad de puntos cóncavos en su contorno. La capacidad del modelo para distinguir estas anomalías explica su alto poder discriminativo en el diagnóstico oncológico.
+
+% -----------------------------------------------------------------------------
+\section[Comparación y Reflexión]{Tarea 4 --- Comparación Global y Reflexión}
+% -----------------------------------------------------------------------------
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|c|c|p{4cm}|p{4.5cm}|}
+    \hline
+    \textbf{Modelo} & \textbf{Acc. Test} & \textbf{Coste} & \textbf{Ventajas} & \textbf{Desventajas} \\ \hline
+    Árbol Simple & 0.923 & Muy bajo & Máxima interpretabilidad, inferencia ultrarrápida. & Fuerte sobreajuste, alta varianza. \\ \hline
+    Random Forest & 0.958 & Medio & Paralelizable, reduce varianza, robusto. & Pérdida de interpretabilidad (caja negra). \\ \hline
+    Gradient Boosting & 0.958 & Alto & Altísima precisión, corrige sesgo progresivamente. & Coste computacional alto, propenso a sobreajuste si no se regula bien. \\ \hline
+    \end{tabular}
+    \caption{Comparativa global de los modelos evaluados.}
+\end{table}
+
+\textbf{Inconvenientes de los ensambles:} A pesar de su excelente rendimiento, los ensambles presentan dos problemas fundamentales. En primer lugar, se convierten en modelos de \textit{caja negra}, donde seguir la lógica de decisión de cientos de árboles simultáneos es inabarcable para un humano, perdiendo interpretabilidad. En segundo lugar, multiplican los requerimientos de memoria y CPU tanto en la fase de entrenamiento como durante la inferencia, dificultando su uso en entornos con recursos limitados.
+
+\vspace{0.5cm}
+
+\textbf{Reto de Despliegue:} \\
+\textit{Si tuvieras que desplegar un modelo en un dispositivo con CPU y memoria limitados, ¿cuál elegirías y por qué?}
+
+Para un despliegue en un dispositivo muy limitado (ej. un \textit{wearable} o un sistema \textit{embedded} básico), elegiría el \textbf{Árbol Simple} o, como alternativa de compromiso, un \textbf{Random Forest extremadamente reducido} (de 1 a 10 estimadores). Al seleccionar un único Árbol de Decisión, \textbf{sacrifico} un porcentaje de precisión de aproximadamente un 3.5\% y la robustez frente al ruido de nuevas muestras. Sin embargo, \textbf{gano} un modelo con un consumo de memoria insignificante (unos pocos kilobytes para almacenar las reglas de partición) y un coste de inferencia mínimo equivalente a una docena de evaluaciones condicionales \texttt{if-else}. En sistemas críticos donde la latencia o la batería dictan la viabilidad del proyecto, esta enorme reducción del uso computacional justifica plenamente la pérdida marginal de \textit{accuracy}.
+
+\vspace{3.0cm}
+
+\end{document}
