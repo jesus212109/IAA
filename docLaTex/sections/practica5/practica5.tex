@@ -200,26 +200,15 @@ Aunque el modelo MLP(100) alcanza la precisión más alta (98.00\%), bajo un cri
   \caption{Matriz de confusión de la arquitectura \textbf{MLP(20)}. El desempeño es casi impecable en todas las clases; los escasos errores se concentran en pares de dígitos visualmente similares.}
 \end{figure}
 
-\subsection*{1.5. Propuesta Técnica de Despliegue}
-
-Finalizada la validación experimental, se exponen las decisiones de diseño recomendadas para la integración del modelo clasificador en un entorno de producción:
-
-\textbf{1. Arquitectura recomendada}
-La configuración idónea es el modelo \textbf{MLP(20)}, compuesto por una única capa oculta de 20 neuronas y activado mediante la función \textbf{ReLU}. Se descarta el uso de un modelo lineal (cero capas ocultas) porque es estructuralmente incapaz de resolver fronteras de decisión complejas. La función ReLU se establece como el estándar preferido frente a la Sigmoide, ya que mitiga el desvanecimiento del gradiente y logra una convergencia más estable. Con esta configuración, el sistema alcanza un 96.44\% de precisión, superando el objetivo técnico del 95\%.
-
-\textbf{2. Justificación de simplicidad vs. profundidad}
-Aunque el incremento a 100 neuronas mejora la precisión ligeramente (hasta un $\sim$98\%), supone multiplicar por cinco la cantidad de parámetros de la red. En un entorno real, esta ganancia marginal no compensa el sobrecoste computacional. Mantener la topología en 20 neuronas proporciona latencias más bajas y un menor consumo de memoria, facilitando su posible ejecución en arquitecturas de recursos limitados (\textit{Edge Computing}). Además, al limitar la capacidad de la red, se reduce el riesgo de \textit{overfitting}, haciendo que el modelo sea más robusto frente a variaciones en los datos de producción (\textit{Data Drift}).
-
-\textbf{3. Estrategia de monitorización}
-Debido a la tendencia inicial de la red a memorizar el conjunto de entrenamiento, se recomienda desplegar el modelo inicialmente bajo la modalidad de \textit{shadow deployment} (despliegue en sombra). Esto permitirá evaluar la fiabilidad de sus predicciones frente al tráfico de datos real en tiempo de ejecución, pero sin impactar los procesos operativos hasta confirmar su total estabilización.
-
 \section*{Conclusiones}
 
-Esta práctica ha demostrado la evolución desde el perceptrón simple hasta arquitecturas multicapa, evidenciando cómo la introducción de capas ocultas permite modelar fronteras de decisión no lineales. Se ha confirmado que un perceptrón sin capas ocultas es inherentemente lineal e incapaz de resolver problemas como \texttt{make\_moons}, mientras que con una sola capa oculta de 20 neuronas con activación ReLU se alcanza un 85.33\,\% de accuracy. La comparativa entre funciones de activación revela que ReLU converge más rápido que la Sigmoide (406 vs 485 iteraciones) al evitar el desvanecimiento del gradiente, consolidándose como la opción estándar para redes modernas.
+Esta práctica me sirvió para ver en la práctica cómo la arquitectura de una red afecta a lo que puede aprender. Empezando por el perceptrón simple: tal como esperaba, con cero capas ocultas solo podía trazar una línea recta, y el dataset \texttt{make\_moons} necesita una frontera curva para separar las clases. Con 20 neuronas ocultas y ReLU el MLP ya se defendía bien (85.33\,\% de accuracy).
 
-En el dataset de dígitos, la arquitectura MLP(20) demuestra que la simplicidad es una virtud en ingeniería: con solo 20 neuronas ocultas y aproximadamente 1.500 parámetros se supera el 95\,\% de accuracy, igualando a redes cinco veces mayores. Esto subraya que, para problemas de complejidad moderada, ensanchar una sola capa es más eficiente que profundizar innecesariamente la arquitectura, especialmente cuando se considera el despliegue en entornos con recursos limitados.
+Al comparar funciones de activación, la Sigmoide tardaba más en converger que ReLU (485 iteraciones frente a 406). Mirando las curvas de pérdida se ve claramente que ReLU aprende más rápido, y por lo que hemos visto en clase esto se debe a que la Sigmoide satura los gradientes en los extremos. No es que ReLU sea mejor siempre, pero para este problema funcionó mejor.
 
-La regularización L2 incorporada por defecto en \texttt{MLPClassifier} juega un papel crítico en la prevención del sobreajuste, permitiendo que el modelo memorice el entrenamiento (100\,\% de accuracy en train) sin perder capacidad de generalización (96-98\,\% en test). Sin este término de penalización, la red se ajustaría al ruido y colapsaría su rendimiento en producción.
+En el reconocimiento de dígitos me sorprendió que hiciese falta tan poca red para superar el 95\,\% de accuracy. Probé varias configuraciones y el MLP(20) —una sola capa con 20 neuronas— bastaba. Con 100 neuronas subía un poco más (98\,\%), pero multiplicaba por cinco los parámetros. Para este problema concreto, no merecía la pena.
+
+Un detalle que no esperaba es que todas las arquitecturas llegasen al 100\,\% de accuracy en entrenamiento. Pensaba que con 20 neuronas no memorizaría del todo, pero lo hizo. Por suerte, la regularización L2 que trae por defecto \texttt{MLPClassifier} evitó que el sobreajuste perjudicase los resultados en test.
 
 \vspace{1.0cm}
 

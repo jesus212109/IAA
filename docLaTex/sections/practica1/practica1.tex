@@ -62,7 +62,7 @@ Valor elegido: $\alpha =$ 0.9\\
 \end{center}
 \textbf{Análisis:} ¿Por qué el error crece? Relaciónalo con ``pasarse'' del mínimo.
 
-La función de coste diverge de forma monótona ascendente porque el coeficiente $\alpha$ es tan desproporcionado que el algoritmo ``se pasa de largo'' del mínimo local con una inercia destructiva. En lugar de descender gravitando hacia el valle, la gran magnitud de la corrección empuja a los pesos a rebotar cada vez a mayor altitud en las paredes opuestas, alejando indefinidamente la solución.
+El error no deja de crecer porque $\alpha$ es tan grande que cada paso sobrepasa el mínimo por completo. En vez de acercarse, los pesos saltan de un lado al otro del valle, y cada salto es más grande que el anterior. El modelo nunca encuentra una dirección estable de descenso.
 
 % -----------------------------------------------------------------------------
 \newpage
@@ -89,12 +89,12 @@ Usa tu $\alpha_{opt}$ y compara los siguientes esquemas de procesamiento:
 \textbf{Preguntas de reflexión:}
 \begin{enumerate}
   \item ¿Cuál de las tres curvas es más ``ruidosa'' y por qué?
-        
-        La curva del gradiente estocástico puro (batch = 1) presenta el mayor nivel de ruido intrínseco. Fundamentar la dirección de máximo descenso en base a una única muestra observacional en cada iteración induce una elevadísima varianza estocástica. Esto provoca que el vector de descenso temporal apunte de forma muy errática, generando un fenotipo visual de dentado continuo (picos de subida y bajada). A pesar de esta inestabilidad local, la tendencia estocástica agregada garantiza un descenso a largo plazo.
+
+        La del batch = 1, sin duda. Al calcular el gradiente con una sola muestra, la dirección de descenso cambia constantemente y se ve claramente en la gráfica: la línea tiene picos de subida y bajada continuos. A pesar de eso, a largo plazo la tendencia general sigue bajando.
 
   \item A nivel de tiempo de ejecución (CPU), ¿cuál ha sido más eficiente? Justifica basándote en computación vectorial.
 
-        A nivel hardware, tanto el Batch completo como el Mini-batch son radicalmente más eficientes que el descenso estocástico a base de iteraciones unitarias. Esto radica en el paradigma de la computación vectorial y las arquitecturas de instrucciones SIMD (Single Instruction, Multiple Data) del procesador. Agrupar los datos en bloques matriciales sustanciales permite a librerías numéricas de bajo nivel procesar transformaciones matemáticas complejas en estricto paralelo y directamente en la ALU. Por el contrario, el modelo estocástico está condicionado a ejecutar un costoso control de flujo secuencial (bucles for ineficientes), provocando un cuello de botella abrumador en el tiempo de ejecución. El modelo \textbf{Mini-batch} resalta fundamentalmente por constituir un óptimo de Pareto: regulariza parcialmente el ruido de las muestras individuales garantizando un descenso suave, e invierte la carga computacional en veloces operaciones matriciales preservando simultáneamente una convergencia excepcionalmente rápida frente al Batch completo.
+        Tanto el Batch completo como el Mini-batch son mucho más rápidos que el estocástico porque procesan los datos en bloques y aprovechan las operaciones vectorizadas de librerías como numpy, que internamente trabajan en paralelo a nivel de hardware. En el caso estocástico (batch=1), cada iteración ejecuta un bucle en Python y actualiza los pesos muestra a muestra, lo que multiplica el tiempo de ejecución. Desde mi experiencia, esta diferencia se nota muchísimo: el bucle estocástico tardaba varios segundos mientras que el mini-batch y el batch completo terminaban casi instantáneamente. El \textbf{Mini-batch} me parece el mejor equilibrio porque el descenso es mucho más suave que el estocástico y casi tan rápido como el batch completo.
 \end{enumerate}
 
 % -----------------------------------------------------------------------------
@@ -143,11 +143,15 @@ Para analizar las trayectorias asintóticas del sistema a largo plazo, se establ
 \end{figure}
 
 % -----------------------------------------------------------------------------
-\section[Conclusiones]{Conclusiones finales}
-% -----------------------------------------------------------------------------
+\section[Conclusiones]{Conclusiones}
 
-El presente cuaderno de laboratorio corrobora categóricamente que la estabilidad e integridad de la convergencia global de un estimador iterativo requiere una rigurosa sintonización analítica de sus hiperparámetros numéricos. Un factor paramétrico $\alpha$ marginal asegura la convergencia matemática, pero lo hace a expensas de un elevado lastre temporal infranqueable, mientras su hipertrofia causa la irremediable divergencia iterativa por retroproyección fuera del sumidero global. Por ello, el $\alpha$ óptimo impone un compromiso técnico de descenso inicial abrupto y mitigación suave sobre el vecindario absoluto.
-Respectivamente, se demuestra el segundo compromiso arquitectural: procesar muestras estocásticas individuales padece de extrema volatilidad métrica (ruido de las submuestras) y colapsa el motor computacional; el procesamiento de tipo Mini-batch emerge como el paradigma por excelencia superior, permitiendo actualizaciones continuas del vector de error al aprovechar el paralelismo subyacente de la microarquitectura del procesador de tipo vector (SIMD). Adicionalmente, el diseño del algoritmo ha reflejado categóricamente cómo implementar un control de flujo derivativo limitativo ($|J_t - J_{t-1}| < 10^{-5}$) extingue iteraciones marginales una vez garantizada la estabilización, culminando con un ahorro sustancial en el cálculo para el entrenamiento neuronal moderno.
+Lo que más me ha quedado claro después de esta práctica es que el gradiente descendente no funciona por sí solo: hay que ajustar bien los hiperparámetros o el algoritmo no converge o lo hace demasiado lento. 
+
+Con $\alpha$ muy pequeño (1e-5) el error bajaba tan despacio que necesitaba muchísimas iteraciones para acercarme al mínimo. Con $\alpha$ muy grande (0.9) el modelo directamente divergía, y el error se disparaba sin remedio. Encontrar un valor intermedio (0.01) marcó la diferencia: la pérdida caía rápido al principio y luego se estabilizaba sin rebotes. No esperaba que el comportamiento cambiase tanto con solo mover un número.
+
+En cuanto al tamaño de batch, el estocástico puro (batch=1) era tan ruidoso que costaba seguir la evolución del error, y además era el más lento con diferencia. El batch completo era rápido pero el descenso no era tan fluido. El mini-batch de 32 muestras me pareció el punto óptimo: convergía casi igual de rápido que el batch completo, la curva de pérdida era mucho más estable que la estocástica, y computacionalmente era eficiente porque numpy procesa los bloques en paralelo.
+
+Por último, implementar el criterio de parada $|J_t - J_{t-1}| < 10^{-5}$ fue sencillo y resultó muy útil: el modelo dejaba de entrenar automáticamente cuando ya no mejoraba, evitando iteraciones innecesarias. En mi caso, con $\alpha=0.01$ y batch=32 se detuvo en la época 55.
 
 \vspace{3.0cm}
 

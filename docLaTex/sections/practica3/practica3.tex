@@ -216,11 +216,11 @@ matemáticamente indefinida en la mayoría de los experimentos.
         que además es desfavorable (cercano a una clasificación aleatoria).
         Con \texttt{StratifiedKFold}, la AUC-ROC es siempre computable:
         media $= 0{,}5283$, desv.\ típica $= 0{,}0253$, en las 10 iteraciones.
-  \item \textbf{La AUC-ROC reafirma empíricamente la necesidad de
-          estratificar:} el hecho de que \texttt{KFold} haga la métrica
-        indefinida en el 80\% de los experimentos no es un artefacto
-        numérico, sino la \emph{manifestación directa} del problema
-        demostrado matemáticamente en la Tarea~1 mediante la distribución
+  \item \textbf{La AUC-ROC confirma la necesidad de
+          estratificar:} que \texttt{KFold} dejase la métrica
+        indefinida en el 80\% de los experimentos no es casualidad:
+        es justo lo que predecía el cálculo
+        de la Tarea~1 con la distribución
         hipergeométrica: cuando los folds no están estratificados, es
         probable que algunos queden sin representantes de la clase
         positiva, haciendo imposible cualquier evaluación orientada a
@@ -306,8 +306,7 @@ En cuanto al \textbf{data leakage}, el caso de \texttt{ID\_Hospital\_Filtro}
 es bastante claro: una variable artificialmente correlacionada con el
 target hace que el modelo alcance un 100\% de Accuracy, lo que en
 la práctica significaría entregar un sistema que falla en cuanto
-se usa con datos reales. La regla práctica que saco de aquí es auditarlas
-siempre antes de entrenar.
+se usa con datos reales. Desde entonces, cuando trabajo con un dataset nuevo procuro revisar si hay variables con correlaciones sospechosas con el objetivo antes de entrenar.
 
 
 

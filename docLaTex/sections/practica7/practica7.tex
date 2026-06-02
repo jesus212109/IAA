@@ -113,7 +113,7 @@ Esta práctica ha demostrado que los modelos de ensamble mejoran significativame
 
 Gradient Boosting iguala el rendimiento de Random Forest (0.958), pero con un enfoque secuencial que corrige errores residuales. Aunque computacionalmente más costoso, destaca por su alta precisión. El análisis de importancia de variables revela que \texttt{worst radius} (55.9\,\%), \texttt{worst concave points} (13.2\,\%) y \texttt{worst perimeter} (12.8\,\%) son los predictores más relevantes, coherente con la caracterización de núcleos celulares malignos.
 
-La principal limitación de los ensambles es la pérdida de interpretabilidad y el mayor coste computacional, lo que condiciona su despliegue en entornos con recursos limitados. Para un sistema \textit{embedded} básico, un Árbol Simple o un Random Forest reducido (1-10 árboles) ofrecen el mejor compromiso entre precisión y eficiencia, sacrificando aproximadamente un 3.5\,\% de accuracy a cambio de inferencia ultrarrápida y consumo de memoria mínimo.
+La principal limitación de los ensambles es la pérdida de interpretabilidad y el mayor coste computacional, lo que condiciona su despliegue en entornos con recursos limitados. Si tuviese que usar uno de estos modelos en un dispositivo con poca capacidad de proceso, creo que usaría el Árbol Simple o un Random Forest muy pequeño (con 1-10 árboles). Se perdería algo de precisión (del 95.8\,\% al 92.3\,\%), pero el modelo ocuparía muy poco y haría predicciones casi instantáneas.
 
 \vspace{1.0cm}
 

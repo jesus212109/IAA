@@ -59,10 +59,10 @@ Ejecución & RMSE \\
 
 \vspace{0.2cm}
 \noindent\textbf{Análisis:}
-\begin{itemize}
-    \item ¿Por qué el error varía tanto entre ejecuciones? Porque el conjunto de entrenamiento es pequeño (50\% de los datos). El modelo es extremadamente sensible a la partición aleatoria específica de cada ejecución.
-    \item ¿Es fiable esta métrica (con K=2) para tomar una decisión técnica? No, su alta varianza impide saber si una mejora aparente se debe a la configuración del modelo o simplemente a la aleatoriedad de la división de datos.
-\end{itemize}
+    \begin{itemize}
+        \item ¿Por qué el error varía tanto entre ejecuciones? Con K=2 entrenamos solo con el 50\% de los datos, así que según qué muestras caigan en train o test el RMSE cambia bastante. Entre mis 5 ejecuciones el RMSE osciló entre 5.17 y 5.54.
+        \item ¿Es fiable esta métrica (con K=2) para tomar una decisión técnica? A mí no me lo parece. Si repito el experimento y obtengo resultados distintos cada vez, no puedo saber si una mejora se debe al modelo o a la partición.
+    \end{itemize}
 
 \vspace{0.5cm}
 
@@ -78,7 +78,7 @@ Ejecución & RMSE \\
 
 \vspace{0.4cm}
 \noindent\textbf{Análisis:}
-Describe si el resultado parece más estable que en K=2 y por qué. Sí, es notablemente más estable (fluctúa entre 5.16 y 5.23). Al usar K=10, el modelo entrena con el 90\% de los datos en cada iteración y promedia 10 errores diferentes, mitigando drásticamente el impacto de particiones anómalas.
+Describe si el resultado parece más estable que en K=2 y por qué. Sí, mucho más estable. Con K=10 el RMSE se movía muy poco (entre 5.16 y 5.23), mientras que con K=2 llegaba a variar hasta 0.37. Tiene sentido: al entrenar con el 90\% de los datos y promediar 10 folds, el resultado depende menos de una partición concreta.
 
 \vspace{0.5cm}
 
@@ -94,8 +94,9 @@ Describe si el resultado parece más estable que en K=2 y por qué. Sí, es nota
 Tiempo aproximado: \textbf{0.131s}
 
 \vspace{0.4cm}
+
 \noindent\textbf{Análisis:}
-Compara el coste computacional frente a K=10. El tiempo de ejecución se multiplica casi por 8 (de $\sim0.016$s a $\sim0.131$s). ¿Merece la pena el tiempo extra para mejorar la precisión obtenida? No merece la pena. La mejora en la precisión del RMSE es marginal (apenas 0.01 unidades), lo cual no justifica el enorme aumento del coste computacional.
+Compara el coste computacional frente a K=10. K=100 tardó 0.131s frente a los 0.016s de K=10, casi 8 veces más. ¿Merece la pena el tiempo extra para mejorar la precisión obtenida? En mi opinión no. El RMSE mejoró solo 0.01 respecto a K=10 (de 5.19 a 5.18), un cambio que no justifica el tiempo adicional.
 
 \vspace{0.5cm}
 
@@ -115,7 +116,7 @@ K & RMSE & Comentario de estabilidad/coste \\
 
 \vspace{0.3cm}
 \noindent\textbf{Conclusión Tarea 1:}
-¿Cuál elegirías para este problema y por qué? Elegiría K=10. Demuestra ser el estándar óptimo porque ofrece un error robusto y fiable para comparar modelos, sin incurrir en los altos tiempos de ejecución que exige K=100. Proporciona el mejor compromiso técnico entre precisión estadística y eficiencia temporal.
+¿Cuál elegirías para este problema y por qué? Me quedo con K=10. Con K=2 los resultados variaban demasiado entre ejecuciones como para fiarme, y K=100 tardaba mucho para una mejora mínima. K=10 da resultados estables en poco tiempo.
 
 \newpage
 
@@ -182,12 +183,9 @@ Fijamos K = 10 y comparamos:
 \vspace{0.4cm}
 \noindent\textbf{Análisis clave:}
 \begin{enumerate}
-    \item Identifica para qué valor de $\lambda$ el modelo \textbf{Lasso} consigue \textbf{eliminar} (poner a cero) las 7 variables ruidosas, quedándose solo con las 3 importantes:
-    \[
-    \lambda^{*} = \textbf{1.0} \text{(y en general entre 0.5 y 2.0)}
-    \]
-    \item Variables con coeficiente distinto de cero (modelo Lasso con $\lambda^{*}$):\\
-    \textbf{Var\_0, Var\_1, Var\_2}
+    \item ¿Para qué $\lambda$ consigue \textbf{Lasso} \textbf{eliminar} las 7 variables ruidosas? Lo probé con varios valores y a partir de $\lambda \approx 1.0$ las variables Var\_3 a Var\_9 se ponían a cero. Por debajo de 0.5 todavía alguna ruidosa se colaba con coeficientes pequeños pero distintos de cero.
+    \item Variables con coeficiente distinto de cero (modelo Lasso con ese $\lambda$):\\
+    \textbf{Var\_0, Var\_1, Var\_2} — justo las 3 que se usaron para generar los datos.
 \end{enumerate}
 
 \vspace{0.5cm}
@@ -255,6 +253,6 @@ Resume en 8--12 líneas lo aprendido sobre:
 \end{itemize}
 
 \vspace{0.5cm}
-\noindent La validación cruzada con $K=10$ es el estándar porque equilibra un RMSE estadísticamente fiable frente a la inestabilidad de $K=2$, evitando los desproporcionados tiempos de ejecución de LOOCV ($K=100$). En cuanto a la regularización, Ridge (L2) reduce la magnitud de los coeficientes de las variables menos relevantes pero los mantiene activos, mientras que Lasso (L1) es capaz de forzarlos a cero absoluto. Esta propiedad hace que Lasso actúe como un potente selector automático de características, ideal para limpiar datasets con ruido. Por último, un hiperparámetro $\lambda$ demasiado alto penaliza en exceso al modelo, volviéndolo incapaz de aprender (underfitting) y empujándolo a una zona de sesgo alto donde el error se dispara.
+\noindent De la práctica me quedo con dos cosas. Primero, que K=10 es el valor más práctico para validación cruzada: con K=2 los resultados no son fiables y con K=100 se tarda mucho para una mejora mínima. Segundo, la diferencia entre Ridge y Lasso se ve muy clara al probarlos: Ridge reduce los coeficientes de las variables ruidosas pero nunca llega a cero, mientras que Lasso los elimina directamente si subes un poco $\lambda$. Me pareció interesante ver cómo jugando con un solo parámetro ($\lambda$) podía seleccionar automáticamente las 3 variables relevantes y descartar las otras 7. También comprobé que si $\lambda$ es demasiado grande el modelo se vuelve demasiado simple y el error se dispara (underfitting), así que hay que encontrar un punto intermedio.
 
 \end{document}

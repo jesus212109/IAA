@@ -109,8 +109,10 @@ El Mensaje 3 resulta de especial interés analítico al ser un falso negativo (s
 
 \section*{Conclusiones}
 
-El clasificador Naïve Bayes demuestra una alta velocidad computacional y gran eficiencia con una alta precisión en conjuntos de datos donde las clases son semánticamente distantes. Su limitación estructural radica en la pérdida del contexto secuencial, lo que dificulta la detección en casos donde el orden de las palabras es fundamental para el sentido del mensaje.
+El clasificador Naïve Bayes funciona bien para este problema de detección de spam: es rápido, sencillo y con un 98\,\% de accuracy parece que lo hace muy bien. Sin embargo, al mirar con más detalle, los 20 falsos negativos (spam que no se detectó) muestran que el modelo falla en mensajes con un lenguaje más neutro que no activa las palabras típicas de spam.
 
-Como mejora crítica, el empleo de una vectorización TF-IDF (\textit{Term Frequency-Inverse Document Frequency}) en lugar de \texttt{CountVectorizer} podría haber incrementado el rendimiento del filtrado. TF-IDF permite penalizar palabras muy comunes en todo el corpus y otorgar un mayor valor estadístico a términos inusuales y discriminatorios, lo que probablemente habría ayudado a identificar correctamente mensajes ambiguos como el del caso de prueba M3.
+Algo que me llamó la atención fue cómo el prior $P(ham)=0.866$ actúa como un sesgo implícito: aunque el mensaje M3 (\textit{"Hello, we have a special offer..."}) tiene términos que podrían ser spam, la probabilidad a priori de ser ham es tan alta que el modelo lo clasifica como legítimo. 
+
+Si tuviese que mejorar algo, probaría con TF-IDF en lugar de \texttt{CountVectorizer}, porque penaliza las palabras muy frecuentes y podría dar más peso a términos realmente discriminatorios. Pero eso sería para explorar en otro experimento; con \texttt{CountVectorizer} y Naïve Bayes el resultado ya es bastante bueno.
 
 \end{document}

@@ -8,6 +8,8 @@
 \standalonecover
 \pagestyle{cuerpo}
 
+\graphicspath{{\subfix{../../Imagenes/}}{../../Imagenes/}{\subfix{img/}}{img/}}
+
 \chapter[Práctica 8: Aprendizaje Activo]{Cuaderno de Laboratorio --- Práctica 8: Aprendizaje Activo}
 
 \section*{Introducción}
@@ -37,18 +39,20 @@ Para tener una referencia con la que comparar el aprendizaje activo, implementam
 \textbf{Resultados de la selección aleatoria:}
 
 \begin{center}
-\begin{tabular}{|c|c|}
-\hline
-\textbf{Etiquetas usadas} & \textbf{Accuracy en test} \\ \hline
-10  & 0.7567 \\ \hline
-15  & 0.8433 \\ \hline
-20  & 0.8400 \\ \hline
-25  & 0.8567 \\ \hline
-30  & 0.8567 \\ \hline
-35  & 0.9033 \\ \hline
-40  & 0.9067 \\ \hline
-45  & 0.9167 \\ \hline
-50  & 0.9233 \\ \hline
+\begin{tabular}{cc}
+\toprule
+\textbf{Etiquetas usadas} & \textbf{Accuracy en test} \\
+\midrule
+10  & 0.7567 \\
+15  & 0.8433 \\
+20  & 0.8400 \\
+25  & 0.8567 \\
+30  & 0.8567 \\
+35  & 0.9033 \\
+40  & 0.9067 \\
+45  & 0.9167 \\
+50  & 0.9233 \\
+\bottomrule
 \end{tabular}
 \end{center}
 
@@ -67,18 +71,20 @@ Técnicamente, calculamos $|p - 0.5|$ para cada muestra del pool (donde $p$ es l
 \textbf{Resultados de la selección por incertidumbre:}
 
 \begin{center}
-\begin{tabular}{|c|c|}
-\hline
-\textbf{Etiquetas usadas} & \textbf{Accuracy en test} \\ \hline
-10  & 0.7567 \\ \hline
-15  & 0.8400 \\ \hline
-20  & 0.8500 \\ \hline
-25  & 0.9233 \\ \hline
-30  & 0.9267 \\ \hline
-35  & 0.9200 \\ \hline
-40  & 0.9300 \\ \hline
-45  & 0.9533 \\ \hline
-50  & 0.9533 \\ \hline
+\begin{tabular}{cc}
+\toprule
+\textbf{Etiquetas usadas} & \textbf{Accuracy en test} \\
+\midrule
+10  & 0.7567 \\
+15  & 0.8400 \\
+20  & 0.8500 \\
+25  & 0.9233 \\
+30  & 0.9267 \\
+35  & 0.9200 \\
+40  & 0.9300 \\
+45  & 0.9533 \\
+50  & 0.9533 \\
+\bottomrule
 \end{tabular}
 \end{center}
 
@@ -121,13 +127,14 @@ Una forma de mitigarlo es combinar ambas estrategias: al principio, cuando el mo
 \vspace{0.3cm}
 
 \textbf{¿Qué estrategia usaría en un caso real donde etiquetar cuesta dinero?} \\
-Sin duda la selección por incertidumbre, o una variante de ella. Si cada etiqueta tiene un coste (tiempo de un médico, encuesta pagada, trabajo manual), la clave es maximizar la información obtenida por etiqueta. Los resultados de esta práctica lo ilustran bien: con la mitad del presupuesto de etiquetado, la selección activa alcanza el mismo rendimiento que la aleatoria con el presupuesto completo. En un proyecto real con miles de muestras por etiquetar, esa eficiencia puede marcar la diferencia entre un proyecto viable y uno inviable económicamente.
+En un caso real, creo que empezaría con selección aleatoria hasta tener un modelo mínimamente decente, y luego pasaría a incertidumbre. Esta práctica muestra que la selección por incertidumbre alcanza el mismo rendimiento con la mitad de etiquetas, pero eso asume que el modelo inicial es razonable. Si empiezo con un modelo muy malo, sus estimaciones de incertidumbre pueden no ser fiables, por lo que una fase inicial aleatoria ayuda a explorar el espacio antes de explotar.
 
 % -----------------------------------------------------------------------------
 \section*{Conclusión}
-% -----------------------------------------------------------------------------
 
-Esta práctica deja claro que no todos los datos son igualmente útiles para entrenar un modelo. Etiquetar de forma inteligente, priorizando los puntos donde el modelo tiene más dudas, permite aprender más rápido con menos recursos. El aprendizaje activo es una herramienta muy práctica en escenarios reales donde los datos etiquetados son escasos o caros de obtener.
+Lo que más me ha gustado de esta práctica es ver cómo el modelo puede decidir por sí mismo qué datos le conviene aprender. La diferencia entre seleccionar puntos al azar y seleccionar los que generan más dudas es muy clara: con la mitad de etiquetas se consigue el mismo rendimiento. Al principio me costó entender por qué \texttt{np.argsort()} ascendente servía para seleccionar los más inciertos (porque ordena de menor a mayor $|p-0.5|$), pero una vez visto es muy sencillo.
+
+Si tuviese que aplicar aprendizaje activo en un problema real, creo que combinaría ambas estrategias: empezar con selección aleatoria para explorar y, cuando el modelo tenga cierta base, pasar a incertidumbre para afinar. Pero está claro que saber qué puntos etiquetar es casi tan importante como saber construir el modelo.
 
 \vspace{3.0cm}
 
