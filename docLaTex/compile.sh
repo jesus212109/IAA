@@ -157,7 +157,7 @@ do_clean() {
   info "Limpiando archivos temporales..."
   rm -rf "$DOC_DIR/$BUILD_DIR" "$DOC_DIR/__memoria.pdf"
   find "$DOC_DIR" -type d -name '_minted-*' -exec rm -rf {} + 2>/dev/null || true
-  for n in 1 2 3 4 5 6 7 8; do
+  for n in 1 2 3 4 5 6 7 8 9; do
     rm -rf "$DOC_DIR/sections/practica${n}/build" 2>/dev/null || true
   done
   success "Limpieza completada."
@@ -366,18 +366,17 @@ case "${1:-}" in
     compile_full
     ;;
 
-  --clean)
+    --clean)
     do_clean
     ;;
 
-  --watch)
+    --watch)
     check_deps || true
     compile_watch
     ;;
 
-  practica[1-8])
+  practica[1-9])
     num="${1#practica}"
-    # For individual compilation, also check deps first
     check_deps || true
     compile_practice "$num"
     ;;
