@@ -76,16 +76,16 @@ Conclusión: un mal split aleatorio puede hacer que la evaluación no sirva para
 % --- Execution results section ---
 \subsection{Registro de resultados (5 particiones aleatorias)}
 \begin{center}
-  \begin{tabular}{|c|c|c|}
-    \hline
+  \begin{tabular}{ccc}
+    \toprule
     Ejecución & Positivos en test & \% clase 1 en test \\
-    \hline
+    \midrule
     1         & 4                 & 2{,}0\%            \\
     2         & 3                 & 1{,}5\%            \\
     3         & 5                 & 2{,}5\%            \\
     4         & 4                 & 2{,}0\%            \\
     5         & 3                 & 1{,}5\%            \\
-    \hline
+    \bottomrule
   \end{tabular}
 \end{center}
 
@@ -110,10 +110,10 @@ Conclusión: un mal split aleatorio puede hacer que la evaluación no sirva para
 
 \subsection{Registro por folds (\texttt{StratifiedKFold}, \texorpdfstring{$k=10$}{k=10})}
 \begin{center}
-  \begin{tabular}{|c|c|c|c|}
-    \hline
+  \begin{tabular}{cccc}
+    \toprule
     Fold & Positivos en test & Tamaño del fold & Proporción clase 1 \\
-    \hline
+    \midrule
     1    & 2                 & 100             & 2{,}0\%            \\
     2    & 2                 & 100             & 2{,}0\%            \\
     3    & 2                 & 100             & 2{,}0\%            \\
@@ -124,7 +124,7 @@ Conclusión: un mal split aleatorio puede hacer que la evaluación no sirva para
     8    & 2                 & 100             & 2{,}0\%            \\
     9    & 2                 & 100             & 2{,}0\%            \\
     10   & 2                 & 100             & 2{,}0\%            \\
-    \hline
+    \bottomrule
   \end{tabular}
 \end{center}
 
@@ -160,24 +160,24 @@ He añadido la métrica AUC-ROC para reforzar las conclusiones sobre la necesida
   \centering
   \caption{Comparativa de estabilidad de métricas: KFold estándar vs.\ StratifiedKFold (10 iteraciones $\times$ 10 folds).}
   \label{tab:comparativa_metricas}
-  \begin{tabular}{|l|c|c|c|c|c|c|}
-    \hline
+  \begin{tabular}{lcccccc}
+    \toprule
     \multirow{2}{*}{\textbf{Método}}
-     & \multicolumn{2}{c|}{\textbf{Accuracy}}
-     & \multicolumn{2}{c|}{\textbf{F1-macro}}
-     & \multicolumn{2}{c|}{\textbf{AUC-ROC}}                                                                                                  \\
-    \cline{2-7}
+     & \multicolumn{2}{c}{\textbf{Accuracy}}
+     & \multicolumn{2}{c}{\textbf{F1-macro}}
+     & \multicolumn{2}{c}{\textbf{AUC-ROC}}                                                                                                  \\
+    \cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7}
      & Media                                                                & \textit{std}      & Media & \textit{std} & Media & \textit{std} \\
-    \hline
+    \midrule
     \texttt{KFold}
      & 0{,}5771                                                             & 0{,}0090
      & 0{,}3829                                                             & 0{,}0051
-     & \multicolumn{2}{c|}{\textbf{N/D} (\textit{8/10 iters.}$^{\dagger}$)}                                                                   \\
+     & \multicolumn{2}{c}{\textbf{N/D} (\textit{8/10 iters.}$^{\dagger}$)}                                                                   \\
     \texttt{StratifiedKFold}
      & 0{,}5783                                                             & \textbf{0{,}0085}
      & 0{,}3857                                                             & \textbf{0{,}0050}
      & \textbf{0{,}5283}                                                    & \textbf{0{,}0253}                                               \\
-    \hline
+    \bottomrule
   \end{tabular}
 \end{table}
 
@@ -234,13 +234,13 @@ matemáticamente indefinida en la mayoría de los experimentos.
 
 \subsection{Comparativa: con y sin variable trampa}
 \begin{center}
-  \begin{tabular}{|l|c|c|}
-    \hline
+  \begin{tabular}{lcc}
+    \toprule
     Escenario                                           & Accuracy          & F1-macro          \\
-    \hline
+    \midrule
     Sin variable trampa (\textit{evaluación real})      & 0{,}5850          & 0{,}3887          \\
     Con variable trampa (\texttt{ID\_Hospital\_Filtro}) & \textbf{1{,}0000} & \textbf{1{,}0000} \\
-    \hline
+    \bottomrule
   \end{tabular}
 \end{center}
 

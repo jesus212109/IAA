@@ -7,12 +7,12 @@
 % ── Configuración de rutas de imágenes ────────────────────────────────────────
 \graphicspath{{\subfix{../../Imagenes/}}{../../Imagenes/}{\subfix{img/}}{img/}}
 
-\chapter[Práctica 6: Clasificador Naïve Bayes]{Clasificación de Texto Mediante Modelos Probabilísticos: Naïve Bayes}
+\chapter[Práctica 6: Clasificador Naïve Bayes]{Cuaderno de Laboratorio --- Práctica 6: Clasificación de Texto con Naïve Bayes}
 
 Esta práctica describe la implementación de un sistema de clasificación automática de mensajes de texto para la detección de \textit{spam}. Se utiliza un clasificador probabilístico Multinomial Naïve Bayes, evaluando su rendimiento tras transformar el lenguaje natural en representaciones vectoriales numéricas procesables.
 
 % =============================================================================
-\section[Representación y Modelo Vectorial]{Tarea 1: Modelo Bag of Words y Extracción de Características}
+\section[Tarea 1: Bag of Words]{Tarea 1 --- Modelo Bag of Words y Extracción de Características}
 % =============================================================================
 
 Los algoritmos de aprendizaje automático requieren vectores de características numéricas. Para ello, se ha empleado la representación de Bolsa de Palabras (\textit{Bag of Words}, BoW) mediante \texttt{CountVectorizer}.
@@ -22,7 +22,7 @@ El preprocesamiento aplicado incluye la normalización a minúsculas, eliminaci�
 En esta transformación, se omite la estructura gramatical y el orden de aparición de los términos, conservando únicamente la frecuencia de cada palabra en el mensaje. Aunque esta técnica ignora el contexto secuencial, permite una clasificación eficiente en tareas de filtrado de contenido sin el coste computacional de analizar estructuras lingüísticas complejas.
 
 % =============================================================================
-\section[Fundamentos de Naïve Bayes]{Tarea 2: Modelo Multinomial Naïve Bayes}
+\section[Tarea 2: Naïve Bayes Multinomial]{Tarea 2 --- Modelo Multinomial Naïve Bayes}
 % =============================================================================
 
 El modelo Multinomial Naïve Bayes calcula la probabilidad de pertenencia a una clase basándose en las frecuencias de los términos observados. Durante el entrenamiento se definen:
@@ -36,7 +36,7 @@ El modelo Multinomial Naïve Bayes calcula la probabilidad de pertenencia a una 
 La naturaleza de este clasificador es \textit{Naïve} debido a la asunción de independencia condicional entre las palabras dada la clase. Aunque el lenguaje natural no cumple matemáticamente esta premisa, el modelo proporciona resultados altamente precisos para la clasificación de documentos.
 
 % =============================================================================
-\section[Suavizado de Laplace]{Tarea 3: Ajuste de Frecuencia Cero mediante Suavizado de Laplace}
+\section[Tarea 3: Suavizado de Laplace]{Tarea 3 --- Ajuste de Frecuencia Cero mediante Suavizado de Laplace}
 % =============================================================================
 
 Un problema crítico en el cálculo de probabilidades mediante productos es la aparición de términos no observados durante el entrenamiento. Si una palabra aparece en la fase de inferencia pero tiene frecuencia cero en una clase del entrenamiento, la probabilidad condicional resultante es nula. Al realizar el producto total de probabilidades, este valor de cero anula el resultado global del mensaje. A esta anulación de probabilidades se le conoce como el problema de la frecuencia cero.
@@ -44,7 +44,7 @@ Un problema crítico en el cálculo de probabilidades mediante productos es la a
 Para solucionar este inconveniente se aplica el Suavizado de Laplace (\texttt{alpha=1.0}). Este ajuste suma una unidad a los recuentos de todos los términos, garantizando que ninguna probabilidad condicional sea estrictamente cero y aportando robustez al modelo ante términos desconocidos.
 
 % =============================================================================
-\section[Evaluación de Errores]{Tarea 4: Matriz de Confusión y Análisis de Métricas}
+\section[Tarea 4: Matriz de Confusión]{Tarea 4 --- Matriz de Confusión y Análisis de Métricas}
 % =============================================================================
 
 Tras la evaluación sobre el conjunto de test (1.393 muestras), se obtuvo una accuracy global del 98\,\%. No obstante, al analizar la distribución de los resultados, la matriz de confusión muestra variaciones relevantes en la distribución de los errores.
@@ -67,7 +67,7 @@ Los errores se dividen en:
 Para la experiencia de usuario, es preferible que los FP se mantengan reducidos al mínimo aceptando un incremento en los FN, ya que la molestia de recibir un mensaje de spam es menor que el riesgo de descartar información importante.
 
 % =============================================================================
-\section[Análisis de Vocabulario]{Tarea 5: Términos Representativos de la Clase Spam}
+\section[Tarea 5: Vocabulario Spam]{Tarea 5 --- Términos Representativos de la Clase Spam}
 % =============================================================================
 
 Mediante el cálculo de la diferencia de probabilidades logarítmicas ($\log P(w | spam) - \log P(w | ham)$), se ha extraído el Top 5 de términos altamente representativos del spam:
@@ -83,7 +83,7 @@ Mediante el cálculo de la diferencia de probabilidades logarítmicas ($\log P(w
 El marcado carácter comercial de estos términos explica la facilidad del modelo para segmentar el tráfico de red mediante recuentos de términos.
 
 % =============================================================================
-\section[Validación de Mensajes Custom]{Tarea 6: Inferencia Sobre Casos de Prueba}
+\section[Tarea 6: Inferencia]{Tarea 6 --- Inferencia Sobre Casos de Prueba}
 % =============================================================================
 
 Se han evaluado tres mensajes sintéticos para verificar la respuesta del modelo ante diferentes contextos semánticos:
@@ -107,7 +107,7 @@ El Mensaje 1 presenta un 0\,\% de probabilidad de spam. El Mensaje 2 activa múl
 
 El Mensaje 3 resulta de especial interés analítico al ser un falso negativo (se clasifica como ham). El modelo asigna únicamente un 2.56\,\% de probabilidad de spam. Esto se debe a dos factores: primero, la inercia del prior $P(ham)$ (86,60\,\%) actúa como una barrera matemática considerable. Segundo, las probabilidades condicionales $P(palabra | spam)$ de términos como 'special' u 'offer' no tienen el suficiente peso diferencial para superar dicha barrera, al ser términos que también aparecen en contextos comerciales legítimos. Además, estas palabras carecen del fuerte carácter promocional de otras como 'claim' o 'prize'.
 
-\section*{Conclusiones y Evaluación Crítica}
+\section*{Conclusiones}
 
 El clasificador Naïve Bayes demuestra una alta velocidad computacional y gran eficiencia con una alta precisión en conjuntos de datos donde las clases son semánticamente distantes. Su limitación estructural radica en la pérdida del contexto secuencial, lo que dificulta la detección en casos donde el orden de las palabras es fundamental para el sentido del mensaje.
 

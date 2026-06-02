@@ -8,6 +8,8 @@
 \standalonecover
 \pagestyle{cuerpo}
 
+\graphicspath{{\subfix{../../Imagenes/}}{../../Imagenes/}{\subfix{img/}}{img/}}
+
 \chapter[Práctica 2: Selección de Modelos]{Cuaderno de Laboratorio --- Práctica 2: Selección de Modelos y Regularización}
 \chaptermark{Práctica 2}
 
@@ -42,16 +44,16 @@ Semillas: \textbf{\texttt{random\_state} 1, 2, 3, 4 y 5, de forma consecutiva pa
 
 \noindent\textbf{Registro de resultados (rellena):}
 \begin{center}
-\begin{tabular}{|c|c|}
-\hline
+\begin{tabular}{cc}
+\toprule
 Ejecución & RMSE \\
-\hline
+\midrule
 1 & 5.33 \\
 2 & 5.43 \\
 3 & 5.24 \\
 4 & 5.17 \\
 5 & 5.54 \\
-\hline
+\bottomrule
 \end{tabular}
 \end{center}
 
@@ -100,14 +102,14 @@ Compara el coste computacional frente a K=10. El tiempo de ejecución se multipl
 \subsection{Resumen comparativo (K = 2 vs 10 vs 100)}
 
 \begin{center}
-\begin{tabular}{|c|c|c|}
-\hline
+\begin{tabular}{ccc}
+\toprule
 K & RMSE & Comentario de estabilidad/coste \\
-\hline
-2 & 5.17 - 5.54 & Alta inestabilidad (varianza). Coste muy bajo. \\
-10 & 5.16 - 5.23 & Alta estabilidad. Coste equilibrado y eficiente. \\
-100 & 5.17 - 5.19 & Máxima estabilidad. Coste computacional prohibitivo. \\
-\hline
+\midrule
+2 & 5.17 -- 5.54 & Alta inestabilidad (varianza). Coste muy bajo. \\
+10 & 5.16 -- 5.23 & Alta estabilidad. Coste equilibrado y eficiente. \\
+100 & 5.17 -- 5.19 & Máxima estabilidad. Coste computacional prohibitivo. \\
+\bottomrule
 \end{tabular}
 \end{center}
 

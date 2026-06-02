@@ -8,6 +8,8 @@
 \standalonecover
 \pagestyle{cuerpo}
 
+\graphicspath{{\subfix{../../Imagenes/}}{../../Imagenes/}{\subfix{img/}}{img/}}
+
 \chapter[Práctica 7: Modelos de Ensambles]{Cuaderno de Laboratorio --- Práctica 7: La Inteligencia Colectiva (Modelos de Ensambles)}
 
 \section*{Introducción}
@@ -80,12 +82,12 @@ Tiene mucho sentido desde el punto de vista clínico: las células malignas tien
 \begin{table}[H]
     \centering
     \resizebox{\textwidth}{!}{%
-    \begin{tabular}{|l|c|c|p{5cm}|p{5cm}|}
-    \hline
-    \textbf{Modelo} & \textbf{Acc. Test} & \textbf{Coste} & \textbf{Ventajas} & \textbf{Desventajas} \\ \hline
-    Árbol Simple      & 0.923 & Bajo  & Interpretable, ultrarrápido, poca memoria. & Se sobreajusta con facilidad. \\ \hline
-    Random Forest     & 0.958 & Medio & Robusto, reduce varianza, paralelizable.    & Difícil de interpretar (caja negra). \\ \hline
-    Gradient Boosting & 0.958 & Alto  & Alta precisión, corrige errores paso a paso. & Secuencial, sensible a hiperparámetros. \\ \hline
+    \begin{tabular}{lccp{4cm}p{4.5cm}}
+    \toprule
+    \textbf{Modelo} & \textbf{Acc. Test} & \textbf{Coste} & \textbf{Ventajas} & \textbf{Desventajas} \\ \midrule
+    Árbol Simple      & 0.923 & Bajo  & Interpretable, ultrarrápido, poca memoria. & Se sobreajusta con facilidad. \\
+    Random Forest     & 0.958 & Medio & Robusto, reduce varianza, paralelizable.    & Difícil de interpretar (caja negra). \\
+    Gradient Boosting & 0.958 & Alto  & Alta precisión, corrige errores paso a paso. & Secuencial, sensible a hiperparámetros. \\ \bottomrule
     \end{tabular}}
     \caption{Comparativa de los tres modelos evaluados.}
 \end{table}
@@ -105,6 +107,14 @@ La contrapartida de los ensambles es que pierden interpretabilidad. Con cientos 
 
 Elegiría el \textbf{Árbol Simple}. Sacrificamos unos 3.5 puntos de precisión respecto a los ensambles (92.3\% vs 95.8\%), pero el modelo cabe en unos pocos kilobytes y hacer una predicción es tan rápido como recorrer unas pocas condiciones \texttt{if-else}. En un microcontrolador o un dispositivo de bajo consumo, eso es exactamente lo que necesitas. Además, la interpretabilidad del árbol es una ventaja añadida en entornos médicos donde el profesional necesita entender por qué el sistema da una alerta.
 
-\vspace{3.0cm}
+\section*{Conclusiones}
+
+Esta práctica ha demostrado que los modelos de ensamble mejoran significativamente el rendimiento predictivo respecto a un solo árbol de decisión. El Árbol Simple, pese a su interpretabilidad y bajo coste, presenta un sobreajuste severo (accuracy en test de 0.923 frente a 1.000 en entrenamiento). Random Forest mitiga este problema mediante bagging y promediado de predicciones, alcanzando un 0.958 de accuracy con 100 árboles y estabilizándose a partir de 50 estimadores.
+
+Gradient Boosting iguala el rendimiento de Random Forest (0.958), pero con un enfoque secuencial que corrige errores residuales. Aunque computacionalmente más costoso, destaca por su alta precisión. El análisis de importancia de variables revela que \texttt{worst radius} (55.9\,\%), \texttt{worst concave points} (13.2\,\%) y \texttt{worst perimeter} (12.8\,\%) son los predictores más relevantes, coherente con la caracterización de núcleos celulares malignos.
+
+La principal limitación de los ensambles es la pérdida de interpretabilidad y el mayor coste computacional, lo que condiciona su despliegue en entornos con recursos limitados. Para un sistema \textit{embedded} básico, un Árbol Simple o un Random Forest reducido (1-10 árboles) ofrecen el mejor compromiso entre precisión y eficiencia, sacrificando aproximadamente un 3.5\,\% de accuracy a cambio de inferencia ultrarrápida y consumo de memoria mínimo.
+
+\vspace{1.0cm}
 
 \end{document}

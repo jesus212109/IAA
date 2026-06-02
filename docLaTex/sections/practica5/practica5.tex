@@ -7,7 +7,7 @@
 % ── Configuración de rutas de imágenes (Homogénea con P4) ─────────────────────
 \graphicspath{{\subfix{../../Imagenes/}}{../../Imagenes/}{\subfix{img/}}{img/}}
 
-\chapter[Práctica 5: Perceptrón Multicapa]{Arquitectura de Redes Neuronales: El Perceptrón Multicapa}
+\chapter[Práctica 5: Perceptrón Multicapa]{Cuaderno de Laboratorio --- Práctica 5: Arquitectura de Redes Neuronales (MLP)}
 
 En esta práctica se explora el funcionamiento del Perceptrón Multicapa (MLP) y su capacidad para modelar fronteras de decisión no lineales. A diferencia del perceptrón simple, el MLP aborda problemas de clasificación más complejos mediante la introducción de capas ocultas. A lo largo del documento se analizan distintos hiperparámetros, como el número de neuronas y la función de activación, y su impacto en la convergencia y generalización del modelo.
 
@@ -212,5 +212,15 @@ Aunque el incremento a 100 neuronas mejora la precisión ligeramente (hasta un $
 
 \textbf{3. Estrategia de monitorización}
 Debido a la tendencia inicial de la red a memorizar el conjunto de entrenamiento, se recomienda desplegar el modelo inicialmente bajo la modalidad de \textit{shadow deployment} (despliegue en sombra). Esto permitirá evaluar la fiabilidad de sus predicciones frente al tráfico de datos real en tiempo de ejecución, pero sin impactar los procesos operativos hasta confirmar su total estabilización.
+
+\section*{Conclusiones}
+
+Esta práctica ha demostrado la evolución desde el perceptrón simple hasta arquitecturas multicapa, evidenciando cómo la introducción de capas ocultas permite modelar fronteras de decisión no lineales. Se ha confirmado que un perceptrón sin capas ocultas es inherentemente lineal e incapaz de resolver problemas como \texttt{make\_moons}, mientras que con una sola capa oculta de 20 neuronas con activación ReLU se alcanza un 85.33\,\% de accuracy. La comparativa entre funciones de activación revela que ReLU converge más rápido que la Sigmoide (406 vs 485 iteraciones) al evitar el desvanecimiento del gradiente, consolidándose como la opción estándar para redes modernas.
+
+En el dataset de dígitos, la arquitectura MLP(20) demuestra que la simplicidad es una virtud en ingeniería: con solo 20 neuronas ocultas y aproximadamente 1.500 parámetros se supera el 95\,\% de accuracy, igualando a redes cinco veces mayores. Esto subraya que, para problemas de complejidad moderada, ensanchar una sola capa es más eficiente que profundizar innecesariamente la arquitectura, especialmente cuando se considera el despliegue en entornos con recursos limitados.
+
+La regularización L2 incorporada por defecto en \texttt{MLPClassifier} juega un papel crítico en la prevención del sobreajuste, permitiendo que el modelo memorice el entrenamiento (100\,\% de accuracy en train) sin perder capacidad de generalización (96-98\,\% en test). Sin este término de penalización, la red se ajustaría al ruido y colapsaría su rendimiento en producción.
+
+\vspace{1.0cm}
 
 \end{document}
